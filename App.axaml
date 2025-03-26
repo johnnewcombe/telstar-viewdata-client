@@ -3,13 +3,27 @@
              x:Class="AvaloniaApplication1.App"
              xmlns:local="using:AvaloniaApplication1"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <local:ViewLocator />
     </Application.DataTemplates>
-  
+
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="/Styles/ApplicationStyles.axaml"></StyleInclude>
     </Application.Styles>
+    <Application.Resources>
+        <!--<FontFamily x:Key="NunitoFont">avares://GoogleFonts/Assets/Fonts#Nunito</FontFamily>-->
+        <FontFamily x:Key="ModeSeven">/Assets/Fonts/MODE7GX3.TTF#ModeSeven</FontFamily>
+        <FontFamily x:Key="AkkoPro">/Assets/Fonts/AkkoPro-Regular.TTF#Akko Pro</FontFamily>
+        <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
+        <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Boldr</FontFamily>
+        <FontFamily x:Key="PhosphorDuoTone">/Assets/Fonts/Phosphor-DuoTone.ttf#Phosphor-DuoTone</FontFamily>
+        <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
+        <FontFamily x:Key="PhosphorLight">/Assets/Fonts/Phosphor-Light.ttf#Phosphor-Light</FontFamily>
+        <FontFamily x:Key="PhosphorThin">/Assets/Fonts/Phosphor-Thin.ttf#Phosphor-Thin</FontFamily>
+
+    </Application.Resources>
+
 </Application>

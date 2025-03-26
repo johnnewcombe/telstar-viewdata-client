@@ -11459,5 +11459,10 @@
       <UpToDateCheckInput Remove="Assets\FontForge.app\Contents\Resources\opt\local\share\metainfo\org.fontforge.FontForge.appdata.xml" />
       <UpToDateCheckInput Remove="Assets\FontForge.app\Contents\Resources\opt\local\share\mime\packages\fontforge.xml" />
       <UpToDateCheckInput Remove="Assets\MODE7GX3_EDITED\Thumbnails\thumbnail.png" />
+      <UpToDateCheckInput Remove="Assets\Fonts\Akko Pro Regular\.DS_Store" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Panels\" />
     </ItemGroup>
 </Project>

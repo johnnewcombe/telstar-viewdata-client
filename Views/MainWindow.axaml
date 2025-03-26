@@ -3,21 +3,59 @@
         xmlns:vm="using:AvaloniaApplication1.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="AvaloniaApplication1.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="telstar-client-avalonia">
+        Title=""
+        Height="1440"
+        Width="1080">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
-    <DockPanel>
-        <Button Click="Button_OnClick">Click Me!</Button>
-        <UniformGrid Rows="24" Columns="40" Name="display">
-        </UniformGrid>
-    </DockPanel>
+
+    <Grid ShowGridLines="False" RowDefinitions="Auto, *, Auto" Background="PaleTurquoise">
+        <!-- Title Bar -->
+        <Grid ShowGridLines="True" Grid.Row="0" Margin="5" Height="40"
+              ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="0" Click="Button_OnClick">
+                <StackPanel Orientation="Horizontal">
+                    <Label Classes="icon" Content="&#xe256;"></Label>
+                    <Label Content="Connect"></Label>
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="1" Click="Button_OnClick">
+                <StackPanel Orientation="Horizontal">
+                    <Label Classes="icon"  Content="&#xe4f8;"></Label>
+                    <Label Content="Disconnect"></Label>
+                </StackPanel>
+            </Button>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Grid.Column="2">
+                <Label FontWeight="Black">TELSTAR </Label>
+                <Label>Viewdata Terminal</Label>
+            </StackPanel>
+            <Button Grid.Column="3" Click="Button_OnClick">Reaveal</Button>
+            <Button Grid.Column="4" Click="Button_OnClick">onceal</Button>
+        </Grid>
+        <!-- Main Area -->
+        <Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="Auto,*">
+            <Rectangle Grid.Column="0" Width="120" Fill="LightGray"></Rectangle>
+            <UniformGrid Grid.Column="1" Background="Chartreuse" Name="display" Columns="40" Rows="25"></UniformGrid>
+        </Grid>
+        <!-- Status Area -->
+        <Grid ShowGridLines="True" Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="5">
+            <Button Grid.Column="0" Margin="0" Click="Button_OnClick">Click Me!</Button>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Grid.Column="1">
+                <Label FontWeight="Black">TELSTAR </Label>
+                <Label>Viewdata Terminal</Label>
+            </StackPanel>
+            <Button Grid.Column="2" Margin="0" Click="Button_OnClick">Click Me!</Button>
+        </Grid>
+    </Grid>
 
 </Window>

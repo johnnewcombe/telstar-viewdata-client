@@ -1,0 +1,25 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+            <StackPanel Orientation="Horizontal">
+                <Label Classes="mode7" Content="&#xe276;"></Label>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- Add Styles Here -->
+    <Style Selector="Window">
+        <!--<Setter Property="FontFamily" Value="{DynamicResource AkkoPro}"></Setter>-->
+    </Style>
+    <Style Selector="Label.icon">
+        <Setter Property="FontFamily" Value="{DynamicResource PhosphorFill}"></Setter>
+        <Setter Property="Margin" Value="0,1,3,0"></Setter>
+    </Style>
+    <Style Selector="Label.mode7">
+        <Setter Property="FontFamily" Value="{DynamicResource ModeSeven}"></Setter>
+        <Setter Property="Margin" Value="0,1,3,0"></Setter>
+    </Style>
+</Styles>
+
