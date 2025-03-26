@@ -44,7 +44,7 @@
         <!-- Main Area -->
         <Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="Auto,*">
             <Rectangle Grid.Column="0" Width="120" Fill="LightGray"></Rectangle>
-            <UniformGrid Grid.Column="1"  Background="Chartreuse" Name="display" Columns="40" Rows="25"></UniformGrid>
+            <UniformGrid Grid.Column="1"  Background="Chartreuse" Name="display" Columns="40" Rows="24"></UniformGrid>
         </Grid>
         <!-- Status Area -->
         <Grid ShowGridLines="True" Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="5">
