@@ -32,7 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public void TestCharacter()
+    public void Test()
     {
         this.CharacterReceived = 0xe276;
     }
@@ -47,6 +47,8 @@ public partial class MainWindowViewModel : ViewModelBase
         this.DisplayData = dummyData;
     }
 
+    public Cursor Cursor{set; get;}
+    
     public int CharacterReceived {
         set
         {

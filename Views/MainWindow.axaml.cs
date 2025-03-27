@@ -45,7 +45,7 @@ public partial class MainWindow : Window
 
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        ViewModel.TestCharacter();
+        ViewModel.Test();
     }
 
     private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e)
@@ -63,7 +63,11 @@ public partial class MainWindow : Window
 
     private void addCharacter()
     {
-        display.Children[0] = GetCharacterLabel(ViewModel.CharacterReceived);
+        var cursor = ViewModel.Cursor;
+        
+        // TODO: calculate screen position from cursor
+        var pos = 0
+        display.Children[pos] = GetCharacterLabel(ViewModel.CharacterReceived);
     }
 
     private void updateDisplay()
