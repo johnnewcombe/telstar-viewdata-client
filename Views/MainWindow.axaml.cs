@@ -4,6 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using AvaloniaApplication1.Models;
+using AvaloniaApplication1.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
 
 
@@ -12,33 +14,23 @@ namespace AvaloniaApplication1.Views;
 public partial class MainWindow : Window
 {
     
-    const int ROWS = 24;
-    const int COLS = 40;
-
     public MainWindow()
     {
         InitializeComponent();
 
+        MainWindowViewModel viewModel = new MainWindowViewModel();
+
         // remove title bar etc.
         //this.ExtendClientAreaToDecorationsHint = true;
 
-        var thicknessZero = Thickness.Parse("0");
+        var data = viewModel.DisplayData;
         
+        // TODO: This is just an initialisation, we need to update this if a value changes
         // Loop through attaching font characters from the
         // display data array i.e. (960 bytes of virtual screen memory)
-        // Last row is blank.
-        for (var i = 0; i < (ROWS * COLS); i++)
+        for (var i = 0; i < (Globals.ROWS * Globals.COLS); i++)
         {
-            
-            /* Mode 7 font
-             * Graphics start at e201
-             * Non-contiguous graphics start at e2c1
-             * Upper part of Alpha double height e021
-             * Lower part of Alpha double height e121
-             *
-             */
-            var g = GetCharacterLabel(0xe276);
-            
+            var g = GetCharacterLabel(data[i]);
             // Add to Uniform grid 40 x 24
             display.Children.Add(g);
         }

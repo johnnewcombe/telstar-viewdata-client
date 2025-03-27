@@ -16,7 +16,11 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Design.DataContext>
-
+    <Window.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
     <Grid ShowGridLines="False" RowDefinitions="Auto, *, Auto" Background="PaleTurquoise">
         <!-- Title Bar -->
         <Grid ShowGridLines="True" Grid.Row="0" Margin="5" Height="40"
@@ -54,7 +58,7 @@
                 <Label FontWeight="Black">TELSTAR </Label>
                 <Label>Viewdata Terminal</Label>
             </StackPanel>
-            <Button Grid.Column="2" Margin="0" Click="Button_OnClick">Click Me!</Button>
+            <Button Grid.Column="2" HorizontalAlignment="Stretch" Margin="0" Click="Button_OnClick">Click Me!</Button>
         </Grid>
     </Grid>
 
