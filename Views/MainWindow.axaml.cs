@@ -23,17 +23,9 @@ public partial class MainWindow : Window
         // remove title bar etc.
         //this.ExtendClientAreaToDecorationsHint = true;
 
-        var data = viewModel.DisplayData;
-        
         // TODO: This is just an initialisation, we need to update this if a value changes
-        // Loop through attaching font characters from the
-        // display data array i.e. (960 bytes of virtual screen memory)
-        for (var i = 0; i < (Globals.ROWS * Globals.COLS); i++)
-        {
-            var g = GetCharacterLabel(data[i]);
-            // Add to Uniform grid 40 x 24
-            display.Children.Add(g);
-        }
+        updateDisplay(viewModel);
+        
     }
 
     private void Button_OnClick(object? sender, RoutedEventArgs e)
@@ -72,5 +64,22 @@ public partial class MainWindow : Window
         };
         
         return viewBox;
+    }
+
+    private void updateDisplay(MainWindowViewModel viewModel)
+    {
+
+        var data = viewModel.DisplayData;
+        
+        // Loop through attaching font characters from the
+        // display data array i.e. (960 bytes of virtual screen memory)
+        // TODO this updates all characters, is this the best approach?
+        // TODO Can we use Bindings?
+        for (var i = 0; i < (Globals.ROWS * Globals.COLS); i++)
+        {
+            var g = GetCharacterLabel(data[i]);
+            // Add to Uniform grid 40 x 24
+            display.Children.Add(g);
+        }
     }
 }
