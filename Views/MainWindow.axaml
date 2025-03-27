@@ -25,15 +25,15 @@
         <!-- Title Bar -->
         <Grid ShowGridLines="True" Grid.Row="0" Margin="5" Height="40"
               ColumnDefinitions="Auto,Auto,*,Auto,Auto">
-            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="0" Click="Button_OnClick">
+            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="0" Click="ConnectButton_OnClick">
                 <StackPanel Orientation="Horizontal">
                     <Label Classes="icon" Content="&#xe256;"></Label>
                     <Label Content="Connect"></Label>
                 </StackPanel>
             </Button>
-            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="1" Click="Button_OnClick">
+            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="1" Click="DisconnectButton_OnClick">
                 <StackPanel Orientation="Horizontal">
-                    <Label Classes="icon"  Content="&#xe4f8;"></Label>
+                    <Label Classes="icon" Content="&#xe4f8;"></Label>
                     <Label Content="Disconnect"></Label>
                 </StackPanel>
             </Button>
@@ -42,8 +42,8 @@
                 <Label FontWeight="Black">TELSTAR </Label>
                 <Label>Viewdata Terminal</Label>
             </StackPanel>
-            <Button Grid.Column="3" Click="Button_OnClick">Reaveal</Button>
-            <Button Grid.Column="4" Click="Button_OnClick">onceal</Button>
+            <Button Grid.Column="3" Click="RevealButton_OnClick">Reaveal</Button>
+            <Button Grid.Column="4" Click="ConcealButton_OnClick">onceal</Button>
         </Grid>
         <!-- Main Area -->
         <Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="Auto,*">
@@ -52,14 +52,13 @@
         </Grid>
         <!-- Status Area -->
         <Grid ShowGridLines="True" Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="5">
-            <Button Grid.Column="0" Margin="0" Click="Button_OnClick">Click Me!</Button>
+            <Button Grid.Column="0" Margin="0" >Click Me!</Button>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Grid.Column="1">
                 <Label FontWeight="Black">TELSTAR </Label>
                 <Label>Viewdata Terminal</Label>
             </StackPanel>
-            <Button Grid.Column="2" HorizontalAlignment="Stretch" Margin="0" Click="Button_OnClick">Click Me!</Button>
+            <Button Grid.Column="2" HorizontalAlignment="Stretch" Margin="0">Click Me!</Button>
         </Grid>
     </Grid>
-
 </Window>

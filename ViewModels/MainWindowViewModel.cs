@@ -1,35 +1,82 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using AvaloniaApplication1.Models;
 
 namespace AvaloniaApplication1.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private int[] displayData = new int[Globals.COLS*Globals.ROWS];
+    private ObservableCollection<Character> _characters;
+    private int[] _displayData = new int[Globals.COLS * Globals.ROWS];
+    private int _characterReceived;
     
-    public int[] DisplayData
+    public ObservableCollection<Character> Characters
     {
-        get
+        get { return _characters; }
+        set { SetProperty(ref _characters, value); }
+    }
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    public MainWindowViewModel()
+    {
+        const string defaultValue = "c";
+        const int defaultAttribute = 0;
+
+        Characters = new ObservableCollection<Character>();
+
+        for (var i = 0; i < Globals.COLS * Globals.ROWS; i++)
         {
-            
-            /* Mode 7 font
-             * Graphics start at e201
-             * Non-contiguous graphics start at e2c1
-             * Upper part of Alpha double height e021
-             * Lower part of Alpha double height e121
-             *
-             */
-            
-            // temp code to add some valid data
-            for (int i = 0; i < Globals.COLS * Globals.ROWS; i++)
-            {
-                displayData[i] = 0xe276;
-            }
-            
-            return displayData;
+            Characters.Add(new Character { Value = defaultValue, Attribute = defaultAttribute });
         }
     }
-    
 
+    public void TestCharacter()
+    {
+        this.CharacterReceived = 0xe276;
+    }
+    
+    public void ClearDisplay()
+    {
+        int[] dummyData = new int[Globals.COLS * Globals.ROWS];
+        for (int i = 0; i < Globals.COLS * Globals.ROWS; i++)
+        {
+            dummyData[i] = 0x20;
+        }
+        this.DisplayData = dummyData;
+    }
+
+    public int CharacterReceived {
+        set
+        {
+            _characterReceived = value;
+            OnPropertyChanged(nameof(CharacterReceived));
+        }
+        get
+        {
+            return _characterReceived;
+        }
+    }
+
+    public int[] DisplayData
+    {
+        set
+        {
+            _displayData = value;
+            OnPropertyChanged(nameof(DisplayData));
+        }
+        get
+        {
+            return _displayData;
+        }
+    }
+
+    // implmentation of INotify for properties
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected virtual void OnPropertyChanged(string propertyDisplayData)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyDisplayData));
+    }
 }
