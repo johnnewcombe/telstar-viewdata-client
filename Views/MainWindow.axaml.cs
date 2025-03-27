@@ -70,6 +70,7 @@ public partial class MainWindow : Window
         display.Children[pos] = GetCharacterLabel(ViewModel.CharacterReceived);
     }
 
+    // TODO: Use this to display stored pages from the view model
     private void updateDisplay()
     {
         var data = ViewModel.DisplayData;
