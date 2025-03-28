@@ -44,11 +44,12 @@ public partial class MainWindow : Window
 
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        ViewModel.Test();
+        ViewModel.Connect();
     }
 
     private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e)
     {
+        ViewModel.Disconnect();
     }
 
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e)

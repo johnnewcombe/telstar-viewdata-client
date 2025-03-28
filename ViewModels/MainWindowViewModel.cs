@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Security.AccessControl;
 using AvaloniaApplication1.Models;
 
 namespace AvaloniaApplication1.ViewModels;
@@ -9,7 +10,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     
     private Display _display;
-    
+    private Comms.NetClient _client;
 
     /// <summary>
     /// Constructor
@@ -17,11 +18,18 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _display = new Display();
+        _client = new Comms.NetClient();
+
+        
     }
 
-    public void Test()
+    public void Connect()
     {
-        this.DisplayData = _display;
+        _client.Connect("glasstty.com", 6502);
+    }
+    public void Disconnect()
+    {
+        _client.Disconnect();
     }
     
 
