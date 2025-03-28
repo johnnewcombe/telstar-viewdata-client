@@ -11,7 +11,6 @@ using AvaloniaApplication1.Models;
 using AvaloniaApplication1.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
 
-
 namespace AvaloniaApplication1.Views;
 
 public partial class MainWindow : Window
@@ -29,7 +28,7 @@ public partial class MainWindow : Window
         //this.ExtendClientAreaToDecorationsHint = true;
 
         //initialise the display
-        //updateDisplay();
+        updateDisplay();
 
     }
 

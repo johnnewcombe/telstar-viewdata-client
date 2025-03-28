@@ -17,16 +17,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _display = new Display();
-
     }
 
     public void Test()
     {
         this.DisplayData = _display;
     }
-    
-
-    public Cursor Cursor{set; get;}
     
 
     public Display DisplayData
