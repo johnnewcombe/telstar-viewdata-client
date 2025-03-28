@@ -27,18 +27,18 @@ public partial class MainWindow : Window
 
         // remove title bar etc.
         //this.ExtendClientAreaToDecorationsHint = true;
+
+        //initialise the display
+        //updateDisplay();
+
     }
 
     private void PropertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
     {
-        updateDisplay();
         switch (e.PropertyName)
         {
             case nameof(ViewModel.DisplayData):
                 updateDisplay();
-                break;
-            case nameof(ViewModel.CharacterReceived):
-                addCharacter();
                 break;
         }
     }
@@ -50,7 +50,6 @@ public partial class MainWindow : Window
 
     private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        ViewModel.ClearDisplay();
     }
 
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e)
@@ -60,16 +59,7 @@ public partial class MainWindow : Window
     private void ConcealButton_OnClick(object? sender, RoutedEventArgs e)
     {
     }
-
-    private void addCharacter()
-    {
-        var cursor = ViewModel.Cursor;
-        
-        // TODO: calculate screen position from cursor
-        var pos = 0
-        display.Children[pos] = GetCharacterLabel(ViewModel.CharacterReceived);
-    }
-
+    
     // TODO: Use this to display stored pages from the view model
     private void updateDisplay()
     {
@@ -79,12 +69,14 @@ public partial class MainWindow : Window
         // display data array i.e. (960 bytes of virtual screen memory)
         // TODO this updates all characters, is this the best approach?
         // TODO Can we use Bindings?
-        for (var i = 0; i < (Globals.ROWS * Globals.COLS); i++)
+        display.Children.Clear();
+        foreach (var row in data.Rows)
         {
-            var g = GetCharacterLabel(data[i]);
-
-            display.Children.Clear();
-            display.Children.Add(g);
+            foreach (var cell in row.Cells)
+            {
+                var g = GetCharacterLabel(cell.Character);
+                display.Children.Add(g);
+            }
         }
     }
 
