@@ -30,7 +30,7 @@ using System.Text;
 
 namespace AvaloniaApplication1.Comms
 {
-    public class AsynchronousClient
+    public class TCPClient
     {
         // *** Event Handlers *** //
 
@@ -62,11 +62,11 @@ namespace AvaloniaApplication1.Comms
         // *** Methods *** //
 
         /// <summary>
-        /// Create a TCP Asynchronous Client. This client is connect to the server and port with passed parameters.
+        /// Create a TCP asynchronous client. This client is connect to the server and port with passed parameters.
         /// </summary>
         /// <param name="_ip">Server IP</param>
         /// <param name="_port">Server Port</param>
-        public AsynchronousClient(string _ip, int _port)
+        public TCPClient(string _ip, int _port)
         {
             //ipAddress = IPAddress.Parse(_ip);
             ipAddress = (Dns.Resolve(_ip)).AddressList[0];

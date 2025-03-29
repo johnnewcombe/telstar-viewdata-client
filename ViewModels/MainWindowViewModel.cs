@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing.Printing;
-using System.Security.AccessControl;
 using AvaloniaApplication1.Comms;
 using AvaloniaApplication1.Models;
 
@@ -13,8 +9,7 @@ namespace AvaloniaApplication1.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private Display _display;
-    private Comms.NetClient _client;
-    AsynchronousClient tcp;
+    TCPClient _tcp;
     
     /// <summary>
     /// Constructor
@@ -29,11 +24,10 @@ public partial class MainWindowViewModel : ViewModelBase
         //_client = new Comms.NetClient("glasstty.com", 6502);
         try
         {
-            //tcp = new AsynchronousClient("46.101.66.218", int.Parse("6502"));
-            tcp = new AsynchronousClient("glasstty.com", int.Parse("6502"));
-            tcp.OnConnectEvent += new AsynchronousClient.OnConnectEventHandler(OnConnect);
-            tcp.OnDataRecievedEvent += new AsynchronousClient.DataReceivedEventHandler(OnRecieved);
-            tcp.Connect();
+            _tcp = new TCPClient("glasstty.com", 6502);
+            _tcp.OnConnectEvent += OnConnect;
+            _tcp.OnDataRecievedEvent += OnRecieved;
+            _tcp.Connect();
         }
         catch (Exception ex)
         {
@@ -43,20 +37,20 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     // Connection Status Listner
-    private void OnConnect(bool status)
+    private static void OnConnect(bool status)
     {
         Debug.Print("Connection : " + status.ToString());
     }
 
     // Data Recieved Listner
-    private void OnRecieved(string data)
+    private static void OnRecieved(string data)
     {
         Debug.Print(data);
     }
     
     public void Disconnect()
     {
-       if (tcp.Write("*"))
+       if (_tcp.Write("*"))
        {
            Debug.Print("Data Sent");
        }
