@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -7,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using TelstarClient.Models;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
@@ -28,16 +30,28 @@ public partial class MainWindow : Window
         //this.ExtendClientAreaToDecorationsHint = true;
 
         //initialise the display
-        updateDisplay();
-
+        display.Children.Clear();
+        for (int i = 0; i < Display.COLS * Display.ROWS; i++)
+        {
+            var g = GetCharacterLabel(0x20);
+            display.Children.Add(g);
+        }
     }
 
     private void PropertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
         {
-            case nameof(ViewModel.DisplayData):
-                updateDisplay();
+            case nameof(ViewModel.DisplayManagerData):
+                try
+                {
+                    Dispatcher.UIThread.Post(updateDisplay);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+
                 break;
         }
     }
@@ -58,7 +72,7 @@ public partial class MainWindow : Window
         ViewModel.Send((string)button.Tag);
     }
 
-    
+
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e)
     {
     }
@@ -66,24 +80,21 @@ public partial class MainWindow : Window
     private void ConcealButton_OnClick(object? sender, RoutedEventArgs e)
     {
     }
-    
+
     // TODO: Use this to display stored pages from the view model
     private void updateDisplay()
     {
-        var data = ViewModel.DisplayData;
+        var data = ViewModel.DisplayManagerData;
 
         // Loop through attaching font characters from the
         // display data array i.e. (960 bytes of virtual screen memory)
         // TODO this updates all characters, is this the best approach?
-        // TODO Can we use Bindings?
-        display.Children.Clear();
-        foreach (var row in data.Rows)
+        //   consider a tuple with the char and display index
+        // TODO Can we use a custom binding?
+        for (var i=0;i<Display.COLS*Display.ROWS;i++)
         {
-            foreach (var cell in row.Cells)
-            {
-                var g = GetCharacterLabel(cell.Character);
-                display.Children.Add(g);
-            }
+            var cell = (Viewbox)display.Children[i];
+            ((Label)cell.Child).Content = "@";  //data[i];
         }
     }
 

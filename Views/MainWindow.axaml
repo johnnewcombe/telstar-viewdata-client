@@ -21,7 +21,7 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Window.DataContext>
-    <Grid ShowGridLines="True" Margin="0" RowDefinitions="Auto, *, Auto" Background="Beige">
+    <Grid ShowGridLines="False" Margin="0" RowDefinitions="Auto, *, Auto" Background="Beige">
         <!-- Main Area -->
         <!--<Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="Auto,*">-->
         <Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="*,Auto">

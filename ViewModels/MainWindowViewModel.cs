@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using TelstarClient.Comms;
@@ -8,20 +9,21 @@ namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private Display _display;
-    TCPClient _tcp;
+    private DisplayManager.DisplayManager _displayManager;
+    private List<int> _displayManagerData = new List<int>();
     
+    TCPClient _tcp;
+
     /// <summary>
     /// Constructor
     /// </summary>
     public MainWindowViewModel()
     {
-        _display = new Display();
+        _displayManager = new DisplayManager.DisplayManager();
     }
 
     public void Connect()
     {
-        //_client = new Comms.NetClient("glasstty.com", 6502);
         try
         {
             _tcp = new TCPClient("glasstty.com", 6502);
@@ -37,17 +39,21 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     // Connection Status Listner
-    private static void OnConnect(bool status)
+    private void OnConnect(bool status)
     {
         Debug.Print("Connection : " + status.ToString());
     }
 
     // Data Recieved Listner
-    private static void OnRecieved(string data)
+    private void OnRecieved(string data)
     {
-        Debug.Print("Recv<={0}",data);
+        Debug.Print("Recv<={0}", data);
+        // add data to the display
+        _displayManager.Print(data);
+        DisplayManagerData = _displayManager.GetDisplay();
+
     }
-    
+
     public void Disconnect()
     {
         _tcp.Disconnect();
@@ -60,15 +66,15 @@ public partial class MainWindowViewModel : ViewModelBase
             Debug.Print("Sent=>{0}", data);
         }
     }
-    
-    public Display DisplayData
+
+    public List<int> DisplayManagerData
     {
         set
         {
-            _display = value;
-            OnPropertyChanged(nameof(DisplayData));
+            _displayManagerData = value;
+            OnPropertyChanged(nameof(DisplayManagerData));
         }
-        get { return _display; }
+        get { return _displayManager.GetDisplay(); }
     }
 
     // implmentation of INotify for properties

@@ -5,10 +5,13 @@ namespace TelstarClient.Models;
 
 public class Display 
 {
+    public const int COLS = 40;
+    public const int ROWS = 24;
+    
     public Display()
     {
         Rows = new List<Row>();
-        for (var i = 0; i < Globals.ROWS; i++)
+        for (var i = 0; i < ROWS; i++)
         {
             var row = new Row(true);
             Rows.Add(row);
@@ -24,7 +27,7 @@ public class Row
         Cells = new List<Cell>();
         Visible = visible;
             
-        for (var i = 0; i < Globals.COLS; i++)
+        for (var i = 0; i < Display.COLS; i++)
         {
             var cell = new Cell(0xe276, "white,", "black");
             Cells.Add(cell);
