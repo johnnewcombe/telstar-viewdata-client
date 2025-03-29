@@ -29,7 +29,8 @@ public partial class MainWindowViewModel : ViewModelBase
         //_client = new Comms.NetClient("glasstty.com", 6502);
         try
         {
-            tcp = new AsynchronousClient("46.101.66.218", int.Parse("6502"));
+            //tcp = new AsynchronousClient("46.101.66.218", int.Parse("6502"));
+            tcp = new AsynchronousClient("glasstty.com", int.Parse("6502"));
             tcp.OnConnectEvent += new AsynchronousClient.OnConnectEventHandler(OnConnect);
             tcp.OnDataRecievedEvent += new AsynchronousClient.DataReceivedEventHandler(OnRecieved);
             tcp.Connect();

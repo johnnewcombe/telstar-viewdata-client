@@ -68,7 +68,8 @@ namespace AvaloniaApplication1.Comms
         /// <param name="_port">Server Port</param>
         public AsynchronousClient(string _ip, int _port)
         {
-            ipAddress = IPAddress.Parse(_ip);
+            //ipAddress = IPAddress.Parse(_ip);
+            ipAddress = (Dns.Resolve(_ip)).AddressList[0];
             port = _port;
         }
 
