@@ -1,4 +1,4 @@
-namespace AvaloniaApplication1.ViewModels;
+namespace TelstarClient.ViewModels;
 
 public static class CursorControl
 {

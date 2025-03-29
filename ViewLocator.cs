@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using AvaloniaApplication1.ViewModels;
+using TelstarClient.ViewModels;
 
-namespace AvaloniaApplication1;
+namespace TelstarClient;
 
 public class ViewLocator : IDataTemplate
 {

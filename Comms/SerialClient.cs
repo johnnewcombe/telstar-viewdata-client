@@ -1,4 +1,4 @@
-namespace AvaloniaApplication1.Net;
+namespace TelstarClient.Net;
 
 public class SerialClient
 {

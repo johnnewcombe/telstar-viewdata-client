@@ -28,7 +28,7 @@ using System.Text;
  */
 
 
-namespace AvaloniaApplication1.Comms
+namespace TelstarClient.Comms
 {
     public class TCPClient
     {

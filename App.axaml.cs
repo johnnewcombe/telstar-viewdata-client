@@ -4,10 +4,10 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using AvaloniaApplication1.ViewModels;
-using AvaloniaApplication1.Views;
+using TelstarClient.ViewModels;
+using TelstarClient.Views;
 
-namespace AvaloniaApplication1;
+namespace TelstarClient;
 
 public partial class App : Application
 {

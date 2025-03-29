@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace AvaloniaApplication1.ViewModels;
+namespace TelstarClient.ViewModels;
 
 public class ViewModelBase : ObservableObject
 {

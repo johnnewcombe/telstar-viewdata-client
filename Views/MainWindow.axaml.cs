@@ -7,11 +7,11 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using AvaloniaApplication1.Models;
-using AvaloniaApplication1.ViewModels;
+using TelstarClient.Models;
+using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
 
-namespace AvaloniaApplication1.Views;
+namespace TelstarClient.Views;
 
 public partial class MainWindow : Window
 {

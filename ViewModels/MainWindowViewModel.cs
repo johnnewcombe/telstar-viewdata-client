@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using AvaloniaApplication1.Comms;
-using AvaloniaApplication1.Models;
+using TelstarClient.Comms;
+using TelstarClient.Models;
 
-namespace AvaloniaApplication1.ViewModels;
+namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
@@ -45,14 +45,15 @@ public partial class MainWindowViewModel : ViewModelBase
     // Data Recieved Listner
     private static void OnRecieved(string data)
     {
-        Debug.Print(data);
+        Debug.Print("Recv<={0}",data);
     }
     
     public void Disconnect()
     {
-       if (_tcp.Write("*"))
+        var data = "*";
+       if (_tcp.Write(data))
        {
-           Debug.Print("Data Sent");
+           Debug.Print("Sent=>{0}", data);
        }
        
        

@@ -1,4 +1,4 @@
-namespace AvaloniaApplication1.Models;
+namespace TelstarClient.Models;
 
 public static class Globals
 {

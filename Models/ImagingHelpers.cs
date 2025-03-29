@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Avalonia.Platform;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 
-namespace AvaloniaApplication1.Models
+namespace TelstarClient.Models
 {
     public static class ImageHelper
     {

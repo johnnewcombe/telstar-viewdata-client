@@ -4,7 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace AvaloniaApplication1.Controls;
+namespace TelstarClient.Controls;
 
 public partial class Grid : UserControl
 {

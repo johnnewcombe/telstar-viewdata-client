@@ -1,6 +1,6 @@
 using Avalonia.Styling;
 
-namespace AvaloniaApplication1.Models;
+namespace TelstarClient.Models;
 
 public class Cursor
 {
