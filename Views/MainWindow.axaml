@@ -7,7 +7,7 @@
         x:Class="TelstarClient.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title=""
+        Title="Viewdata Client"
         Height="600"
         Width="800">
 
@@ -21,11 +21,11 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Window.DataContext>
-    <Grid ShowGridLines="False" Margin="0" RowDefinitions="Auto, *, Auto" Background="Beige">
+    <Grid ShowGridLines="False" Margin="0,0,0,0" RowDefinitions="Auto, *, Auto" Background="Goldenrod">
         <!-- Main Area -->
         <!--<Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="Auto,*">-->
         <Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="*,Auto">
-            <UniformGrid Grid.Column="0" Margin="20,20,0,10" Name="display" Columns="40" Rows="24"></UniformGrid>
+            <UniformGrid Grid.Column="0" Margin="20,20,0,10" Name="display" Columns="40" Rows="24" Background="Black"></UniformGrid>
             <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1">
                 <UniformGrid Columns="3" Margin="20">
                     <Button Tag="1" Classes="keypad" Click="Keypad_OnClick" HorizontalAlignment="Center"

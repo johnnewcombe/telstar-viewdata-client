@@ -24,23 +24,23 @@ public class Row
 {
     public Row(bool visible)
     {
-        Cells = new List<Cell>();
+        Cells = new List<Col>();
         Visible = visible;
             
         for (var i = 0; i < Display.COLS; i++)
         {
-            var cell = new Cell(0xe276, "white,", "black");
+            var cell = new Col(0xe276, "white,", "black");
             Cells.Add(cell);
         }
     }
-    public List<Cell> Cells { get; set; }
+    public List<Col> Cells { get; set; }
     public bool Visible { get; set; }
 
 }
 
-public class Cell
+public class Col
 {
-    public Cell(int characters, string foreground, string background)
+    public Col(int characters, string foreground, string background)
     {
         Character = characters;
         Foreground = foreground;

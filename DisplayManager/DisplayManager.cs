@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing.Printing;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -16,6 +17,8 @@ public class DisplayManager
         _display = new Display();
     }
 
+    public char LastCharacter { private set; get; }
+    
     public List<int> GetDisplay()
     {
         var results = new List<int>();
@@ -37,6 +40,7 @@ public class DisplayManager
         {
             //TODO: sort this out... 
             _display.Rows[_row].Cells[_col].Character = c;
+            LastCharacter = c;
         }
     }
 

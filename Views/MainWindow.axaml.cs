@@ -94,7 +94,7 @@ public partial class MainWindow : Window
         for (var i=0;i<Display.COLS*Display.ROWS;i++)
         {
             var cell = (Viewbox)display.Children[i];
-            ((Label)cell.Child).Content = "@";  //data[i];
+            ((Label)cell.Child).Content = $"&{data[i]};";
         }
     }
 
