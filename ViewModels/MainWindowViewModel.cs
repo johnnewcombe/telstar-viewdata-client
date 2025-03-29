@@ -50,15 +50,17 @@ public partial class MainWindowViewModel : ViewModelBase
     
     public void Disconnect()
     {
-        var data = "*";
-       if (_tcp.Write(data))
-       {
-           Debug.Print("Sent=>{0}", data);
-       }
-       
-       
+        _tcp.Disconnect();
     }
 
+    public void Send(string data)
+    {
+        if (_tcp.Write(data))
+        {
+            Debug.Print("Sent=>{0}", data);
+        }
+    }
+    
     public Display DisplayData
     {
         set

@@ -8,8 +8,8 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title=""
-        Height="1440"
-        Width="1080">
+        Height="600"
+        Width="800">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -21,45 +21,89 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Window.DataContext>
-    <Grid ShowGridLines="False" RowDefinitions="Auto, *, Auto" Background="PaleTurquoise">
-        <!-- Title Bar -->
-        <Grid ShowGridLines="True" Grid.Row="0" Margin="5" Height="40"
-              ColumnDefinitions="Auto,Auto,*,Auto,Auto">
-            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="0" Click="ConnectButton_OnClick">
-                <StackPanel Orientation="Horizontal">
-                    <Label Classes="icon" Content="&#xe256;"></Label>
-                    <Label Content="Connect"></Label>
-                </StackPanel>
-            </Button>
-            <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="1" Click="DisconnectButton_OnClick">
-                <StackPanel Orientation="Horizontal">
-                    <Label Classes="icon" Content="&#xe4f8;"></Label>
-                    <Label Content="Disconnect"></Label>
-                </StackPanel>
-            </Button>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"
-                        Grid.Column="2">
-                <Label FontWeight="Black">TELSTAR </Label>
-                <Label>Viewdata Terminal</Label>
-            </StackPanel>
-            <Button Grid.Column="3" Click="RevealButton_OnClick">Reaveal</Button>
-            <Button Grid.Column="4" Click="ConcealButton_OnClick">onceal</Button>
-        </Grid>
+    <Grid ShowGridLines="True" Margin="0" RowDefinitions="Auto, *, Auto" Background="Beige">
         <!-- Main Area -->
         <!--<Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="Auto,*">-->
-            <Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="*">
-            <!--<Rectangle Grid.Column="0" Width="120" Fill="LightGray"></Rectangle>-->
-            <UniformGrid Grid.Column="1"  Background="Chartreuse" Name="display" Columns="40" Rows="24"></UniformGrid>
+        <Grid ShowGridLines="True" Grid.Row="1" ColumnDefinitions="*,Auto">
+            <UniformGrid Grid.Column="0" Margin="20,20,0,10" Name="display" Columns="40" Rows="24"></UniformGrid>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1">
+                <UniformGrid Columns="3" Margin="20">
+                    <Button Tag="1" Classes="keypad" Click="Keypad_OnClick" HorizontalAlignment="Center"
+                            VerticalAlignment="Center" Width="40" Height="40">
+                        <TextBlock Classes="keypad">1</TextBlock>
+                    </Button>
+                    <Button Tag="2" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">2</TextBlock>
+                    </Button>
+                    <Button Tag="3" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">3</TextBlock>
+                    </Button>
+                    <Button Tag="4" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad" >4</TextBlock>
+                    </Button>
+                    <Button Tag="5" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">5</TextBlock>
+                    </Button>
+                    <Button Tag="6" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">6</TextBlock>
+                    </Button>
+                    <Button Tag="7" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">7</TextBlock>
+                    </Button>
+                    <Button Tag="8" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">8</TextBlock>
+                    </Button>
+                    <Button Tag="9" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">9</TextBlock>
+                    </Button>
+                    <Button Tag="*" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">*</TextBlock>
+                    </Button>
+                    <Button Tag="0" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">0</TextBlock>
+                    </Button>
+                    <Button Tag="&#x05f;" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
+                        <TextBlock Classes="keypad">1</TextBlock>
+                    </Button>
+                </UniformGrid>
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                    <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="0" Click="RevealButton_OnClick">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Classes="icon" Content="&#xe220;"></Label>
+                            <Label Content="Reveal"></Label>
+                        </StackPanel>
+                    </Button>
+                    <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="0"
+                            Click="ConcealButton_OnClick">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Classes="icon" Content="&#xe224;"></Label>
+                            <Label Content="Conceal"></Label>
+                        </StackPanel>
+                    </Button>
+                    <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="0"
+                            Click="ConnectButton_OnClick">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Classes="icon" Content="&#xe256;"></Label>
+                            <Label Content="Connect"></Label>
+                        </StackPanel>
+                    </Button>
+                    <Button HorizontalAlignment="Stretch" Margin="0,0,5,0" Grid.Column="1"
+                            Click="DisconnectButton_OnClick">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Classes="icon" Content="&#xe4f8;"></Label>
+                            <Label Content="Disconnect"></Label>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
         </Grid>
         <!-- Status Area -->
         <Grid ShowGridLines="True" Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="5">
-            <Button Grid.Column="0" Margin="0" >Click Me!</Button>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Grid.Column="1">
                 <Label FontWeight="Black">TELSTAR </Label>
                 <Label>Viewdata Terminal</Label>
             </StackPanel>
-            <Button Grid.Column="2" HorizontalAlignment="Stretch" Margin="0">Click Me!</Button>
         </Grid>
     </Grid>
 </Window>

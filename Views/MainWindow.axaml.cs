@@ -52,6 +52,13 @@ public partial class MainWindow : Window
         ViewModel.Disconnect();
     }
 
+    private void Keypad_OnClick(object? sender, RoutedEventArgs e)
+    {
+        var button = (Button)sender;
+        ViewModel.Send((string)button.Tag);
+    }
+
+    
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e)
     {
     }
