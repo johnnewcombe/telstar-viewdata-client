@@ -1,74 +1,89 @@
-using System;
 using System.Collections.Generic;
-using System.Drawing.Printing;
-using Avalonia.Controls.ApplicationLifetimes;
 using TelstarClient.Models;
 
 namespace TelstarClient.DisplayManager;
 
+/// <summary>
+/// This class manages the Display model. Methods here update the Display model
+/// and provide all the Viewdata decoding etc., 
+/// </summary>
 public class DisplayManager
 {
-    private Models.Display _display;
+    private Display _display;
     private int _col;
     private int _row;
 
+    /// <summary>
+    /// Contructor which creates a new Display Model.
+    /// </summary>
     public DisplayManager()
     {
         _display = new Display();
     }
 
+    /// <summary>
+    /// Returns the last character sent to the Print method.
+    /// </summary>
     public char LastCharacter { private set; get; }
-    
-    public List<int> GetDisplay()
-    {
-        var results = new List<int>();
 
-        foreach (var row in _display.Rows)
-        {
-            foreach (var cell in row.Cells)
-            {
-                results.Add(cell.Character);
-            }
-        }
-
-        return results;
-    }
-
+    /// <summary>
+    /// Places a single Unicode 16 character in the Display model
+    /// the current cursor position.
+    /// </summary>
+    /// <param name="character"></param>
+    /// <returns></returns>
     public (int, char) PrintChar(char character)
-    {   
+    {
         _display.Rows[_row].Cells[_col].Character = character;
         LastCharacter = character;
         incrementCursor();
-        
+
         // return position index and character as a tuple
-        return (_row*_col+_col, character);
+        return (_row * _col + _col, character);
     }
 
+    /// <summary>
+    /// Returns the current cursor row position.
+    /// </summary>
     public int CurrentRow
     {
         get { return _row; }
     }
 
+    /// <summary>
+    /// Returns the current cursor column position.
+    /// </summary>
     public int CurrentCol
     {
         get { return _col; }
     }
 
     /// <summary>
-    /// Increments cursor. The cursor wrapps at the end of the rom, and
-    /// the wraps from the bottom back to the top.
+    /// Increments the cursor. The cursor wraps at the end of the row, and
+    /// wraps from the bottom back to the top.
     /// </summary>
     private void incrementCursor()
     {
         _col++;
-        if (_col == Display.COLS)
-        {
-            _col = 0;
-            _row++;
-            if (_row == Display.ROWS)
-            {
-                _row = 0;
-            }
-        }
+        if (_col != Display.COLS) return;
+        _col = 0;
+        _row++;
+        if (_row == Display.ROWS)
+            _row = 0;
+    }
+
+    private void decrementCursor()
+    {
+        _col--;
+        if (_col >= 0) return;
+        _col = Display.COLS - 1;
+        _row--;
+        if (_row < 0)
+            _row = Display.ROWS - 1;
+    }
+
+    private void verticalTab()
+    {
+        
     }
 }
