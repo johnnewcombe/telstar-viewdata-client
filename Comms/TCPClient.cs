@@ -102,7 +102,7 @@ namespace TelstarClient.Comms
             catch (Exception ex)
             {
                 OnConnectEvent(false);
-                throw new Exception("Socket Connection Falied. Message : " + ex.ToString());
+                throw new Exception($"Socket Connection Falied. Message : {ex}");
             }
         }
 
@@ -154,7 +154,7 @@ namespace TelstarClient.Comms
             catch (Exception ex)
             {
                 Dispose();
-                throw new Exception("Recieve Callback Setup Failed");
+                throw new Exception($"Receive Callback Setup Failed: {ex}");
             }
         }
 
@@ -191,7 +191,7 @@ namespace TelstarClient.Comms
                 catch (Exception ex)
                 {
                     Dispose();
-                    throw new Exception("Recieve Operation Failed");
+                    throw new Exception($"Receive Operation Failed: {ex}");
                 }
             }
         }
@@ -215,7 +215,7 @@ namespace TelstarClient.Comms
                 catch (Exception ex)
                 {
                     Dispose();
-                    throw new Exception("Data Writing Operation Failed");
+                    throw new Exception($"Data Writing Operation Failed: {ex}");
                 }
             }
             else
@@ -242,7 +242,7 @@ namespace TelstarClient.Comms
                 catch (Exception ex)
                 {
                     Dispose();
-                    throw new Exception("Data Writing Operation Failed");
+                    throw new Exception("Data Writing Operation Failed.");
                 }
             }
             else

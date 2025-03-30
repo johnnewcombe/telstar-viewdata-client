@@ -84,15 +84,22 @@ public partial class MainWindow : Window
     // TODO: Use this to display stored pages from the view model
     private void updateDisplay()
     {
+
         // the data returned is a tuple the first item is the position index
         // (e.g. rows * cols + cols), the second item is the character to display
         var data = ViewModel.DisplayManagerData;
+        var index = data.Item1;
+        var character = data.Item2;
+        if (character == '\x00')
+        {
+            return;
+        }
         
         // TODO Can we use a custom binding?
         for (var i=0;i<Display.COLS*Display.ROWS;i++)
         {
-            var cell = (Viewbox)display.Children[data.Item1];
-            ((Label)cell.Child).Content = $"{data.Item2}";
+            var cell = (Viewbox)display.Children[index];
+            ((Label)cell.Child).Content = $"{character}";
         }
     }
 

@@ -63,7 +63,7 @@
                         <TextBlock Classes="keypad">0</TextBlock>
                     </Button>
                     <Button Tag="&#x05f;" Classes="keypad" Click="Keypad_OnClick" Width="40" Height="40">
-                        <TextBlock Classes="keypad">1</TextBlock>
+                        <TextBlock Classes="keypad">#</TextBlock>
                     </Button>
                 </UniformGrid>
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">

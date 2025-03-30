@@ -53,7 +53,15 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             // print char returns a Tuple which is used to bind to a cell
             // in the UI
-            DisplayManagerData = _displayManager.PrintChar(c);
+            var dData = _displayManager.PrintChar(c);
+            
+            // if we get a NULL character e.g. character 0, then do nothing
+            // this happens if we have just sent a control code e.g. 00 to 1F
+            // to be printed.
+            if (dData.Item2 != '\x00')
+            {
+                DisplayManagerData = dData;
+            }
         }
     }
 
