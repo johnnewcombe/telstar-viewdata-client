@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using TelstarClient.Models;
 
 namespace TelstarClient.DisplayManager;
@@ -36,7 +35,7 @@ public class DisplayManager
     {
         _display.Rows[_row].Cells[_col].Character = character;
         LastCharacter = character;
-        incrementCursor();
+        horozontalTab();
 
         // return position index and character as a tuple
         return (_row * _col + _col, character);
@@ -58,21 +57,23 @@ public class DisplayManager
         get { return _col; }
     }
 
+    #region Cursor Movement
+    
     /// <summary>
     /// Increments the cursor. The cursor wraps at the end of the row, and
     /// wraps from the bottom back to the top.
     /// </summary>
-    private void incrementCursor()
+    private void horozontalTab()
     {
         _col++;
-        if (_col != Display.COLS) return;
+        if (_col < Display.COLS) return;
         _col = 0;
         _row++;
         if (_row == Display.ROWS)
             _row = 0;
     }
 
-    private void decrementCursor()
+    private void backSpace()
     {
         _col--;
         if (_col >= 0) return;
@@ -84,6 +85,21 @@ public class DisplayManager
 
     private void verticalTab()
     {
-        
+        _row--;
+        if (_row >= 0) return;
+        _row = Display.ROWS - 1;
     }
+    private void lineFeed()
+    {
+        _row++;
+        if (_row < Display.ROWS) return;
+        _row = 0;
+    }
+    private void carraigeReturn()
+    {
+        _col = 0;
+    }
+    
+    #endregion
+
 }
