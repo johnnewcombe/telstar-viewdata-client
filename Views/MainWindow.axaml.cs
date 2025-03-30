@@ -84,17 +84,15 @@ public partial class MainWindow : Window
     // TODO: Use this to display stored pages from the view model
     private void updateDisplay()
     {
+        // the data returned is a tuple the first item is the position index
+        // (e.g. rows * cols + cols), the second item is the character to display
         var data = ViewModel.DisplayManagerData;
-
-        // Loop through attaching font characters from the
-        // display data array i.e. (960 bytes of virtual screen memory)
-        // TODO this updates all characters, is this the best approach?
-        //   consider a tuple with the char and display index
+        
         // TODO Can we use a custom binding?
         for (var i=0;i<Display.COLS*Display.ROWS;i++)
         {
-            var cell = (Viewbox)display.Children[i];
-            ((Label)cell.Child).Content = $"&{data[i]};";
+            var cell = (Viewbox)display.Children[data.Item1];
+            ((Label)cell.Child).Content = $"{data.Item2}";
         }
     }
 

@@ -34,14 +34,14 @@ public class DisplayManager
         return results;
     }
 
-    public void Print(string text)
-    {
-        foreach (char c in text)
-        {
-            //TODO: sort this out... 
-            _display.Rows[_row].Cells[_col].Character = c;
-            LastCharacter = c;
-        }
+    public (int, char) PrintChar(char character)
+    {   
+        _display.Rows[_row].Cells[_col].Character = character;
+        LastCharacter = character;
+        incrementCursor();
+        
+        // return position index and character as a tuple
+        return (_row*_col+_col, character);
     }
 
     public int CurrentRow

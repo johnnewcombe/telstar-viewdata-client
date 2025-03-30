@@ -10,7 +10,7 @@ namespace TelstarClient.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private DisplayManager.DisplayManager _displayManager;
-    private List<int> _displayManagerData = new List<int>();
+    private (int,char) _displayManagerData;
     
     TCPClient _tcp;
 
@@ -49,9 +49,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Debug.Print("Recv<={0}", data);
         // add data to the display
-        _displayManager.Print(data);
-        DisplayManagerData = _displayManager.GetDisplay();
-
+        foreach (char c in data)
+        {
+            // print char returns a Tuple which is used to bind to a cell
+            // in the UI
+            DisplayManagerData = _displayManager.PrintChar(c);
+        }
     }
 
     public void Disconnect()
@@ -66,15 +69,15 @@ public partial class MainWindowViewModel : ViewModelBase
             Debug.Print("Sent=>{0}", data);
         }
     }
-
-    public List<int> DisplayManagerData
+    
+    public (int,char) DisplayManagerData
     {
         set
         {
             _displayManagerData = value;
             OnPropertyChanged(nameof(DisplayManagerData));
         }
-        get { return _displayManager.GetDisplay(); }
+        get { return _displayManagerData; }
     }
 
     // implmentation of INotify for properties
