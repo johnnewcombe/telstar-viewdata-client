@@ -44,18 +44,24 @@ public partial class MainWindowViewModel : ViewModelBase {
         //Debug.Print("Recv<={0}", data);
 
         // add data to the display
-        foreach (char c in data) {
+        foreach (var c in data) {
+            
             // print char returns a Tuple which is used to bind to a cell
             // in the UI
             var dData = _displayManager.PrintChar(c);
-
-            // if we get a NULL character e.g. character 0, then do nothing
-            // this happens if we have just sent a control code e.g. 00 to 1F
-            // to be printed.
+            
             if (dData is not null) {
-                // updating this property will invoke the OnPropertyChanged event
-                // to update the view
-                DisplayManagerData = dData;
+                foreach (var d in dData) {
+                    if (d is not null) {
+                        // if we get a NULL character e.g. character 0, then do nothing
+                        // this happens if we have just sent a control code e.g. 00 to 1F
+                        // to be printed.
+
+                        // updating this property will invoke the OnPropertyChanged event
+                        // to update the view
+                        DisplayManagerData = d;
+                    }
+                }
             }
         }
     }
@@ -75,10 +81,11 @@ public partial class MainWindowViewModel : ViewModelBase {
             _displayManagerData = value;
             OnPropertyChanged(nameof(DisplayManagerData));
         }
+
         get { return _displayManagerData; }
     }
 
-    // implmentation of INotify for properties
+// implmentation of INotify for properties
     public event PropertyChangedEventHandler PropertyChanged;
 
     protected virtual void OnPropertyChanged(string propertyDisplayData) {

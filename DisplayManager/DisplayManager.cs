@@ -22,17 +22,19 @@ public class DisplayManager {
     }
 
     /// <summary>
-    /// Places a single Unicode 16 character in the Display model
-    /// the current cursor position.
+    /// Accepts a single Unicode 16 character to update the cursor or Display model.
+    /// Returns a List of Char objects that need updating in the UI.
     /// </summary>
     /// <param name="character"></param>
     /// <returns></returns>
-    public Char PrintChar(char character) {
+    public List<Char> PrintChar(char character) {
         // process for viewdata
         character = _viewdataUtils.ConvertChar(character);
         if (character == '\x00') {
             // a control code was received and actioned so ignore
             return null;
+        } else if (character == 0x12 || character==0x1e) {
+            //TODO: return a new list of Char for the whole screen
         }
 
         // get the position index e.g. 0-959
@@ -48,7 +50,7 @@ public class DisplayManager {
         _cursor.HorizontalTab();
 
         // return position index and character as a tuple
-        return chr;
+        return new List<Char> { chr };
     }
 
     /// <summary>
@@ -58,7 +60,7 @@ public class DisplayManager {
         // TODO: How does this propagate to the display! Event?
         _display = new Display();
     }
-
+    
     private Display CreateDisplay() {
         var index = 0;
 

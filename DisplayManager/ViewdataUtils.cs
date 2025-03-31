@@ -38,6 +38,7 @@ public class ViewdataUtils {
     private const char ReleaseGraphics = '\x5f';
 
     private bool _escapedMode;
+    private bool _graphicsMode;
     private bool _doubleHeight;
     private Display _display;
     private Cursor _cursor;
@@ -75,21 +76,41 @@ public class ViewdataUtils {
             }
 
             Debug.Print("{0}",(int)character);
-            // sort out graphics by selecting the appropriate character in the font
-            if (character >= 0x20 && character <= 0x3f) {
-                character += (char)(0xe200 - 0x20);
+
+            // TODO: this needs to be reset at the begining of a line
+            if (character >= 0x51 && character <= 0x57) {
+                //switch to graphics mode
+                _graphicsMode = true;
+                return NullChar;
+
             }
-            if (character >= 0x60 && character <= 0x7F) {
-                character += (char)(0xe220 - 0x60);
+            
+            if (character >= 0x41 && character <= 0x47) {
+                //switch to alpha mode
+                _graphicsMode = false;
+                return NullChar;
+                
             }
-            
-            
-            
-            
             
             
         }
         else {
+            
+            //TODO: FIX the clear screen.
+            
+            if (_graphicsMode) {
+                // sort out graphics by selecting the appropriate character in the font
+                if (character >= 0x20 && character <= 0x2f) {
+                    character += (char)(0xe200 - 0x20);
+                }
+                if (character >= 0x60 && character <= 0x7f) {
+                    character += (char)(0xe220 - 0x60);
+                }
+
+            }
+            else {
+                
+            }
         }
 
         return character;
