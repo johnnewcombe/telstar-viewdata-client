@@ -19,7 +19,7 @@ public class DisplayManager
     {
         _display = new Display();
         _cursor = new();
-        _viewdataUtils = new (_cursor);
+        _viewdataUtils = new (_display,_cursor);
     }
     
     /// <summary>
@@ -28,15 +28,15 @@ public class DisplayManager
     /// </summary>
     /// <param name="character"></param>
     /// <returns></returns>
-    public (int, char) PrintChar(char character)
+    public (int, char)? PrintChar(char character)
     {
         
         // process for viewdata
         character = _viewdataUtils.ConvertChar(character);
-        if (character != '\x00')
+        if (character == '\x00')
         {
             // a control code was received and actioned so ignore
-            return (_cursor.Row * _cursor.Col + _cursor.Col, character);
+            return null;
         }
 
         // get the position index e.g. 0-959

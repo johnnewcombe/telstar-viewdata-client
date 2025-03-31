@@ -13,7 +13,7 @@ public class Display
         Rows = new List<Row>();
         for (var i = 0; i < ROWS; i++)
         {
-            var row = new Row(true);
+            var row = new Row(false);
             Rows.Add(row);
         }
     }
@@ -22,10 +22,10 @@ public class Display
 
 public class Row 
 {
-    public Row(bool visible)
+    public Row(bool readOnly)
     {
         Cells = new List<Col>();
-        Visible = visible;
+        ReadOnly = readOnly;
             
         for (var i = 0; i < Display.COLS; i++)
         {
@@ -34,7 +34,7 @@ public class Row
         }
     }
     public List<Col> Cells { get; set; }
-    public bool Visible { get; set; }
+    public bool ReadOnly { get; set; }
 
 }
 
@@ -49,4 +49,5 @@ public class Col
     public int Character { get; set; }
     public string Foreground { get; set; }
     public string Background { get; set; }
+    public bool DoubleHeight { get; set; }
 }

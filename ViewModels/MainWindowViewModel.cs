@@ -58,9 +58,10 @@ public partial class MainWindowViewModel : ViewModelBase
             // if we get a NULL character e.g. character 0, then do nothing
             // this happens if we have just sent a control code e.g. 00 to 1F
             // to be printed.
-            if (dData.Item2 != '\x00')
+            if (dData is not null)
             {
-                DisplayManagerData = dData;
+                // create a non-nullable tuple
+                DisplayManagerData = (dData.Value.Item1, dData.Value.Item2);
             }
         }
     }

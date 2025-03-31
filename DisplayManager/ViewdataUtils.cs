@@ -1,53 +1,100 @@
+using System.Drawing.Imaging.Effects;
 using System.IO.Pipelines;
+using TelstarClient.Models;
 
 namespace TelstarClient.DisplayManager;
 
-public class ViewdataUtils
-{
+public class ViewdataUtils {
     // character constants
-    private const char NULL = '\x00';
+    private const char NullChar = '\x00';
     private const char BS = '\x08';
     private const char HT = '\x09';
     private const char LF = '\x0a';
     private const char VT = '\x0b';
-    private const char HOME = '\x0c';
-    private const char HOMECLR = '\x1e';
+    private const char Home = '\x0c';
+    private const char HomeClear = '\x1e';
     private const char CR = '\x0d';
-    private const char ESC = '\x1b';
-
+    private const char Esc = '\x1b';
     
+    /* 41-49
+     * r g y b m c w f s
+     *
+     * 4c-4d
+     * n d
+     *
+     * 51-5a
+     * r g y b m c w conceal, contig, sep,
+     *
+     * 5c-5f
+     * black back, new back, hold, release
+
+
+     */
+    private const char DoubleHeight = '\x4c';
+    private const char NormalHeight = '\x4d';
+    
+    private const char HoldGraphics = '\x5e';
+    private const char ReleaseGraphics = '\x5f';
+
     private bool _escapedMode;
     private bool _doubleHeight;
+    private Display _display;
     private Cursor _cursor;
+    private bool _holdGraphics;
 
-    public ViewdataUtils(Cursor cursor)
-    {
+    public ViewdataUtils(Display display, Cursor cursor) {
+        _display = display;
         _cursor = cursor;
     }
 
-    public char ConvertChar(char character)
-    {
+    public char ConvertChar(char character) {
         // process control codes
         // null character will be returned if a control
         if (ProcessControls(character))
-            return NULL;
-        
-        
+            return NullChar; // character CHAR_NULL not null
+
+        // if current row is lower line of a Double Height row then
+        // it will be readonly
+        if (_display.Rows[_cursor.Row].ReadOnly) {
+            return NullChar;
+        }
+
+        // if we get here then the current char is not a control code
+        // i.e. char >= 0x20, therefore the _escapMode flag, if set,
+        // has been set by the previous character.
+        if (_escapedMode) {
+            
+            // reset the escapeMode flag
+            _escapedMode = false;
+
+            // check for hold/release graphics
+            _holdGraphics = character == HoldGraphics;
+            if (character == ReleaseGraphics) {
+                _holdGraphics = false;
+            }
+            
+            
+            
+            
+            
+            
+        }
+        else {
+        }
+
         return character;
     }
 
-    private bool ProcessControls(char character)
-    {
-        // assume we are going to process a control
-        var result = true;
-        
-        // if any of these get detected then NULL character is returned otherwise
+    private bool ProcessControls(char character) {
+        // is this a Control code
+        var result = character < 0x20;
+
+        // if any of these get detected then CHAR_NULL character is returned otherwise
         // the passed character is returned unaltered.
-        switch (character)
-        {
+        switch (character) {
             case '\x08':
                 _cursor.Backspace();
-                break;           
+                break;
             case '\x09':
                 _cursor.HorizontalTab();
                 break;
@@ -72,14 +119,9 @@ public class ViewdataUtils
                 break;
             case '\x1b':
                 _escapedMode = true;
-                break;  
-            default:
-                // didn't process a control so indicate as such
-                result = false;
                 break;
         }
 
         return result;
-
     }
 }
