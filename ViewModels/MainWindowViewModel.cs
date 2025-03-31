@@ -10,7 +10,7 @@ namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase {
     private DisplayManager.DisplayManager _displayManager;
-    private Char _displayManagerData;
+    private List<Char> _displayManagerData;
 
     TCPClient _tcp;
 
@@ -51,17 +51,15 @@ public partial class MainWindowViewModel : ViewModelBase {
             var dData = _displayManager.PrintChar(c);
             
             if (dData is not null) {
-                foreach (var d in dData) {
-                    if (d is not null) {
+
                         // if we get a NULL character e.g. character 0, then do nothing
                         // this happens if we have just sent a control code e.g. 00 to 1F
                         // to be printed.
 
                         // updating this property will invoke the OnPropertyChanged event
                         // to update the view
-                        DisplayManagerData = d;
-                    }
-                }
+                        DisplayManagerData = dData;
+
             }
         }
     }
@@ -76,7 +74,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         }
     }
 
-    public Char DisplayManagerData {
+    public List<Char> DisplayManagerData {
         set {
             _displayManagerData = value;
             OnPropertyChanged(nameof(DisplayManagerData));

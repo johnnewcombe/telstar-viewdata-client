@@ -16,7 +16,7 @@ public class ViewdataUtils {
     private const char HomeClear = '\x1e';
     private const char CR = '\x0d';
     private const char Esc = '\x1b';
-    
+
     /* 41-49
      * r g y b m c w f s
      *
@@ -33,7 +33,7 @@ public class ViewdataUtils {
      */
     private const char DoubleHeight = '\x4c';
     private const char NormalHeight = '\x4d';
-    
+
     private const char HoldGraphics = '\x5e';
     private const char ReleaseGraphics = '\x5f';
 
@@ -53,7 +53,7 @@ public class ViewdataUtils {
         // process control codes
         // null character will be returned if a control
         if (ProcessControls(character))
-            return NullChar; // character CHAR_NULL not null
+            return character; // character CHAR_NULL not null
 
         // if current row is lower line of a Double Height row then
         // it will be readonly
@@ -65,7 +65,6 @@ public class ViewdataUtils {
         // i.e. char >= 0x20, therefore the _escapMode flag, if set,
         // has been set by the previous character.
         if (_escapedMode) {
-            
             // reset the escapeMode flag
             _escapedMode = false;
 
@@ -75,41 +74,35 @@ public class ViewdataUtils {
                 _holdGraphics = false;
             }
 
-            Debug.Print("{0}",(int)character);
+            Debug.Print("{0}", (int)character);
 
             // TODO: this needs to be reset at the begining of a line
             if (character >= 0x51 && character <= 0x57) {
                 //switch to graphics mode
                 _graphicsMode = true;
                 return NullChar;
-
             }
-            
+
             if (character >= 0x41 && character <= 0x47) {
                 //switch to alpha mode
                 _graphicsMode = false;
                 return NullChar;
-                
             }
-            
-            
         }
         else {
-            
             //TODO: FIX the clear screen.
-            
+
             if (_graphicsMode) {
                 // sort out graphics by selecting the appropriate character in the font
-                if (character >= 0x20 && character <= 0x2f) {
+                if (character >= 0x20 && character <= 0x3f) {
                     character += (char)(0xe200 - 0x20);
                 }
+
                 if (character >= 0x60 && character <= 0x7f) {
                     character += (char)(0xe220 - 0x60);
                 }
-
             }
             else {
-                
             }
         }
 
@@ -151,6 +144,12 @@ public class ViewdataUtils {
             case '\x1b':
                 _escapedMode = true;
                 break;
+        }
+
+        // reset graphics mode and escapeMode if column == 0
+        if (_cursor.Col == 0) {
+            //_graphicsMode = false;
+            //_escapedMode = false;
         }
 
         return result;

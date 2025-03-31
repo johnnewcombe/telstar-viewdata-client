@@ -70,15 +70,20 @@ public partial class MainWindow : Window {
 
     // TODO: Use this to display stored pages from the view model
     private void UpdateDisplay() {
-        var chr = ViewModel.DisplayManagerData;
-        if (chr is null) {
+        var chars = ViewModel.DisplayManagerData;
+        if (chars is null) {
             return;
         }
 
-        // TODO Can we use a custom binding?
-        for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
-            var cell = (Viewbox)display.Children[chr.Index];
-            (((Label)cell.Child)!).Content = $"{chr.Value}";
+        foreach (var c in chars) {
+            
+            if (c is null) continue;
+            
+            // TODO Can we use a custom binding?
+            for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
+                var cell = (Viewbox)display.Children[c.Index];
+                (((Label)cell.Child)!).Content = $"{c.Value}";
+            }
         }
     }
 

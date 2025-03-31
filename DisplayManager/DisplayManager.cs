@@ -30,11 +30,26 @@ public class DisplayManager {
     public List<Char> PrintChar(char character) {
         // process for viewdata
         character = _viewdataUtils.ConvertChar(character);
-        if (character == '\x00') {
-            // a control code was received and actioned so ignore
+        
+        // special case, clear screen
+        if (character == 0x0c) {
+
+            // clear the model data
+            _display = CreateDisplay();
+
+            // list of new Chars to be returned these
+            // will be used to update the UI
+            var clearScreen = new List<Char>();
+            foreach (var r in _display.Rows) {
+                foreach (var c in r.Chars) {
+                    clearScreen.Add(c);
+                }
+            }
+            return clearScreen;
+        }
+        
+        if (character < 0x20) {
             return null;
-        } else if (character == 0x12 || character==0x1e) {
-            //TODO: return a new list of Char for the whole screen
         }
 
         // get the position index e.g. 0-959
@@ -72,7 +87,7 @@ public class DisplayManager {
             row.Chars = new List<Char>();
 
             for (var j = 0; j < Display.COLS; j++) {
-                var chr = new Char((char)0xe276, "white,", "black");
+                var chr = new Char(' ', "white,", "black");
                 chr.Index = index++;
                 row.Chars.Add(chr);
             }
