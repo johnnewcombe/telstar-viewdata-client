@@ -4,85 +4,74 @@ using System.ComponentModel;
 using System.Diagnostics;
 using TelstarClient.Comms;
 using TelstarClient.Models;
+using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
-{
+public partial class MainWindowViewModel : ViewModelBase {
     private DisplayManager.DisplayManager _displayManager;
-    private (int,char) _displayManagerData;
-    
+    private Char _displayManagerData;
+
     TCPClient _tcp;
 
     /// <summary>
     /// Constructor
     /// </summary>
-    public MainWindowViewModel()
-    {
+    public MainWindowViewModel() {
         _displayManager = new DisplayManager.DisplayManager();
     }
 
-    public void Connect()
-    {
-        try
-        {
+    public void Connect() {
+        try {
             _tcp = new TCPClient("glasstty.com", 6502);
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataRecievedEvent += OnRecieved;
             _tcp.Connect();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             // Catch errors in Connection and Recieve Callbacks
             Debug.Print("Error : " + ex.ToString());
         }
     }
 
     // Connection Status Listner
-    private void OnConnect(bool status)
-    {
-        Debug.Print("Connection : " + status.ToString());
+    private void OnConnect(bool status) {
+        Debug.Print("Connected! : " + status.ToString());
     }
 
-    // Data Recieved Listner
-    private void OnRecieved(string data)
-    {
-        Debug.Print("Recv<={0}", data);
+    // Data Received Listner
+    private void OnRecieved(string data) {
+        //Debug.Print("Recv<={0}", data);
+
         // add data to the display
-        foreach (char c in data)
-        {
+        foreach (char c in data) {
             // print char returns a Tuple which is used to bind to a cell
             // in the UI
             var dData = _displayManager.PrintChar(c);
-            
+
             // if we get a NULL character e.g. character 0, then do nothing
             // this happens if we have just sent a control code e.g. 00 to 1F
             // to be printed.
-            if (dData is not null)
-            {
-                // create a non-nullable tuple
-                DisplayManagerData = (dData.Value.Item1, dData.Value.Item2);
+            if (dData is not null) {
+                // updating this property will invoke the OnPropertyChanged event
+                // to update the view
+                DisplayManagerData = dData;
             }
         }
     }
 
-    public void Disconnect()
-    {
+    public void Disconnect() {
         _tcp.Disconnect();
     }
 
-    public void Send(string data)
-    {
-        if (_tcp.Write(data))
-        {
-            Debug.Print("Sent=>{0}", data);
+    public void Send(string data) {
+        if (_tcp.Write(data)) {
+            //Debug.Print("Sent=>{0}", data);
         }
     }
-    
-    public (int,char) DisplayManagerData
-    {
-        set
-        {
+
+    public Char DisplayManagerData {
+        set {
             _displayManagerData = value;
             OnPropertyChanged(nameof(DisplayManagerData));
         }
@@ -92,8 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
     // implmentation of INotify for properties
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual void OnPropertyChanged(string propertyDisplayData)
-    {
+    protected virtual void OnPropertyChanged(string propertyDisplayData) {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyDisplayData));
     }
 }

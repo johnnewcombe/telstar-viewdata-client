@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Drawing.Imaging.Effects;
 using System.IO.Pipelines;
 using TelstarClient.Models;
@@ -71,6 +72,15 @@ public class ViewdataUtils {
             _holdGraphics = character == HoldGraphics;
             if (character == ReleaseGraphics) {
                 _holdGraphics = false;
+            }
+
+            Debug.Print("{0}",(int)character);
+            // sort out graphics by selecting the appropriate character in the font
+            if (character >= 0x20 && character <= 0x3f) {
+                character += (char)(0xe200 - 0x20);
+            }
+            if (character >= 0x60 && character <= 0x7F) {
+                character += (char)(0xe220 - 0x60);
             }
             
             

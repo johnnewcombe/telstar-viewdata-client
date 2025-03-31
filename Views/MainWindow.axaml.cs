@@ -15,12 +15,10 @@ using Brushes = Avalonia.Media.Brushes;
 
 namespace TelstarClient.Views;
 
-public partial class MainWindow : Window
-{
+public partial class MainWindow : Window {
     public MainWindowViewModel ViewModel { get; set; }
 
-    public MainWindow()
-    {
+    public MainWindow() {
         InitializeComponent();
 
         ViewModel = new MainWindowViewModel();
@@ -31,24 +29,19 @@ public partial class MainWindow : Window
 
         //initialise the display
         display.Children.Clear();
-        for (int i = 0; i < Display.COLS * Display.ROWS; i++)
-        {
+        for (int i = 0; i < Display.COLS * Display.ROWS; i++) {
             var g = GetCharacterLabel(0x20);
             display.Children.Add(g);
         }
     }
 
-    private void PropertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
-    {
-        switch (e.PropertyName)
-        {
+    private void PropertyChangedEventHandler(object sender, PropertyChangedEventArgs e) {
+        switch (e.PropertyName) {
             case nameof(ViewModel.DisplayManagerData):
-                try
-                {
-                    Dispatcher.UIThread.Post(updateDisplay);
+                try {
+                    Dispatcher.UIThread.Post(UpdateDisplay);
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     Debug.WriteLine(ex.Message);
                 }
 
@@ -56,60 +49,44 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ConnectButton_OnClick(object? sender, RoutedEventArgs e)
-    {
+    private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
         ViewModel.Connect();
     }
 
-    private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e)
-    {
+    private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e) {
         ViewModel.Disconnect();
     }
 
-    private void Keypad_OnClick(object? sender, RoutedEventArgs e)
-    {
+    private void Keypad_OnClick(object? sender, RoutedEventArgs e) {
         var button = (Button)sender;
         ViewModel.Send((string)button.Tag);
     }
 
-
-    private void RevealButton_OnClick(object? sender, RoutedEventArgs e)
-    {
+    private void RevealButton_OnClick(object? sender, RoutedEventArgs e) {
     }
 
-    private void ConcealButton_OnClick(object? sender, RoutedEventArgs e)
-    {
+    private void ConcealButton_OnClick(object? sender, RoutedEventArgs e) {
     }
 
     // TODO: Use this to display stored pages from the view model
-    private void updateDisplay()
-    {
-
-        // the data returned is a tuple the first item is the position index
-        // (e.g. rows * cols + cols), the second item is the character to display
-        var data = ViewModel.DisplayManagerData;
-        var index = data.Item1;
-        var character = data.Item2;
-        if (character == '\x00')
-        {
+    private void UpdateDisplay() {
+        var chr = ViewModel.DisplayManagerData;
+        if (chr is null) {
             return;
         }
-        
+
         // TODO Can we use a custom binding?
-        for (var i=0;i<Display.COLS*Display.ROWS;i++)
-        {
-            var cell = (Viewbox)display.Children[index];
-            ((Label)cell.Child).Content = $"{character}";
+        for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
+            var cell = (Viewbox)display.Children[chr.Index];
+            (((Label)cell.Child)!).Content = $"{chr.Value}";
         }
     }
 
-    private static Viewbox GetCharacterLabel(int charNumber)
-    {
+    private static Viewbox GetCharacterLabel(int charNumber) {
         var thicknessZero = Thickness.Parse("0");
 
         // create a sixel
-        var label = new Label()
-        {
+        var label = new Label() {
             Background = Brushes.Black,
             Foreground = Brushes.White,
             Content = (char)charNumber,
@@ -120,8 +97,7 @@ public partial class MainWindow : Window
         // set the style i.e. Mode 7 font.
         label.Classes.Add("mode7");
 
-        var viewBox = new Viewbox()
-        {
+        var viewBox = new Viewbox() {
             Child = label,
             Stretch = Stretch.Fill,
             HorizontalAlignment = HorizontalAlignment.Stretch,
