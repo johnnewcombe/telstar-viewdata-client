@@ -8,6 +8,9 @@ namespace TelstarClient.DisplayManager;
 
 public class ViewdataUtils {
     // character constants
+
+    #region Primary Controls C0
+
     private const char NullChar = '\x00';
     private const char BS = '\x08';
     private const char HT = '\x09';
@@ -17,27 +20,39 @@ public class ViewdataUtils {
     private const char HomeClear = '\x1e';
     private const char CR = '\x0d';
     private const char Esc = '\x1b';
-
-    /* 41-49
-     * r g y b m c w f s
-     *
-     * 4c-4d
-     * n d
-     *
-     * 51-5a
-     * r g y b m c w conceal, contig, sep,
-     *
-     * 5c-5f
-     * black back, new back, hold, release
-
-
-     */
-    private const char DoubleHeight = '\x4c';
-    private const char NormalHeight = '\x4d';
-
+    
+    #endregion
+    
+    # region Parallel Controls C1
+    
+    private const char AlphaRed = '\x41';
+    private const char AlphaGreen = '\x42';
+    private const char AlphaYellow = '\x43';
+    private const char AlphaBlue = '\x44';
+    private const char AlphaMagenta = '\x45';
+    private const char AlphaCyan = '\x46';
+    private const char AlphaWhite = '\x47';
+    private const char Flash = '\x48';
+    private const char Steady = '\x49';
+    private const char NormalHeight = '\x4c';
+    private const char DoubleHeight = '\x4d';
+    private const char GraphicRed = '\x51';
+    private const char GraphicGreen = '\x52';
+    private const char GraphicYellow = '\x53';
+    private const char GraphicBlue = '\x54';
+    private const char GraphicMagenta = '\x55';
+    private const char GraphicCyan = '\x56';
+    private const char GraphicWhite = '\x57';
+    private const char Conceal = '\x58';
+    private const char Contiguous = '\x59';
+    private const char Separated = '\x5a';
+    private const char BlackBackground = '\x5c';
+    private const char NewBackground = '\x5d';
     private const char HoldGraphics = '\x5e';
     private const char ReleaseGraphics = '\x5f';
 
+    #endregion
+    
     private bool _escapedMode;
     private bool _graphicsMode;
     private bool _doubleHeight;
@@ -83,6 +98,7 @@ public class ViewdataUtils {
             // in the UI.
             chr.IsControl = true;
 
+
             // reset the escapeMode flag
             _escapedMode = false;
 
@@ -92,9 +108,11 @@ public class ViewdataUtils {
                 _holdGraphics = false;
             }
 
-            // TODO: not sure this is needed if we are to be scanning the
-            //  current row each time
+            /*
             # region Not Needed?
+            // TODO: not sure this is needed if we are to be scanning the
+            //  previos chars in the row each time we update
+            
             
             // set the grahics/alpha mode
             if (!_graphicsMode && character >= 0x51 && character <= 0x57) {
@@ -108,9 +126,48 @@ public class ViewdataUtils {
             }
 
             #endregion
+            */
+            
+            // get current attributes based on the previous Char
+            if (_cursor.Col == 0) {
+                // use default settings if we are populating col 0
+                chr.Background = "White";
+                chr.Background = "Black";
+            }
+            else {
+                // get previous char
+                var prevChr = _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
+                chr.Background = prevChr.Background;
+                chr.Foreground = prevChr.Foreground;
+            }
+            
+            switch (character) {
+                case AlphaRed:
+                    chr.Foreground = "Red";
+                    break;
+                case AlphaGreen:
+                    chr.Foreground = "Green";
+                    break;
+                case AlphaYellow:
+                    chr.Foreground = "Yellow";
+                    break;
+                case AlphaBlue:
+                    chr.Foreground = "Blue";
+                    break;
+                case AlphaMagenta:
+                    chr.Foreground = "Magenta";
+                    break;
+                case AlphaCyan:
+                    chr.Foreground = "Cyan";
+                    break;
+                case AlphaWhite:
+                    chr.Foreground = "White";
+                    break;
+            }
+            
+            
+            
 
-            // the control viewdata code is replaced by a space or a hold graphic
-            character = _holdGraphics ? _holdGraphicsCharacter : ' ';
         }
         else {
             // not a control code
@@ -138,8 +195,6 @@ public class ViewdataUtils {
 
         // update the char appropriately
         chr.Value = character;
-        chr.Foreground = "yellow";
-        chr.Background = "Black";
 
         return new List<Char>() { chr };
     }
@@ -179,12 +234,6 @@ public class ViewdataUtils {
             case '\x1b':
                 _escapedMode = true;
                 break;
-        }
-
-        // reset graphics mode and escapeMode if column == 0
-        if (_cursor.Col == 0) {
-            //_graphicsMode = false;
-            //_escapedMode = false;
         }
 
         return result;

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Printing;
+using System.Net.Http.Headers;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Threading;
 using TelstarClient.Models;
@@ -77,14 +79,11 @@ public partial class MainWindow : Window {
         }
 
         foreach (var c in chars) {
-            
             if (c is null) continue;
-            
-            // TODO Can we use a custom binding?
-            for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
-                var cell = (Viewbox)display.Children[c.Index];
-                (((Label)cell.Child)!).Content = $"{c.Value}";
-            }
+            var label = (Label)((Viewbox)display.Children[c.Index]).Child;
+            label.Content = c.IsControl ? " " : $"{c.Value}";
+            label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
+            label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
         }
     }
 

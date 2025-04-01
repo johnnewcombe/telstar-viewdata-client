@@ -84,7 +84,7 @@ public class DisplayManager {
             row.Chars = new List<Char>();
 
             for (var j = 0; j < Display.COLS; j++) {
-                var chr = new Char(' ', "white,", "black");
+                var chr = new Char(' ', "White", "Black");
                 chr.Index = index++;
                 row.Chars.Add(chr);
             }
