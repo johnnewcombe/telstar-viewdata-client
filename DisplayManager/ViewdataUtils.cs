@@ -20,11 +20,11 @@ public class ViewdataUtils {
     private const char HomeClear = '\x1e';
     private const char CR = '\x0d';
     private const char Esc = '\x1b';
-    
+
     #endregion
-    
+
     # region Parallel Controls C1
-    
+
     private const char AlphaRed = '\x41';
     private const char AlphaGreen = '\x42';
     private const char AlphaYellow = '\x43';
@@ -52,7 +52,7 @@ public class ViewdataUtils {
     private const char ReleaseGraphics = '\x5f';
 
     #endregion
-    
+
     private bool _escapedMode;
     private bool _graphicsMode;
     private bool _doubleHeight;
@@ -86,7 +86,12 @@ public class ViewdataUtils {
 
         // get the current character from the position index e.g. 0-959
         var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
-
+        
+        // update the value, this could be a control code or an alpha mosaic
+        // and could get changed if we needed to point to a graphic or double
+        // height character etc. within the font.
+        chr.Value = character;
+        
         // if we get here then the current char is not a C0 control code
         // (char < 0x20)
         if (_escapedMode) {
@@ -108,94 +113,30 @@ public class ViewdataUtils {
                 _holdGraphics = false;
             }
 
-            /*
-            # region Not Needed?
-            // TODO: not sure this is needed if we are to be scanning the
-            //  previos chars in the row each time we update
-            
-            
-            // set the grahics/alpha mode
-            if (!_graphicsMode && character >= 0x51 && character <= 0x57) {
-                //switch to graphics mode
-                _graphicsMode = true;
-            }
-
-            if (_graphicsMode && character >= 0x41 && character <= 0x47) {
-                //switch to alpha mode
-                _graphicsMode = false;
-            }
-
-            #endregion
-            */
-            
-            // get current attributes based on the previous Char
-            if (_cursor.Col == 0) {
-                // use default settings if we are populating col 0
-                chr.Background = "White";
-                chr.Background = "Black";
-            }
-            else {
-                // get previous char
-                var prevChr = _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
-                chr.Background = prevChr.Background;
-                chr.Foreground = prevChr.Foreground;
-            }
-            
-            switch (character) {
-                case AlphaRed:
-                    chr.Foreground = "Red";
-                    break;
-                case AlphaGreen:
-                    chr.Foreground = "Green";
-                    break;
-                case AlphaYellow:
-                    chr.Foreground = "Yellow";
-                    break;
-                case AlphaBlue:
-                    chr.Foreground = "Blue";
-                    break;
-                case AlphaMagenta:
-                    chr.Foreground = "Magenta";
-                    break;
-                case AlphaCyan:
-                    chr.Foreground = "Cyan";
-                    break;
-                case AlphaWhite:
-                    chr.Foreground = "White";
-                    break;
-            }
-            
-            
-            
+            // first get the attributes from the previos cell (or defaults if col 0)
+            chr = ApplyCurrentAttributes(chr);
+            chr = ApplyNewAttributes(chr);
 
         }
         else {
             // not a control code
             chr.IsControl = false;
-
-            if (_graphicsMode) {
+            chr = ApplyCurrentAttributes(chr);
+            
+            if (chr.IsGraphic) {
                 // sort out graphics by selecting the appropriate character in the font
-                if (character >= 0x20 && character <= 0x3f) {
-                    character += (char)(0xe200 - 0x20);
+                if (chr.Value >= 0x20 && chr.Value <= 0x3f) {
+                    chr.Value += (char)(0xe200 - 0x20);
                 }
 
-                if (character >= 0x60 && character <= 0x7f) {
-                    character += (char)(0xe220 - 0x60);
+                if (chr.Value >= 0x60 && chr.Value <= 0x7f) {
+                    chr.Value += (char)(0xe220 - 0x60);
                 }
             }
-            else {
-            }
-        }
-
-        var row = _display.Rows[_cursor.Row];
-        foreach (var r in row.Chars) {
-            // TODO: in order to determine the colour and other attributes of the character
-            //  we need to look at everything that went before on that row.
         }
 
         // update the char appropriately
-        chr.Value = character;
-
+        // we return a list as it may be necessary to update the rest of a row.
         return new List<Char>() { chr };
     }
 
@@ -237,5 +178,90 @@ public class ViewdataUtils {
         }
 
         return result;
+    }
+
+    private Char ApplyCurrentAttributes(Char chr) {
+        // get current attributes based on the previous Char
+        if (_cursor.Col == 0) {
+            // use default settings if we are populating col 0
+            chr.Background = "White";
+            chr.Background = "Black";
+            chr.IsGraphic = false;
+        }
+        else {
+            // get previous char
+            var prevChr = _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
+            chr.Foreground = prevChr.Foreground;
+            chr.Background = prevChr.Background;
+            chr.IsGraphic = prevChr.IsGraphic;
+        }
+
+        return chr;
+    }
+
+    private Char ApplyNewAttributes(Char chr) {
+        
+                    // apply any new attributes on top
+            switch (chr.Value) {
+                case AlphaRed:
+                    chr.Foreground = "Red";
+                    chr.IsGraphic = false;
+                    break;
+                case AlphaGreen:
+                    chr.Foreground = "Green";
+                    chr.IsGraphic = false;
+                    break;
+                case AlphaYellow:
+                    chr.Foreground = "Yellow";
+                    chr.IsGraphic = false;
+                    break;
+                case AlphaBlue:
+                    chr.Foreground = "Blue";
+                    chr.IsGraphic = false;
+                    break;
+                case AlphaMagenta:
+                    chr.Foreground = "Magenta";
+                    chr.IsGraphic = false;
+                    break;
+                case AlphaCyan:
+                    chr.Foreground = "Cyan";
+                    chr.IsGraphic = false;
+                    break;
+                case AlphaWhite:
+                    chr.Foreground = "White";
+                    chr.IsGraphic = false;
+                    break;
+                
+                case GraphicRed:
+                    chr.Foreground = "Red";
+                    chr.IsGraphic = true;
+                    break;
+                case GraphicGreen:
+                    chr.Foreground = "Green";
+                    chr.IsGraphic = true;
+                    break;
+                case GraphicYellow:
+                    chr.Foreground = "Yellow";
+                    chr.IsGraphic = true;
+                    break;
+                case GraphicBlue:
+                    chr.Foreground = "Blue";
+                    chr.IsGraphic = true;
+                    break;
+                case GraphicMagenta:
+                    chr.Foreground = "Magenta";
+                    chr.IsGraphic = true;
+                    break;
+                case GraphicCyan:
+                    chr.Foreground = "Cyan";
+                    chr.IsGraphic = true;
+                    break;
+                case GraphicWhite:
+                    chr.Foreground = "White";
+                    chr.IsGraphic = true;
+                    break;
+            }
+
+            return chr;
     }
 }

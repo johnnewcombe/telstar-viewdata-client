@@ -41,12 +41,14 @@ public class DisplayManager {
         // view controller as a list.
         var chrs = _viewdataUtils.ProcessChar(character);
 
-        if (chrs != null && chrs.Count == 0) {
+        if (chrs.Count == 0) {
             return chrs;
         }
         
         // move cursor for next character
-        _cursor.HorizontalTab();
+        foreach (var c in chrs) {
+            _cursor.HorizontalTab();
+        }
 
         // generally we will be updating a single character but sometimes
         // it could be a whole row or in the case of a clear screen, a whole screen.
