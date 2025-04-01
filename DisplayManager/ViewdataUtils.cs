@@ -119,7 +119,12 @@ public class ViewdataUtils {
             else {
             }
         }
-        // update the char
+        var row =_display.Rows[_cursor.Row];
+        foreach (var r in row.Chars) {
+            // TODO: in order to determine the colour and other attributes of the character
+            //  we need to look at everything that went before on that row.
+        }
+        // update the char appropriately
         chr.Value = character;
         chr.Foreground = "yellow";
         chr.Background = "Black";
