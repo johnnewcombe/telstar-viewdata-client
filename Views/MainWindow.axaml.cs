@@ -39,6 +39,7 @@ public partial class MainWindow : Window {
         switch (e.PropertyName) {
             case nameof(ViewModel.DisplayManagerData):
                 try {
+                    // execute on the main thread
                     Dispatcher.UIThread.Post(UpdateDisplay);
                 }
                 catch (Exception ex) {

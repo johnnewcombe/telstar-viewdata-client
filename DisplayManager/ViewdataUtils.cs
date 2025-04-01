@@ -43,6 +43,7 @@ public class ViewdataUtils {
     private Display _display;
     private Cursor _cursor;
     private bool _holdGraphics;
+    private char _holdGraphicsCharacter;
 
     public ViewdataUtils(Display display, Cursor cursor) {
         _display = display;
@@ -52,8 +53,9 @@ public class ViewdataUtils {
     public char ConvertChar(char character) {
         // process control codes
         // null character will be returned if a control
-        if (ProcessControls(character))
+        if (ProcessControls(character)) {
             return character; // character CHAR_NULL not null
+        }
 
         // if current row is lower line of a Double Height row then
         // it will be readonly
@@ -61,9 +63,10 @@ public class ViewdataUtils {
             return NullChar;
         }
 
-        // if we get here then the current char is not a control code
-        // i.e. char >= 0x20, therefore the _escapMode flag, if set,
-        // has been set by the previous character.
+        // if we get here then the current char is not a C0 control code
+        // (char < 0x20), therefore the _escapMode flag, if set,
+        // has been set by the previous character and the current character is
+        // a viewdata control code
         if (_escapedMode) {
             // reset the escapeMode flag
             _escapedMode = false;
@@ -74,24 +77,24 @@ public class ViewdataUtils {
                 _holdGraphics = false;
             }
 
-            Debug.Print("{0}", (int)character);
-
             // TODO: this needs to be reset at the begining of a line
-            if (character >= 0x51 && character <= 0x57) {
+            if (!_graphicsMode && character >= 0x51 && character <= 0x57) {
                 //switch to graphics mode
                 _graphicsMode = true;
                 return NullChar;
             }
 
-            if (character >= 0x41 && character <= 0x47) {
+            if (_graphicsMode && character >= 0x41 && character <= 0x47) {
                 //switch to alpha mode
                 _graphicsMode = false;
                 return NullChar;
             }
+
+            // the control viewdata code is replaced by a space or a hold graphic
+            character = _holdGraphics ? _holdGraphicsCharacter : ' ';
         }
         else {
-            //TODO: FIX the clear screen.
-
+            
             if (_graphicsMode) {
                 // sort out graphics by selecting the appropriate character in the font
                 if (character >= 0x20 && character <= 0x3f) {

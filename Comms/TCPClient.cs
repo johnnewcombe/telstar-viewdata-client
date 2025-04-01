@@ -38,8 +38,8 @@ namespace TelstarClient.Comms
         /// Notify the Received Data
         /// </summary>
         /// <param name="data">Received Data</param>
-        public delegate void DataReceivedEventHandler(String data);
-        public event DataReceivedEventHandler OnDataRecievedEvent;
+        public delegate void DataReceivedEventHandler(string data);
+        public event DataReceivedEventHandler OnDataReceivedEvent;
 
         /// <summary>
         /// Notify the Connection Status of Socket
@@ -102,7 +102,7 @@ namespace TelstarClient.Comms
             catch (Exception ex)
             {
                 OnConnectEvent(false);
-                throw new Exception($"Socket Connection Falied. Message : {ex}");
+                throw new Exception($"Socket Connection Failed. Message : {ex}");
             }
         }
 
@@ -148,8 +148,8 @@ namespace TelstarClient.Comms
         {
             try
             {
-                AsyncCallback recieveData = new AsyncCallback(OnRecievedData);
-                _socket.BeginReceive(readerBuffer, 0, readerBuffer.Length, SocketFlags.None, recieveData, _socket);
+                AsyncCallback receiveData = new AsyncCallback(OnReceivedData);
+                _socket.BeginReceive(readerBuffer, 0, readerBuffer.Length, SocketFlags.None, receiveData, _socket);
             }
             catch (Exception ex)
             {
@@ -159,7 +159,7 @@ namespace TelstarClient.Comms
         }
 
         // Recieve data from TCP
-        private void OnRecievedData(IAsyncResult ar)
+        private void OnReceivedData(IAsyncResult ar)
         {
             Socket _socket = (Socket)ar.AsyncState;
 
@@ -178,9 +178,9 @@ namespace TelstarClient.Comms
                         }
 
                         // Fire Data Recieved Event
-                        OnDataRecievedEvent(sRecieved);
+                        OnDataReceivedEvent(sRecieved);
 
-                        // If the Connection is Still Usable Restablish the Callback
+                        // If the Connection is Still Usable Re-establish the Callback
                         SetupRecieveCallback(_socket);
                     }
                     else
