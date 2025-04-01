@@ -40,11 +40,9 @@ public class DisplayManager {
         // includes the display index so can be passed directly back to the
         // view controller as a list.
         var chrs = _viewdataUtils.ProcessChar(character);
-        
-        // control characters have already been processed above,
-        // no UI updates are needed so exit.
-        if (character < 0x20) {
-            return null;
+
+        if (chrs != null && chrs.Count == 0) {
+            return chrs;
         }
         
         // move cursor for next character

@@ -44,8 +44,8 @@ public partial class MainWindowViewModel : ViewModelBase {
     private void OnReceived(string data) {
      
         // TODO: can we call this on the main UI thread or a separate thread maybe
-        //  otherwise there is a risk that incomming data will be miseed when doing 
-        // large screen updates e.g. CLS etc.
+        //  otherwise there is a risk that incoming data will be missed when doing 
+        //  large screen updates e.g. CLS etc.
         ViewdataProcess(data);
     }
     
@@ -56,7 +56,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             // in the UI
             var dData = _displayManager.PrintChar(c);
 
-            if (dData is not null) {
+            if (dData.Count>0) {
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
                 DisplayManagerData = dData;

@@ -52,15 +52,14 @@ public class ViewdataUtils {
     }
 
     public List<Char> ProcessChar(char character) {
-        
-        var result =  new List<Char>();
-        
+        var result = new List<Char>();
+
         // process control codes
         // null character will be returned if a control
         // TODO: we need to returm more than the character e.g. is it a control code
         // and the attributes changed
         if (ProcessControls(character)) {
-            // nothing to update so 
+            // nothing to update so return empty list of chars.
             return result;
         }
 
@@ -74,22 +73,30 @@ public class ViewdataUtils {
         var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
 
         // if we get here then the current char is not a C0 control code
-        // (char < 0x20), therefore the _escapMode flag, if set,
-        // has been set by the previous character and the current character is
-        // a viewdata control code
-        
+        // (char < 0x20)
         if (_escapedMode) {
-            
+            // if the _escapeMode flag is set then this has been done
+            // by the previous character and the current character is
+            // a viewdata control code so set the flag. Note that the
+            // actual control code is stored in the display model,
+            // however, a space (or held graphic) will be displayed
+            // in the UI.
+            chr.IsControl = true;
+
             // reset the escapeMode flag
             _escapedMode = false;
 
-            // check for hold/release graphics
+            // check for hold/release graphics code and set the flag accordingly
             _holdGraphics = character == HoldGraphics;
             if (character == ReleaseGraphics) {
                 _holdGraphics = false;
             }
 
-            // TODO: this needs to be reset at the begining of a line
+            // TODO: not sure this is needed if we are to be scanning the
+            //  current row each time
+            # region Not Needed?
+            
+            // set the grahics/alpha mode
             if (!_graphicsMode && character >= 0x51 && character <= 0x57) {
                 //switch to graphics mode
                 _graphicsMode = true;
@@ -100,12 +107,15 @@ public class ViewdataUtils {
                 _graphicsMode = false;
             }
 
+            #endregion
+
             // the control viewdata code is replaced by a space or a hold graphic
             character = _holdGraphics ? _holdGraphicsCharacter : ' ';
-            
         }
         else {
-            
+            // not a control code
+            chr.IsControl = false;
+
             if (_graphicsMode) {
                 // sort out graphics by selecting the appropriate character in the font
                 if (character >= 0x20 && character <= 0x3f) {
@@ -119,17 +129,19 @@ public class ViewdataUtils {
             else {
             }
         }
-        var row =_display.Rows[_cursor.Row];
+
+        var row = _display.Rows[_cursor.Row];
         foreach (var r in row.Chars) {
             // TODO: in order to determine the colour and other attributes of the character
             //  we need to look at everything that went before on that row.
         }
+
         // update the char appropriately
         chr.Value = character;
         chr.Foreground = "yellow";
         chr.Background = "Black";
 
-        return new List<Char>(){chr};
+        return new List<Char>() { chr };
     }
 
     private bool ProcessControls(char character) {
