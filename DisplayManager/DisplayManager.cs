@@ -13,7 +13,7 @@ public class DisplayManager {
     private ViewdataUtils _viewdataUtils;
 
     /// <summary>
-    /// Contructor which creates a new Display Model.
+    /// Constructor which creates a new Display Model.
     /// </summary>
     public DisplayManager() {
         _display = CreateDisplay();
@@ -28,52 +28,51 @@ public class DisplayManager {
     /// <param name="character"></param>
     /// <returns></returns>
     public List<Char> PrintChar(char character) {
-        // process for viewdata
-        character = _viewdataUtils.ConvertChar(character);
         
-        // special case, clear screen
+        // clear screen is a special case as the UI screen needs a full update
+        // to clear each char position
         if (character == 0x0c) {
-
-            // clear the model data
-            _display = CreateDisplay();
-
-            // list of new Chars to be returned these
-            // will be used to update the UI
-            var clearScreen = new List<Char>();
-            foreach (var r in _display.Rows) {
-                foreach (var c in r.Chars) {
-                    clearScreen.Add(c);
-                }
-            }
-            return clearScreen;
+            return ClearScreen();
         }
         
+        // process the character, this will update cursor and other stuff etc
+        // and will return a list of characters to be updated. Ech character
+        // includes the display index so can be passed directly back to the
+        // view controller as a list.
+        var chrs = _viewdataUtils.ProcessChar(character);
+        
+        // control characters have already been processed above,
+        // no UI updates are needed so exit.
         if (character < 0x20) {
             return null;
         }
-
-        // get the position index e.g. 0-959
-        var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
-
-        // update the char
-        chr.Value = character;
-        chr.Foreground = "White";
-        chr.Background = "Black";
-
-
+        
         // move cursor for next character
         _cursor.HorizontalTab();
 
-        // return position index and character as a tuple
-        return new List<Char> { chr };
+        // generally we will be updating a single character but sometimes
+        // it could be a whole row or in the case of a clear screen, a whole screen.
+        // return all characters as a list
+        return chrs;
     }
 
     /// <summary>
     /// Clear the screen by creating a new one.
     /// </summary>
-    private void ClearScreen() {
-        // TODO: How does this propagate to the display! Event?
-        _display = new Display();
+    private List<Char> ClearScreen() {
+        // clear the model data
+        _display = CreateDisplay();
+        _cursor.Home();
+
+        // list of new Chars to be returned these
+        // will be used to update the UI
+        var clearScreen = new List<Char>();
+        foreach (var r in _display.Rows) {
+            foreach (var c in r.Chars) {
+                clearScreen.Add(c);
+            }
+        }
+        return clearScreen;
     }
     
     private Display CreateDisplay() {

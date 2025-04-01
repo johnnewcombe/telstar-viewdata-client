@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing.Imaging.Effects;
 using System.IO.Pipelines;
@@ -50,24 +51,35 @@ public class ViewdataUtils {
         _cursor = cursor;
     }
 
-    public char ConvertChar(char character) {
+    public List<Char> ProcessChar(char character) {
+        
+        var result =  new List<Char>();
+        
         // process control codes
         // null character will be returned if a control
+        // TODO: we need to returm more than the character e.g. is it a control code
+        // and the attributes changed
         if (ProcessControls(character)) {
-            return character; // character CHAR_NULL not null
+            // nothing to update so 
+            return result;
         }
 
         // if current row is lower line of a Double Height row then
         // it will be readonly
         if (_display.Rows[_cursor.Row].ReadOnly) {
-            return NullChar;
+            return result;
         }
+
+        // get the current character from the position index e.g. 0-959
+        var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
 
         // if we get here then the current char is not a C0 control code
         // (char < 0x20), therefore the _escapMode flag, if set,
         // has been set by the previous character and the current character is
         // a viewdata control code
+        
         if (_escapedMode) {
+            
             // reset the escapeMode flag
             _escapedMode = false;
 
@@ -81,17 +93,16 @@ public class ViewdataUtils {
             if (!_graphicsMode && character >= 0x51 && character <= 0x57) {
                 //switch to graphics mode
                 _graphicsMode = true;
-                return NullChar;
             }
 
             if (_graphicsMode && character >= 0x41 && character <= 0x47) {
                 //switch to alpha mode
                 _graphicsMode = false;
-                return NullChar;
             }
 
             // the control viewdata code is replaced by a space or a hold graphic
             character = _holdGraphics ? _holdGraphicsCharacter : ' ';
+            
         }
         else {
             
@@ -108,8 +119,12 @@ public class ViewdataUtils {
             else {
             }
         }
+        // update the char
+        chr.Value = character;
+        chr.Foreground = "yellow";
+        chr.Background = "Black";
 
-        return character;
+        return new List<Char>(){chr};
     }
 
     private bool ProcessControls(char character) {
