@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing.Imaging.Effects;
 using System.IO.Pipelines;
+using Avalonia.Styling;
 using TelstarClient.Models;
 
 namespace TelstarClient.DisplayManager;
@@ -73,7 +74,7 @@ public class ViewdataUtils {
         // null character will be returned if a control
         // TODO: we need to returm more than the character e.g. is it a control code
         // and the attributes changed
-        if (ProcessControls(character)) {
+        if (ProcessC0Controls(character)) {
             // nothing to update so return empty list of chars.
             return result;
         }
@@ -112,9 +113,10 @@ public class ViewdataUtils {
                 _holdGraphics = false;
             }
 
-            // first get the attributes from the previos cell (or defaults if col 0)
+            // first get the attributes from the previous cell (or defaults if col 0)
             ApplyCurrentAttributes(ref chr);
-            ApplyNewAttributes(ref chr);
+            result.AddRange(ApplyNewAttributes(ref chr));
+
         }
         else {
             // not a control code
@@ -135,10 +137,11 @@ public class ViewdataUtils {
 
         // update the char appropriately
         // we return a list as it may be necessary to update the rest of a row.
-        return new List<Char>() { chr };
+        result.Insert(0, chr);
+        return result;
     }
 
-    private bool ProcessControls(char character) {
+    private bool ProcessC0Controls(char character) {
         // is this a Control code
         var result = character < 0x20;
 
@@ -178,10 +181,51 @@ public class ViewdataUtils {
         return result;
     }
 
-    private void ApplyCurrentAttributes(ref Char chr) {
-        // get current attributes based on the previous Char
+    /// <summary>
+    /// Returns the previous character unless the current cursor is at
+    /// the start of the row in which case null is returned.
+    /// </summary>
+    /// <returns></returns>
+    private Char GetPreviousCharacter() {
+
         if (_cursor.Col == 0) {
-            // use default settings if we are populating col 0
+            return null;
+        }
+
+        return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
+    }
+
+    /// <summary>
+    /// Returns all Char positions from current cursor position
+    /// to the end of the row.
+    /// </summary>
+    /// <returns></returns>
+    private List<Char> GetToEndOfRow() {
+
+        var results = new List<Char>();
+
+        for (var i = _cursor.Col; i < Display.ROWS; i++) {
+            results.Add(_display.Rows[_cursor.Row].Chars[i]);
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Adds new attributes based on the control character passed.
+    /// Returns a bool indicating whether the remainder of the row
+    /// needs updating.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    private void ApplyCurrentAttributes(ref Char chr) {
+
+        var updateds = new List<Char>();
+        var prevChr = GetPreviousCharacter();
+
+        // get current attributes based on the previous Char
+        if (prevChr == null) {
+            // must be at the start of a row so use default settings
             chr.Background = "White";
             chr.Background = "Black";
             chr.IsGraphic = false;
@@ -189,16 +233,21 @@ public class ViewdataUtils {
         }
         else {
             // get previous char
-            var prevChr = _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
             chr.Foreground = prevChr.Foreground;
             chr.Background = prevChr.Background;
             chr.IsGraphic = prevChr.IsGraphic;
+
         }
     }
 
-    private void ApplyNewAttributes(ref Char chr) {
-        // TODO: Refactor this!
+    private List<Char> ApplyNewAttributes(ref Char chr) {
+
+        // TODO: Refactor this! to simplyfy it
+
         // apply any new attributes on top
+        var result = new List<Char>();
+        var prevChr = GetPreviousCharacter();
+
         switch (chr.Value) {
 
             case AlphaRed:
@@ -272,6 +321,31 @@ public class ViewdataUtils {
                 chr.IsGraphic = true;
                 chr.IsControl = true;
                 break;
+            case NewBackground:
+                chr.IsControl = true;
+
+                var colour = prevChr is null ? "White" : prevChr.Foreground;
+                var row = GetToEndOfRow();
+                foreach (var r in row) {
+                    r.Background = colour;
+                }
+
+                result.AddRange(row);
+                break;
+
+            case BlackBackground:
+                colour = "Black";
+                row = GetToEndOfRow();
+                foreach (var r in row) {
+                    r.Background = colour;
+                }
+
+                result.AddRange(row);
+
+                break;
+
         }
+
+        return result;
     }
 }

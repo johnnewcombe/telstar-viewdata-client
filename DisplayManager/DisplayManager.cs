@@ -44,15 +44,12 @@ public class DisplayManager {
         if (chrs.Count == 0) {
             return chrs;
         }
-        
+
         // move cursor for next character
-        foreach (var c in chrs) {
-            _cursor.HorizontalTab();
-        }
+        _cursor.HorizontalTab();
 
         // generally we will be updating a single character but sometimes
-        // it could be a whole row or in the case of a clear screen, a whole screen.
-        // return all characters as a list
+        // it could be a whole row.
         return chrs;
     }
 
