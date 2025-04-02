@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using TelstarClient.Comms;
 using TelstarClient.Models;
@@ -13,18 +15,27 @@ public partial class MainWindowViewModel : ViewModelBase {
     private DisplayManager.DisplayManager _displayManager;
     private List<Char> _displayManagerData;
     private CyclicBuffer _cyclicBuffer = new CyclicBuffer();
+    private CancellationTokenSource _cancellationTokenSource;
 
     TCPClient _tcp;
-
+    
     /// <summary>
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
         _displayManager = new DisplayManager.DisplayManager();
+
     }
+
+    #region TCP Client Control and Events
 
     public void Connect() {
         try {
+            // start a new task to process inclomming data
+            _cancellationTokenSource = new CancellationTokenSource();
+            Task.Factory.StartNew(ProcessReceiveBuffer, _cancellationTokenSource.Token);
+
+            // open the tcp client
             _tcp = new TCPClient("glasstty.com", 6502);
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
@@ -33,6 +44,18 @@ public partial class MainWindowViewModel : ViewModelBase {
         catch (Exception ex) {
             // Catch errors in Connection and Recieve Callbacks
             Debug.Print("Error : " + ex.ToString());
+        }
+    }
+
+    public void Disconnect() {
+        _tcp.Disconnect();
+        //  cancel the data processing task
+        _cancellationTokenSource.Cancel();
+    }
+
+    public void Send(string data) {
+        if (_tcp.Write(data)) {
+            //Debug.Print("Sent=>{0}", data);
         }
     }
 
@@ -46,16 +69,34 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         foreach (var c in data) {
             _cyclicBuffer.Add(c);
-            //TODO: Remove this once buffer is in place.
-            var cOut = _cyclicBuffer.Remove(); // added here temporarily to prevent the buffer filling
         }
 
-        // TODO: can we call this on the main UI thread or a separate thread maybe
-        //  otherwise there is a risk that incoming data will be missed when doing 
-        //  large screen updates e.g. CLS etc.
-        ViewdataProcess(data);
     }
-    
+
+    #endregion
+
+    #region Asynchronous Tasks
+
+    private void ProcessReceiveBuffer() {
+        // get data from buffer and process for viewdata  
+        while (true) {
+
+            if (_cyclicBuffer.Count > 0) {
+                var c = _cyclicBuffer.Remove();
+                ViewdataProcess(c.ToString());
+            }
+
+            if (_cancellationTokenSource.Token.IsCancellationRequested) {
+                Debug.Print("Task Ended!");
+                return;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Data Processing and Data Property Notification Events
+
     private void ViewdataProcess(string data) {
         // add data to the display
         foreach (var c in data) {
@@ -63,14 +104,14 @@ public partial class MainWindowViewModel : ViewModelBase {
             // in the UI
             var dData = _displayManager.PrintChar(c);
 
-            if (dData.Count>0) {
+            if (dData.Count > 0) {
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
                 DisplayManagerData = dData;
             }
         }
     }
-    
+
     public List<Char> DisplayManagerData {
         set {
             _displayManagerData = value;
@@ -87,13 +128,6 @@ public partial class MainWindowViewModel : ViewModelBase {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyDisplayData));
     }
 
-    public void Disconnect() {
-        _tcp.Disconnect();
-    }
-
-    public void Send(string data) {
-        if (_tcp.Write(data)) {
-            //Debug.Print("Sent=>{0}", data);
-        }
-    }
+    #endregion
+    
 }
