@@ -12,6 +12,7 @@ namespace TelstarClient.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase {
     private DisplayManager.DisplayManager _displayManager;
     private List<Char> _displayManagerData;
+    private CyclicBuffer _cyclicBuffer = new CyclicBuffer();
 
     TCPClient _tcp;
 
@@ -42,7 +43,13 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     // Data Received Listner
     private void OnReceived(string data) {
-     
+
+        foreach (var c in data) {
+            _cyclicBuffer.Add(c);
+            //TODO: Remove this once buffer is in place.
+            var cOut = _cyclicBuffer.Remove(); // added here temporarily to prevent the buffer filling
+        }
+
         // TODO: can we call this on the main UI thread or a separate thread maybe
         //  otherwise there is a risk that incoming data will be missed when doing 
         //  large screen updates e.g. CLS etc.

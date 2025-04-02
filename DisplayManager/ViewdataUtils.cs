@@ -86,12 +86,12 @@ public class ViewdataUtils {
 
         // get the current character from the position index e.g. 0-959
         var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
-        
+
         // update the value, this could be a control code or an alpha mosaic
         // and could get changed if we needed to point to a graphic or double
         // height character etc. within the font.
         chr.Value = character;
-        
+
         // if we get here then the current char is not a C0 control code
         // (char < 0x20)
         if (_escapedMode) {
@@ -101,7 +101,6 @@ public class ViewdataUtils {
             // actual control code is stored in the display model,
             // however, a space (or held graphic) will be displayed
             // in the UI.
-            chr.IsControl = true;
 
 
             // reset the escapeMode flag
@@ -114,15 +113,14 @@ public class ViewdataUtils {
             }
 
             // first get the attributes from the previos cell (or defaults if col 0)
-            chr = ApplyCurrentAttributes(chr);
-            chr = ApplyNewAttributes(chr);
-
+            ApplyCurrentAttributes(ref chr);
+            ApplyNewAttributes(ref chr);
         }
         else {
             // not a control code
             chr.IsControl = false;
-            chr = ApplyCurrentAttributes(chr);
-            
+            ApplyCurrentAttributes(ref chr);
+
             if (chr.IsGraphic) {
                 // sort out graphics by selecting the appropriate character in the font
                 if (chr.Value >= 0x20 && chr.Value <= 0x3f) {
@@ -180,13 +178,14 @@ public class ViewdataUtils {
         return result;
     }
 
-    private Char ApplyCurrentAttributes(Char chr) {
+    private void ApplyCurrentAttributes(ref Char chr) {
         // get current attributes based on the previous Char
         if (_cursor.Col == 0) {
             // use default settings if we are populating col 0
             chr.Background = "White";
             chr.Background = "Black";
             chr.IsGraphic = false;
+            chr.IsControl = false;
         }
         else {
             // get previous char
@@ -195,73 +194,84 @@ public class ViewdataUtils {
             chr.Background = prevChr.Background;
             chr.IsGraphic = prevChr.IsGraphic;
         }
-
-        return chr;
     }
 
-    private Char ApplyNewAttributes(Char chr) {
-        
-                    // apply any new attributes on top
-            switch (chr.Value) {
-                case AlphaRed:
-                    chr.Foreground = "Red";
-                    chr.IsGraphic = false;
-                    break;
-                case AlphaGreen:
-                    chr.Foreground = "Green";
-                    chr.IsGraphic = false;
-                    break;
-                case AlphaYellow:
-                    chr.Foreground = "Yellow";
-                    chr.IsGraphic = false;
-                    break;
-                case AlphaBlue:
-                    chr.Foreground = "Blue";
-                    chr.IsGraphic = false;
-                    break;
-                case AlphaMagenta:
-                    chr.Foreground = "Magenta";
-                    chr.IsGraphic = false;
-                    break;
-                case AlphaCyan:
-                    chr.Foreground = "Cyan";
-                    chr.IsGraphic = false;
-                    break;
-                case AlphaWhite:
-                    chr.Foreground = "White";
-                    chr.IsGraphic = false;
-                    break;
-                
-                case GraphicRed:
-                    chr.Foreground = "Red";
-                    chr.IsGraphic = true;
-                    break;
-                case GraphicGreen:
-                    chr.Foreground = "Green";
-                    chr.IsGraphic = true;
-                    break;
-                case GraphicYellow:
-                    chr.Foreground = "Yellow";
-                    chr.IsGraphic = true;
-                    break;
-                case GraphicBlue:
-                    chr.Foreground = "Blue";
-                    chr.IsGraphic = true;
-                    break;
-                case GraphicMagenta:
-                    chr.Foreground = "Magenta";
-                    chr.IsGraphic = true;
-                    break;
-                case GraphicCyan:
-                    chr.Foreground = "Cyan";
-                    chr.IsGraphic = true;
-                    break;
-                case GraphicWhite:
-                    chr.Foreground = "White";
-                    chr.IsGraphic = true;
-                    break;
-            }
+    private void ApplyNewAttributes(ref Char chr) {
+        // TODO: Refactor this!
+        // apply any new attributes on top
+        switch (chr.Value) {
 
-            return chr;
+            case AlphaRed:
+                chr.Foreground = "Red";
+                chr.IsGraphic = false;
+                chr.IsControl = true;
+                break;
+            case AlphaGreen:
+                chr.Foreground = "Green";
+                chr.IsGraphic = false;
+                chr.IsControl = true;
+                break;
+            case AlphaYellow:
+                chr.Foreground = "Yellow";
+                chr.IsGraphic = false;
+                chr.IsControl = true;
+                break;
+            case AlphaBlue:
+                chr.Foreground = "Blue";
+                chr.IsGraphic = false;
+                chr.IsControl = true;
+                break;
+            case AlphaMagenta:
+                chr.Foreground = "Magenta";
+                chr.IsGraphic = false;
+                chr.IsControl = true;
+                break;
+            case AlphaCyan:
+                chr.Foreground = "Cyan";
+                chr.IsGraphic = false;
+                chr.IsControl = true;
+                break;
+            case AlphaWhite:
+                chr.Foreground = "White";
+                chr.IsGraphic = false;
+                chr.IsControl = true;
+                break;
+
+            case GraphicRed:
+                chr.Foreground = "Red";
+                chr.IsGraphic = true;
+                chr.IsControl = true;
+                break;
+            case GraphicGreen:
+                chr.Foreground = "Green";
+                chr.IsGraphic = true;
+                chr.IsControl = true;
+                break;
+            case GraphicYellow:
+                chr.Foreground = "Yellow";
+                chr.IsGraphic = true;
+                chr.IsControl = true;
+                break;
+            case GraphicBlue:
+                chr.Foreground = "Blue";
+                chr.IsGraphic = true;
+                chr.IsControl = true;
+                break;
+            case GraphicMagenta:
+                chr.Foreground = "Magenta";
+                chr.IsGraphic = true;
+                chr.IsControl = true;
+                break;
+            case GraphicCyan:
+                chr.Foreground = "Cyan";
+                chr.IsGraphic = true;
+                chr.IsControl = true;
+                break;
+            case GraphicWhite:
+                chr.Foreground = "White";
+                chr.IsGraphic = true;
+                chr.IsControl = true;
+                break;
+        }
     }
 }
