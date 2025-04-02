@@ -32,7 +32,7 @@ public partial class MainWindow : Window {
         //initialise the display
         display.Children.Clear();
         for (int i = 0; i < Display.COLS * Display.ROWS; i++) {
-            var g = GetCharacterLabel(0x20);
+            var g = InitCharacterLabel(0x20);
             display.Children.Add(g);
         }
     }
@@ -87,7 +87,7 @@ public partial class MainWindow : Window {
         }
     }
 
-    private static Viewbox GetCharacterLabel(int charNumber) {
+    private static Viewbox InitCharacterLabel(int charNumber) {
         var thicknessZero = Thickness.Parse("0");
 
         // create a sixel
