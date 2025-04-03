@@ -50,7 +50,7 @@ public partial class MainWindow : Window {
 
                 break;
             case nameof(ViewModel.Status):
-
+                Dispatcher.UIThread.Post(UpdateStatus);
                 break;
         }
     }
@@ -78,11 +78,12 @@ public partial class MainWindow : Window {
     private void UpdateDisplay() {
         var chars = ViewModel.DisplayManagerData;
 
-        if (chars.Count>1)
-            Debug.Print($"Chars to Update: {chars.Count}");
-
         if (chars is null) {
             return;
+        }
+
+        if (chars.Count > 1) {
+            Debug.Print($"Chars to Update: {chars.Count}");
         }
 
         foreach (var c in chars) {
@@ -94,6 +95,10 @@ public partial class MainWindow : Window {
         }
     }
 
+    private void UpdateStatus() {
+        status.Content=ViewModel.Status;
+    }
+    
     private static Viewbox InitCharacterLabel(int charNumber) {
         var thicknessZero = Thickness.Parse("0");
 

@@ -68,7 +68,7 @@ public class ViewdataUtils {
     #endregion
 
     #region Avalonia Colours
-    
+
     private const string Red = "Red";
     private const string Green = "Chartreuse";
     private const string Yellow = "Yellow";
@@ -77,11 +77,11 @@ public class ViewdataUtils {
     private const string Cyan = "Cyan";
     private const string White = "White";
     private const string Black = "Black";
-    
+
     #endregion
 
     #region Private Variables
-    
+
     private bool _escapedMode;
     private bool _graphicsMode;
     private bool _doubleHeight;
@@ -91,7 +91,7 @@ public class ViewdataUtils {
     private char _holdGraphicsCharacter;
 
     #endregion
-    
+
     public ViewdataUtils() {
         _display = CreateDisplay();
         _cursor = new Cursor();
@@ -138,9 +138,6 @@ public class ViewdataUtils {
             // however, a space (or held graphic) will be displayed
             // in the UI.
 
-            // reset the escapeMode flag
-            _escapedMode = false;
-
             // check for hold/release graphics code and set the flag accordingly
             _holdGraphics = character == HoldGraphics;
             if (character == ReleaseGraphics) {
@@ -150,6 +147,8 @@ public class ViewdataUtils {
             // apply new attributes from this control code
             result.AddRange(ApplyNewAttributes(ref chr));
 
+            // reset the escapeMode flag
+            _escapedMode = false;
         }
         else {
 
@@ -173,7 +172,7 @@ public class ViewdataUtils {
         // or a normal character.
         // Note that we will not reach this code for any C0 controls.
         _cursor.HorizontalTab();
-        
+
         // update the char appropriately
         // we return a list as it may be necessary to update the rest of a row.
         result.Insert(0, chr);
@@ -285,10 +284,14 @@ public class ViewdataUtils {
 
     private List<Char> ApplyNewAttributes(ref Char chr) {
 
-        // TODO: Refactor this! to simplyfy it
-
-        // apply any new attributes on top
         var result = new List<Char>();
+
+        if (!_escapedMode || chr.Value <= 0x40 || chr.Value > 0x5f) {
+            return result;
+        }
+
+        chr.IsControl = true;
+
         var prevChr = GetPreviousCharacter();
 
         switch (chr.Value) {
@@ -296,97 +299,100 @@ public class ViewdataUtils {
             case AlphaRed:
                 chr.Foreground = Red;
                 chr.IsGraphic = false;
-                chr.IsControl = true;
                 break;
             case AlphaGreen:
                 chr.Foreground = Green;
                 chr.IsGraphic = false;
-                chr.IsControl = true;
                 break;
             case AlphaYellow:
                 chr.Foreground = Yellow;
                 chr.IsGraphic = false;
-                chr.IsControl = true;
                 break;
             case AlphaBlue:
                 chr.Foreground = Blue;
                 chr.IsGraphic = false;
-                chr.IsControl = true;
                 break;
             case AlphaMagenta:
                 chr.Foreground = Magenta;
                 chr.IsGraphic = false;
-                chr.IsControl = true;
                 break;
             case AlphaCyan:
                 chr.Foreground = Cyan;
                 chr.IsGraphic = false;
-                chr.IsControl = true;
                 break;
             case AlphaWhite:
                 chr.Foreground = White;
                 chr.IsGraphic = false;
-                chr.IsControl = true;
+                break;
+
+            case Flash:
+                break;
+            case Steady:
+                break;
+
+            case NormalHeight:
+                break;
+            case DoubleHeight:
                 break;
 
             case GraphicRed:
                 chr.Foreground = Red;
                 chr.IsGraphic = true;
-                chr.IsControl = true;
                 break;
             case GraphicGreen:
                 chr.Foreground = Green;
                 chr.IsGraphic = true;
-                chr.IsControl = true;
                 break;
             case GraphicYellow:
                 chr.Foreground = Yellow;
                 chr.IsGraphic = true;
-                chr.IsControl = true;
                 break;
             case GraphicBlue:
                 chr.Foreground = Blue;
                 chr.IsGraphic = true;
-                chr.IsControl = true;
                 break;
             case GraphicMagenta:
                 chr.Foreground = Magenta;
                 chr.IsGraphic = true;
-                chr.IsControl = true;
                 break;
             case GraphicCyan:
                 chr.Foreground = Cyan;
                 chr.IsGraphic = true;
-                chr.IsControl = true;
                 break;
             case GraphicWhite:
                 chr.Foreground = White;
                 chr.IsGraphic = true;
-                chr.IsControl = true;
                 break;
+
+            case Conceal:
+                break;
+            case Contiguous:
+                break;
+            case Separated:
+                break;
+
             case NewBackground:
-                chr.IsControl = true;
 
                 var colour = prevChr is null ? White : prevChr.Foreground;
                 var row = GetToEndOfRow();
                 foreach (var r in row) {
                     r.Background = colour;
                 }
-
                 result.AddRange(row);
                 break;
-
             case BlackBackground:
                 colour = Black;
                 row = GetToEndOfRow();
                 foreach (var r in row) {
                     r.Background = colour;
                 }
-
                 result.AddRange(row);
-
                 break;
 
+            case HoldGraphics:
+                break;
+            case ReleaseGraphics:
+                break;
         }
 
         return result;
@@ -424,7 +430,7 @@ public class ViewdataUtils {
         // will be used to update the UI
         var clearScreen = new List<Char>();
         for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
-            var c= new Char(' ', "Black", "White");
+            var c = new Char(' ', "Black", "White");
             c.Index = i;
             clearScreen.Add(c);
         }

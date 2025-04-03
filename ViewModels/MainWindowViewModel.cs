@@ -5,14 +5,15 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using TelstarClient.Comms;
 using TelstarClient.Models;
 using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase {
-
+public partial class MainWindowViewModel {
+    
     private string _status;
     private DisplayManager.ViewdataUtils _displayManager;
     private List<Char> _displayManagerData;
@@ -26,7 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// </summary>
     public MainWindowViewModel() {
         _displayManager = new DisplayManager.ViewdataUtils();
-        _status = "Offline";
+        Status = "Offline";
     }
 
     #region TCP Client Control and Events
@@ -42,7 +43,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
-            _status = "Online";
+            Status = "Online";
         }
         catch (Exception ex) {
             // Catch errors in Connection and Recieve Callbacks
@@ -54,7 +55,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         _tcp.Disconnect();
         //  cancel the data processing task
         _cancellationTokenSource.Cancel();
-        _status = "Offline";
+        Status = "Offline";
     }
 
     public void Send(string data) {
@@ -112,24 +113,23 @@ public partial class MainWindowViewModel : ViewModelBase {
             return;
         }
     }
-
-    public string Status { 
-        get {
-            return _status;
-        }
+    
+    public string Status
+    {
+        get { return _status; }
         set {
             _status = value;
-            OnPropertyChanged(nameof(DisplayManagerData));
+            OnPropertyChanged(nameof(Status));
         }
     }
     
     public List<Char> DisplayManagerData {
+        get { return _displayManagerData; }
         set {
             _displayManagerData = value;
             OnPropertyChanged(nameof(DisplayManagerData));
         }
 
-        get { return _displayManagerData; }
     }
 
     // implementation of INotify for properties

@@ -104,7 +104,7 @@
                 <Label FontWeight="Black">TELSTAR </Label>
                 <Label>Viewdata Terminal</Label>
             </StackPanel>
-            <Label Grid.Column="2" Content="{Binding Status}"></Label>
+            <Label Grid.Column="2" Name="status" Content="Offline"></Label>
         </Grid>
     </Grid>
 </Window>
