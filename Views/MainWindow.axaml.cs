@@ -74,6 +74,9 @@ public partial class MainWindow : Window {
     // TODO: Use this to display stored pages from the view model
     private void UpdateDisplay() {
         var chars = ViewModel.DisplayManagerData;
+
+        //Debug.Print($"Chars to Update: {chars.Count}");
+
         if (chars is null) {
             return;
         }

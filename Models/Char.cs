@@ -11,6 +11,7 @@ public class Char {
     }
 
     public bool IsControl  { get; set; }
+    public bool IsConcealed{get;set;}
     public bool IsGraphic{ get; set; }
     public char Value { get; set; }
     public int Index { get; set; }

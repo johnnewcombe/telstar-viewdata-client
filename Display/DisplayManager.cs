@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing.Imaging.Effects;
+using System.Dynamic;
 using System.IO.Pipelines;
 using Avalonia.Styling;
 using TelstarClient.Models;
@@ -13,14 +14,26 @@ public class ViewdataUtils {
     #region Primary Controls C0
 
     private const char NullChar = '\x00';
+    private const char STX = '\x02';
+    private const char ETX = '\x03';
+    private const char ENQ = '\x03';
+    private const char ACK = '\x03';
     private const char BS = '\x08';
     private const char HT = '\x09';
     private const char LF = '\x0a';
     private const char VT = '\x0b';
-    private const char Home = '\x0c';
-    private const char HomeClear = '\x1e';
+    private const char HomeClear = '\x0c';
     private const char CR = '\x0d';
+    private const char SO = '\x0e';
+    private const char SI = '\x0f';
+    private const char CurOn = '\x11';
+    private const char DC2 = '\x12';
+    private const char DC3 = '\x13';
+    private const char CurOff = '\x14';
     private const char Esc = '\x1b';
+    private const char SS2 = '\x1c';
+    private const char SS3 = '\x1d';
+    private const char Home = '\x1e';
 
     #endregion
 
@@ -62,24 +75,26 @@ public class ViewdataUtils {
     private bool _holdGraphics;
     private char _holdGraphicsCharacter;
 
-    public ViewdataUtils(Display display, Cursor cursor) {
-        _display = display;
-        _cursor = cursor;
+    public ViewdataUtils() {
+        _display = CreateDisplay();
+        _cursor = new Cursor();
     }
 
     public List<Char> ProcessChar(char character) {
         var result = new List<Char>();
 
-        // process control codes
-        // null character will be returned if a control
-        // TODO: we need to returm more than the character e.g. is it a control code
-        // and the attributes changed
+        // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
+            if (character == HomeClear) {
+                // return a full screen full of blank characters
+                result.AddRange(ClearScreen());
+            }
+
             // nothing to update so return empty list of chars.
             return result;
         }
 
-        // if current row is lower line of a Double Height row then
+        // if current row is read only e.g. lower line of a Double Height row then
         // it will be readonly
         if (_display.Rows[_cursor.Row].ReadOnly) {
             return result;
@@ -87,6 +102,9 @@ public class ViewdataUtils {
 
         // get the current character from the position index e.g. 0-959
         var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
+
+        // first get the attributes from the previous cell (or defaults if col 0)
+        ApplyCurrentAttributes(ref chr);
 
         // update the value, this could be a control code or an alpha mosaic
         // and could get changed if we needed to point to a graphic or double
@@ -103,7 +121,6 @@ public class ViewdataUtils {
             // however, a space (or held graphic) will be displayed
             // in the UI.
 
-
             // reset the escapeMode flag
             _escapedMode = false;
 
@@ -113,15 +130,14 @@ public class ViewdataUtils {
                 _holdGraphics = false;
             }
 
-            // first get the attributes from the previous cell (or defaults if col 0)
-            ApplyCurrentAttributes(ref chr);
+            // apply new attributes from this control code
             result.AddRange(ApplyNewAttributes(ref chr));
 
         }
         else {
+
             // not a control code
             chr.IsControl = false;
-            ApplyCurrentAttributes(ref chr);
 
             if (chr.IsGraphic) {
                 // sort out graphics by selecting the appropriate character in the font
@@ -135,6 +151,12 @@ public class ViewdataUtils {
             }
         }
 
+        // Move cursor for next character, irrespective of
+        // how many are being updated or whether this is a parallel control
+        // or a normal character.
+        // Note that we will not reach this code for any C0 controls.
+        _cursor.HorizontalTab();
+        
         // update the char appropriately
         // we return a list as it may be necessary to update the rest of a row.
         result.Insert(0, chr);
@@ -148,23 +170,27 @@ public class ViewdataUtils {
         // if any of these get detected then CHAR_NULL character is returned otherwise
         // the passed character is returned unaltered.
         switch (character) {
-            case '\x08':
+            case BS:
                 _cursor.Backspace();
                 break;
-            case '\x09':
+            case HT:
                 _cursor.HorizontalTab();
                 break;
-            case '\x0a':
+            case LF:
                 _cursor.LineFeed();
                 break;
-            case '\x0b':
+            case VT:
                 _cursor.VerticalTab();
                 break;
-            case '\x0c':
-            case '\x1e':
+            case HomeClear:
+                // update display
+                _display = CreateDisplay();
                 _cursor.Home();
                 break;
-            case '\x0d':
+            case Home:
+                _cursor.Home();
+                break;
+            case CR:
                 _cursor.CarriageReturn();
                 break;
             case '\x11':
@@ -347,5 +373,43 @@ public class ViewdataUtils {
         }
 
         return result;
+    }
+
+    private Display CreateDisplay() {
+        var index = 0;
+
+        var display = new Display();
+        display.Rows = new List<Row>();
+
+        for (var i = 0; i < Display.ROWS; i++) {
+            var row = new Row(false);
+            row.Chars = new List<Char>();
+
+            for (var j = 0; j < Display.COLS; j++) {
+                var chr = new Char(' ', "White", "Black");
+                chr.Index = index++;
+                row.Chars.Add(chr);
+            }
+
+            display.Rows.Add(row);
+        }
+
+        return display;
+    }
+
+    /// <summary>
+    /// Clear the screen by creating a new one.
+    /// </summary>
+    private List<Char> ClearScreen() {
+        // clear the model data
+
+        // list of Chars to be returned these
+        // will be used to update the UI
+        var clearScreen = new List<Char>();
+        for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
+            clearScreen.Add(new Char(' ', "White", "Black"));
+        }
+
+        return clearScreen;
     }
 }

@@ -12,19 +12,18 @@ using Char = TelstarClient.Models.Char;
 namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase {
-    private DisplayManager.DisplayManager _displayManager;
+    private DisplayManager.ViewdataUtils _displayManager;
     private List<Char> _displayManagerData;
     private CyclicBuffer _cyclicBuffer = new CyclicBuffer();
     private CancellationTokenSource _cancellationTokenSource;
 
     TCPClient _tcp;
-    
+
     /// <summary>
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
-        _displayManager = new DisplayManager.DisplayManager();
-
+        _displayManager = new DisplayManager.ViewdataUtils();
     }
 
     #region TCP Client Control and Events
@@ -54,6 +53,11 @@ public partial class MainWindowViewModel : ViewModelBase {
     }
 
     public void Send(string data) {
+
+        if (_tcp == null) {
+            return;
+        }
+
         if (_tcp.Write(data)) {
             //Debug.Print("Sent=>{0}", data);
         }
@@ -70,45 +74,37 @@ public partial class MainWindowViewModel : ViewModelBase {
         foreach (var c in data) {
             _cyclicBuffer.Add(c);
         }
-
     }
 
     #endregion
 
-    #region Asynchronous Tasks
+    #region Data Processing and Notification
 
+    /// <summary>
+    /// Method to process the receive buffer. This is executed as a
+    /// separate task.
+    /// </summary>
     private void ProcessReceiveBuffer() {
         // get data from buffer and process for viewdata  
         while (true) {
 
             if (_cyclicBuffer.Count > 0) {
                 var c = _cyclicBuffer.Remove();
-                ViewdataProcess(c.ToString());
-            }
 
-            if (_cancellationTokenSource.Token.IsCancellationRequested) {
-                Debug.Print("Task Ended!");
-                return;
+                // add data to the display
+                var dData = _displayManager.ProcessChar(c);
+
+                if (dData.Count > 0) {
+                    // updating this property will invoke the OnPropertyChanged event
+                    // to update the view
+                    DisplayManagerData = dData;
+                }
             }
         }
-    }
 
-    #endregion
-
-    #region Data Processing and Data Property Notification Events
-
-    private void ViewdataProcess(string data) {
-        // add data to the display
-        foreach (var c in data) {
-            // print char returns a Tuple which is used to bind to a cell
-            // in the UI
-            var dData = _displayManager.PrintChar(c);
-
-            if (dData.Count > 0) {
-                // updating this property will invoke the OnPropertyChanged event
-                // to update the view
-                DisplayManagerData = dData;
-            }
+        if (_cancellationTokenSource.Token.IsCancellationRequested) {
+            Debug.Print("Task Ended!");
+            return;
         }
     }
 
@@ -129,5 +125,5 @@ public partial class MainWindowViewModel : ViewModelBase {
     }
 
     #endregion
-    
+
 }
