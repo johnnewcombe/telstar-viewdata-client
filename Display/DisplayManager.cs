@@ -407,7 +407,9 @@ public class ViewdataUtils {
         // will be used to update the UI
         var clearScreen = new List<Char>();
         for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
-            clearScreen.Add(new Char(' ', "White", "Black"));
+            var c= new Char(' ', "Black", "White");
+            c.Index = i;
+            clearScreen.Add(c);
         }
 
         return clearScreen;

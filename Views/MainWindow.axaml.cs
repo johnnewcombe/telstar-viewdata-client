@@ -75,7 +75,8 @@ public partial class MainWindow : Window {
     private void UpdateDisplay() {
         var chars = ViewModel.DisplayManagerData;
 
-        //Debug.Print($"Chars to Update: {chars.Count}");
+        if (chars.Count>1)
+            Debug.Print($"Chars to Update: {chars.Count}");
 
         if (chars is null) {
             return;
