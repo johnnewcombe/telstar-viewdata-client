@@ -49,6 +49,9 @@ public partial class MainWindow : Window {
                 }
 
                 break;
+            case nameof(ViewModel.Status):
+
+                break;
         }
     }
 

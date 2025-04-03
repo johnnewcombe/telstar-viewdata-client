@@ -12,18 +12,21 @@ using Char = TelstarClient.Models.Char;
 namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase {
+
+    private string _status;
     private DisplayManager.ViewdataUtils _displayManager;
     private List<Char> _displayManagerData;
     private CyclicBuffer _cyclicBuffer = new CyclicBuffer();
     private CancellationTokenSource _cancellationTokenSource;
 
-    TCPClient _tcp;
+    private TCPClient _tcp;
 
     /// <summary>
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
         _displayManager = new DisplayManager.ViewdataUtils();
+        _status = "Offline";
     }
 
     #region TCP Client Control and Events
@@ -39,6 +42,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
+            _status = "Online";
         }
         catch (Exception ex) {
             // Catch errors in Connection and Recieve Callbacks
@@ -50,6 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         _tcp.Disconnect();
         //  cancel the data processing task
         _cancellationTokenSource.Cancel();
+        _status = "Offline";
     }
 
     public void Send(string data) {
@@ -108,6 +113,16 @@ public partial class MainWindowViewModel : ViewModelBase {
         }
     }
 
+    public string Status { 
+        get {
+            return _status;
+        }
+        set {
+            _status = value;
+            OnPropertyChanged(nameof(DisplayManagerData));
+        }
+    }
+    
     public List<Char> DisplayManagerData {
         set {
             _displayManagerData = value;
