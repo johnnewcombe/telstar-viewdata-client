@@ -15,6 +15,7 @@ public class DisplayManager {
     // this is a speacial case with Avalonia in that a space value of 0x20
     // does not render the background so the blank graphic is used instead
     public const char SPC = '\xe200';
+
     #region Primary Controls C0
 
     public const char NullChar = '\x00';
@@ -42,7 +43,7 @@ public class DisplayManager {
     #endregion
 
     # region Parallel Controls C1
-    
+
     public const char AlphaRed = '\x41';
     public const char AlphaGreen = '\x42';
     public const char AlphaYellow = '\x43';
@@ -50,12 +51,12 @@ public class DisplayManager {
     public const char AlphaMagenta = '\x45';
     public const char AlphaCyan = '\x46';
     public const char AlphaWhite = '\x47';
-    
+
     public const char Flash = '\x48';
     public const char Steady = '\x49';
     public const char NormalHeight = '\x4c';
     public const char DoubleHeight = '\x4d';
-    
+
     public const char GraphicRed = '\x51';
     public const char GraphicGreen = '\x52';
     public const char GraphicYellow = '\x53';
@@ -63,7 +64,7 @@ public class DisplayManager {
     public const char GraphicMagenta = '\x55';
     public const char GraphicCyan = '\x56';
     public const char GraphicWhite = '\x57';
-    
+
     public const char Conceal = '\x58';
     public const char Contiguous = '\x59';
     public const char Separated = '\x5a';
@@ -95,7 +96,7 @@ public class DisplayManager {
     private Models.Display _display;
     private Cursor _cursor;
     private bool _holdGraphics;
-    private char _holdGraphicsCharacter;
+    private char _holdGraphicsCharacter = ' ';
 
     #endregion
 
@@ -109,15 +110,16 @@ public class DisplayManager {
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
+
+            // clear screen is a special case, the display structure has been
+            // cleared but we have to send a list of blank characters back to the UI
             if (character == HomeClear) {
-                // return a full screen full of blank characters
                 result.AddRange(ClearScreen());
             }
 
-            // nothing to update so return empty list of chars.
+            // nothing further to do so exit
             return result;
         }
-
 
         // if current row is read only e.g. lower line of a Double Height row then
         // it will be readonly
@@ -130,7 +132,7 @@ public class DisplayManager {
 
         // first get the attributes from the previous cell (or defaults if col 0)
         ApplyCurrentAttributes(ref chr);
-        
+
         // update the value, this could be a control code or an alpha mosaic
         // and could get changed if we needed to point to a graphic or double
         // height character etc. within the font.
@@ -146,18 +148,12 @@ public class DisplayManager {
             // however, a space (or held graphic) will be displayed
             // in the UI.
 
-            // check for hold/release graphics code and set the flag accordingly
-            _holdGraphics = character == HoldGraphics;
-            if (character == ReleaseGraphics) {
-                _holdGraphics = false;
-            }
-
             // apply new attributes from this control code
             result.AddRange(ApplyNewAttributes(ref chr));
 
             // reset the escapeMode flag
             _escapedMode = false;
-            
+
         }
         else {
 
@@ -165,6 +161,9 @@ public class DisplayManager {
             chr.IsControl = false;
 
             if (chr.IsGraphic) {
+
+                _holdGraphicsCharacter = chr.Value;
+
                 // sort out graphics by selecting the appropriate character in the font
                 if (chr.Value >= 0x20 && chr.Value <= 0x3f) {
                     chr.Value += (char)(0xe200 - 0x20);
@@ -184,12 +183,22 @@ public class DisplayManager {
 
         // update the char appropriately
         // we return a list as it may be necessary to update the rest of a row.
-        
+
         // substitute ascii to viewdata characters as required
         AsciiToViewdata(ref chr);
-        if (chr.Value == 0x20) {
-            Debug.Print(chr.Background);
+
+        // TODO: This cannot be used if chr is a reference to the chr in the DisplayGrid
+        //  only if it is a ne instance of a Char. The Display object must contain the
+        //  control value.
+        if (chr.IsControl) {
+            if (_holdGraphics && _holdGraphicsCharacter != ' ') {
+                chr.Value = _holdGraphicsCharacter;
+            }
+            else {
+                chr.Value = '\xe200';
+            }
         }
+
         result.Insert(0, chr);
         return result;
     }
@@ -198,12 +207,13 @@ public class DisplayManager {
 
         _cursor.Row = row;
         _cursor.Col = column;
-        
+
     }
-    
+
     private bool ProcessC0Controls(char character) {
+
         // is this a Control code
-        var result = character < 0x20;
+        if (character >= 0x20) return false;
 
         // if any of these get detected then CHAR_NULL character is returned otherwise
         // the passed character is returned unaltered.
@@ -221,7 +231,8 @@ public class DisplayManager {
                 _cursor.VerticalTab();
                 break;
             case HomeClear:
-                // update display
+                // update display model
+                // the UI will be updated
                 _display = CreateDisplay();
                 _cursor.Home();
                 break;
@@ -242,7 +253,7 @@ public class DisplayManager {
                 break;
         }
 
-        return result;
+        return true;
     }
 
     /// <summary>
@@ -269,7 +280,7 @@ public class DisplayManager {
 
         var results = new List<Char>();
 
-        for (var i = _cursor.Col+1; i < Models.Display.COLS; i++) {
+        for (var i = _cursor.Col + 1; i < Models.Display.COLS; i++) {
             results.Add(_display.Rows[_cursor.Row].Chars[i]);
         }
 
@@ -323,7 +334,7 @@ public class DisplayManager {
 
         var prevChr = GetPreviousCharacter();
 
-        
+
         // TODO: We need to consider the following.
         //  * Control characters can be placed anywhere
         //    on the screen and often affect the remainder
@@ -336,7 +347,7 @@ public class DisplayManager {
         //    NewBackground or BlackBackground.
         //  * We only need to update display chars
         //    that are different.
-        
+
         switch (chr.Value) {
 
             case AlphaRed:
@@ -417,10 +428,10 @@ public class DisplayManager {
             case NewBackground:
 
                 var colour = prevChr is null ? White : prevChr.Foreground;
-                
+
                 // set the character's background
                 chr.Background = colour;
-                
+
                 // set the background of the rest of the row
                 var row = GetToEndOfRow();
                 foreach (var r in row) {
@@ -428,27 +439,31 @@ public class DisplayManager {
                     //  NewBackground or an BlackBackground
                     r.Background = colour;
                 }
+
                 result.AddRange(row);
                 break;
-            
+
             case BlackBackground:
-                
+
                 // set the character's background
                 chr.Background = Black;
-                
+
                 // set the background of the rest of the row
                 row = GetToEndOfRow();
                 foreach (var r in row) {
                     // TODO: check for a control that would cancel this e.g. NewBackground
                     r.Background = Black;
                 }
+
                 result.AddRange(row);
                 break;
 
             case HoldGraphics:
+                _holdGraphics = true;
                 break;
-            
+
             case ReleaseGraphics:
+                _holdGraphics = false;
                 break;
         }
 
@@ -460,7 +475,7 @@ public class DisplayManager {
         if (chr.Value == 0x20) chr.Value = (char)0xe200;
         if (chr.Value == 0x5f) chr.Value = (char)0x23;
     }
-    
+
     private Models.Display CreateDisplay() {
         var index = 0;
 
