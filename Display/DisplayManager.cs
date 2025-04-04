@@ -6,64 +6,64 @@ using System.IO.Pipelines;
 using Avalonia.Styling;
 using TelstarClient.Models;
 
-namespace TelstarClient.DisplayManager;
+namespace TelstarClient.Display;
 
-public class ViewdataUtils {
+public class DisplayManager {
     // character constants
 
     #region Primary Controls C0
 
-    private const char NullChar = '\x00';
-    private const char STX = '\x02';
-    private const char ETX = '\x03';
-    private const char ENQ = '\x03';
-    private const char ACK = '\x03';
-    private const char BS = '\x08';
-    private const char HT = '\x09';
-    private const char LF = '\x0a';
-    private const char VT = '\x0b';
-    private const char HomeClear = '\x0c';
-    private const char CR = '\x0d';
-    private const char SO = '\x0e';
-    private const char SI = '\x0f';
-    private const char CurOn = '\x11';
-    private const char DC2 = '\x12';
-    private const char DC3 = '\x13';
-    private const char CurOff = '\x14';
-    private const char Esc = '\x1b';
-    private const char SS2 = '\x1c';
-    private const char SS3 = '\x1d';
-    private const char Home = '\x1e';
+    public const char NullChar = '\x00';
+    public const char STX = '\x02';
+    public const char ETX = '\x03';
+    public const char ENQ = '\x03';
+    public const char ACK = '\x03';
+    public const char BS = '\x08';
+    public const char HT = '\x09';
+    public const char LF = '\x0a';
+    public const char VT = '\x0b';
+    public const char HomeClear = '\x0c';
+    public const char CR = '\x0d';
+    public const char SO = '\x0e';
+    public const char SI = '\x0f';
+    public const char CurOn = '\x11';
+    public const char DC2 = '\x12';
+    public const char DC3 = '\x13';
+    public const char CurOff = '\x14';
+    public const char Esc = '\x1b';
+    public const char SS2 = '\x1c';
+    public const char SS3 = '\x1d';
+    public const char Home = '\x1e';
 
     #endregion
 
     # region Parallel Controls C1
 
-    private const char AlphaRed = '\x41';
-    private const char AlphaGreen = '\x42';
-    private const char AlphaYellow = '\x43';
-    private const char AlphaBlue = '\x44';
-    private const char AlphaMagenta = '\x45';
-    private const char AlphaCyan = '\x46';
-    private const char AlphaWhite = '\x47';
-    private const char Flash = '\x48';
-    private const char Steady = '\x49';
-    private const char NormalHeight = '\x4c';
-    private const char DoubleHeight = '\x4d';
-    private const char GraphicRed = '\x51';
-    private const char GraphicGreen = '\x52';
-    private const char GraphicYellow = '\x53';
-    private const char GraphicBlue = '\x54';
-    private const char GraphicMagenta = '\x55';
-    private const char GraphicCyan = '\x56';
-    private const char GraphicWhite = '\x57';
-    private const char Conceal = '\x58';
-    private const char Contiguous = '\x59';
-    private const char Separated = '\x5a';
-    private const char BlackBackground = '\x5c';
-    private const char NewBackground = '\x5d';
-    private const char HoldGraphics = '\x5e';
-    private const char ReleaseGraphics = '\x5f';
+    public const char AlphaRed = '\x41';
+    public const char AlphaGreen = '\x42';
+    public const char AlphaYellow = '\x43';
+    public const char AlphaBlue = '\x44';
+    public const char AlphaMagenta = '\x45';
+    public const char AlphaCyan = '\x46';
+    public const char AlphaWhite = '\x47';
+    public const char Flash = '\x48';
+    public const char Steady = '\x49';
+    public const char NormalHeight = '\x4c';
+    public const char DoubleHeight = '\x4d';
+    public const char GraphicRed = '\x51';
+    public const char GraphicGreen = '\x52';
+    public const char GraphicYellow = '\x53';
+    public const char GraphicBlue = '\x54';
+    public const char GraphicMagenta = '\x55';
+    public const char GraphicCyan = '\x56';
+    public const char GraphicWhite = '\x57';
+    public const char Conceal = '\x58';
+    public const char Contiguous = '\x59';
+    public const char Separated = '\x5a';
+    public const char BlackBackground = '\x5c';
+    public const char NewBackground = '\x5d';
+    public const char HoldGraphics = '\x5e';
+    public const char ReleaseGraphics = '\x5f';
 
     #endregion
 
@@ -85,14 +85,14 @@ public class ViewdataUtils {
     private bool _escapedMode;
     private bool _graphicsMode;
     private bool _doubleHeight;
-    private Display _display;
+    private Models.Display _display;
     private Cursor _cursor;
     private bool _holdGraphics;
     private char _holdGraphicsCharacter;
 
     #endregion
 
-    public ViewdataUtils() {
+    public DisplayManager() {
         _display = CreateDisplay();
         _cursor = new Cursor();
     }
@@ -179,6 +179,13 @@ public class ViewdataUtils {
         return result;
     }
 
+    public void SetCursorPosition(int column, int row) {
+
+        _cursor.Row = row;
+        _cursor.Col = column;
+        
+    }
+    
     private bool ProcessC0Controls(char character) {
         // is this a Control code
         var result = character < 0x20;
@@ -238,15 +245,16 @@ public class ViewdataUtils {
     }
 
     /// <summary>
-    /// Returns all Char positions from current cursor position
-    /// to the end of the row.
+    /// Returns all Char positions from after current cursor position
+    /// to the end of the row, i.e. NOT including the character at the
+    /// current position. 
     /// </summary>
     /// <returns></returns>
-    private List<Char> GetToEndOfRow() {
+    public List<Char> GetToEndOfRow() {
 
         var results = new List<Char>();
 
-        for (var i = _cursor.Col; i < Display.ROWS; i++) {
+        for (var i = _cursor.Col+1; i < Models.Display.COLS; i++) {
             results.Add(_display.Rows[_cursor.Row].Chars[i]);
         }
 
@@ -398,17 +406,17 @@ public class ViewdataUtils {
         return result;
     }
 
-    private Display CreateDisplay() {
+    private Models.Display CreateDisplay() {
         var index = 0;
 
-        var display = new Display();
+        var display = new Models.Display();
         display.Rows = new List<Row>();
 
-        for (var i = 0; i < Display.ROWS; i++) {
+        for (var i = 0; i < Models.Display.ROWS; i++) {
             var row = new Row(false);
             row.Chars = new List<Char>();
 
-            for (var j = 0; j < Display.COLS; j++) {
+            for (var j = 0; j < Models.Display.COLS; j++) {
                 var chr = new Char(' ', "White", "Black");
                 chr.Index = index++;
                 row.Chars.Add(chr);
@@ -429,7 +437,7 @@ public class ViewdataUtils {
         // list of Chars to be returned these
         // will be used to update the UI
         var clearScreen = new List<Char>();
-        for (var i = 0; i < Display.COLS * Display.ROWS; i++) {
+        for (var i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
             var c = new Char(' ', "Black", "White");
             c.Index = i;
             clearScreen.Add(c);

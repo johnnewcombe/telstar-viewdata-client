@@ -11,6 +11,7 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Threading;
+using TelstarClient.Display;
 using TelstarClient.Models;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
@@ -31,7 +32,7 @@ public partial class MainWindow : Window {
 
         //initialise the display
         display.Children.Clear();
-        for (int i = 0; i < Display.COLS * Display.ROWS; i++) {
+        for (int i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
             var g = InitCharacterLabel(0x20);
             display.Children.Add(g);
         }

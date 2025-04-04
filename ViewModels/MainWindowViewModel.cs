@@ -15,7 +15,7 @@ namespace TelstarClient.ViewModels;
 public partial class MainWindowViewModel {
     
     private string _status;
-    private DisplayManager.ViewdataUtils _displayManager;
+    private Display.DisplayManager _displayManager;
     private List<Char> _displayManagerData;
     private CyclicBuffer _cyclicBuffer = new CyclicBuffer();
     private CancellationTokenSource _cancellationTokenSource;
@@ -26,7 +26,7 @@ public partial class MainWindowViewModel {
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
-        _displayManager = new DisplayManager.ViewdataUtils();
+        _displayManager = new Display.DisplayManager();
         Status = "Offline";
     }
 
