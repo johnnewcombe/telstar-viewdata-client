@@ -88,10 +88,6 @@ public partial class MainWindow : Window {
         }
 
         foreach (var c in chars) {
-
-            if (c.Value == 0x20) {
-                c.Value = (char)0xe200;
-            }
             
             if (c is null) continue;
             var label = (Label)((Viewbox)display.Children[c.Index]).Child;

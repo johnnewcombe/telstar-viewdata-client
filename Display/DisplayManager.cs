@@ -472,7 +472,7 @@ public class DisplayManager {
             row.Chars = new List<Char>();
 
             for (var j = 0; j < Models.Display.COLS; j++) {
-                var chr = new Char(' ', "White", "Black");
+                var chr = new Char(SPC, White, Black);
                 chr.Index = index++;
                 row.Chars.Add(chr);
             }
