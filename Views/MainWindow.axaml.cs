@@ -88,9 +88,14 @@ public partial class MainWindow : Window {
         }
 
         foreach (var c in chars) {
+
+            if (c.Value == 0x20) {
+                c.Value = (char)0xe200;
+            }
+            
             if (c is null) continue;
             var label = (Label)((Viewbox)display.Children[c.Index]).Child;
-            label.Content = c.IsControl ? " " : $"{c.Value}";
+            label.Content = c.IsControl ? "\xe200" : $"{c.Value}";
             label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
             label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
         }

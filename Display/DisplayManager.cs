@@ -4,6 +4,7 @@ using System.Drawing.Imaging.Effects;
 using System.Dynamic;
 using System.IO.Pipelines;
 using Avalonia.Styling;
+using Avalonia.Utilities;
 using TelstarClient.Models;
 
 namespace TelstarClient.Display;
@@ -11,6 +12,9 @@ namespace TelstarClient.Display;
 public class DisplayManager {
     // character constants
 
+    // this is a speacial case with Avalonia in that a space value of 0x20
+    // does not render the background so the blank graphic is used instead
+    public const char SPC = '\xe200';
     #region Primary Controls C0
 
     public const char NullChar = '\x00';
@@ -38,7 +42,7 @@ public class DisplayManager {
     #endregion
 
     # region Parallel Controls C1
-
+    
     public const char AlphaRed = '\x41';
     public const char AlphaGreen = '\x42';
     public const char AlphaYellow = '\x43';
@@ -46,10 +50,12 @@ public class DisplayManager {
     public const char AlphaMagenta = '\x45';
     public const char AlphaCyan = '\x46';
     public const char AlphaWhite = '\x47';
+    
     public const char Flash = '\x48';
     public const char Steady = '\x49';
     public const char NormalHeight = '\x4c';
     public const char DoubleHeight = '\x4d';
+    
     public const char GraphicRed = '\x51';
     public const char GraphicGreen = '\x52';
     public const char GraphicYellow = '\x53';
@@ -57,6 +63,7 @@ public class DisplayManager {
     public const char GraphicMagenta = '\x55';
     public const char GraphicCyan = '\x56';
     public const char GraphicWhite = '\x57';
+    
     public const char Conceal = '\x58';
     public const char Contiguous = '\x59';
     public const char Separated = '\x5a';
@@ -111,6 +118,7 @@ public class DisplayManager {
             return result;
         }
 
+
         // if current row is read only e.g. lower line of a Double Height row then
         // it will be readonly
         if (_display.Rows[_cursor.Row].ReadOnly) {
@@ -122,7 +130,7 @@ public class DisplayManager {
 
         // first get the attributes from the previous cell (or defaults if col 0)
         ApplyCurrentAttributes(ref chr);
-
+        
         // update the value, this could be a control code or an alpha mosaic
         // and could get changed if we needed to point to a graphic or double
         // height character etc. within the font.
@@ -149,6 +157,7 @@ public class DisplayManager {
 
             // reset the escapeMode flag
             _escapedMode = false;
+            
         }
         else {
 
@@ -175,6 +184,12 @@ public class DisplayManager {
 
         // update the char appropriately
         // we return a list as it may be necessary to update the rest of a row.
+        
+        // substitute ascii to viewdata characters as required
+        AsciiToViewdata(ref chr);
+        if (chr.Value == 0x20) {
+            Debug.Print(chr.Background);
+        }
         result.Insert(0, chr);
         return result;
     }
@@ -263,8 +278,6 @@ public class DisplayManager {
 
     /// <summary>
     /// Adds new attributes based on the control character passed.
-    /// Returns a bool indicating whether the remainder of the row
-    /// needs updating.
     /// </summary>
     /// <param name="chr"></param>
     /// <returns></returns>
@@ -290,6 +303,14 @@ public class DisplayManager {
         }
     }
 
+    /// <summary>
+    /// Adds any new attributes that this control character might require.
+    /// Returns a list of chars in addition to the argument passed, that
+    /// need the UI display updating e.g. a New Background might require
+    /// the rest of the row to be updated.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
     private List<Char> ApplyNewAttributes(ref Char chr) {
 
         var result = new List<Char>();
@@ -302,6 +323,20 @@ public class DisplayManager {
 
         var prevChr = GetPreviousCharacter();
 
+        
+        // TODO: We need to consider the following.
+        //  * Control characters can be placed anywhere
+        //    on the screen and often affect the remainder
+        //    of the row up until the next control char.
+        //  * A colour change will need to update all
+        //    following the control up until the next
+        //    colour change.
+        //  * A new background needs to update the
+        //    rest of the row up until the next
+        //    NewBackground or BlackBackground.
+        //  * We only need to update display chars
+        //    that are different.
+        
         switch (chr.Value) {
 
             case AlphaRed:
@@ -382,23 +417,37 @@ public class DisplayManager {
             case NewBackground:
 
                 var colour = prevChr is null ? White : prevChr.Foreground;
+                
+                // set the character's background
+                chr.Background = colour;
+                
+                // set the background of the rest of the row
                 var row = GetToEndOfRow();
                 foreach (var r in row) {
+                    // TODO: check for a control that would cancel this e.g. another
+                    //  NewBackground or an BlackBackground
                     r.Background = colour;
                 }
                 result.AddRange(row);
                 break;
+            
             case BlackBackground:
-                colour = Black;
+                
+                // set the character's background
+                chr.Background = Black;
+                
+                // set the background of the rest of the row
                 row = GetToEndOfRow();
                 foreach (var r in row) {
-                    r.Background = colour;
+                    // TODO: check for a control that would cancel this e.g. NewBackground
+                    r.Background = Black;
                 }
                 result.AddRange(row);
                 break;
 
             case HoldGraphics:
                 break;
+            
             case ReleaseGraphics:
                 break;
         }
@@ -406,6 +455,12 @@ public class DisplayManager {
         return result;
     }
 
+    private void AsciiToViewdata(ref Char chr) {
+
+        if (chr.Value == 0x20) chr.Value = (char)0xe200;
+        if (chr.Value == 0x5f) chr.Value = (char)0x23;
+    }
+    
     private Models.Display CreateDisplay() {
         var index = 0;
 
@@ -438,8 +493,9 @@ public class DisplayManager {
         // will be used to update the UI
         var clearScreen = new List<Char>();
         for (var i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
-            var c = new Char(' ', "Black", "White");
-            c.Index = i;
+            var c = new Char(SPC, White, Black) {
+                Index = i
+            };
             clearScreen.Add(c);
         }
 
