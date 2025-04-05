@@ -13,7 +13,7 @@ using Char = TelstarClient.Models.Char;
 namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel {
-    
+
     private string _status;
     private Display.DisplayManager _displayManager;
     private List<Char> _displayManagerData;
@@ -95,8 +95,8 @@ public partial class MainWindowViewModel {
         while (true) {
 
             if (_cyclicBuffer.Count > 0) {
-                var c = _cyclicBuffer.Remove();
 
+                var c = _cyclicBuffer.Remove();
                 // add data to the display
                 var dData = _displayManager.ProcessChar(c);
 
@@ -113,16 +113,15 @@ public partial class MainWindowViewModel {
             return;
         }
     }
-    
-    public string Status
-    {
+
+    public string Status {
         get { return _status; }
         set {
             _status = value;
             OnPropertyChanged(nameof(Status));
         }
     }
-    
+
     public List<Char> DisplayManagerData {
         get { return _displayManagerData; }
         set {

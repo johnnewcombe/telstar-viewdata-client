@@ -92,10 +92,8 @@ public class DisplayManager {
 
     private bool _escapedMode;
     private bool _graphicsMode;
-    private bool _doubleHeight;
     private Models.Display _display;
     private Cursor _cursor;
-    private bool _holdGraphics;
     private char _holdGraphicsCharacter = ' ';
 
     #endregion
@@ -107,7 +105,7 @@ public class DisplayManager {
 
     public List<Char> ProcessChar(char character) {
         var result = new List<Char>();
-
+        
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
 
@@ -156,22 +154,36 @@ public class DisplayManager {
 
         }
         else {
-
             // not a control code
             chr.IsControl = false;
 
             if (chr.IsGraphic) {
 
-                _holdGraphicsCharacter = chr.Value;
+                int graphicsBase;
+
+                graphicsBase = chr.IsSeparated ? 0xe2c0 : 0xe200;
+                /*
+                 * Normal graphics the base numbers are
+                 * e200 for 20-3f
+                 * e220 for 60-7f
+                 *
+                 * Seperated
+                 * e2c0 for 20-3f
+                 * e2e0 for 60-7f
+                 */
 
                 // sort out graphics by selecting the appropriate character in the font
                 if (chr.Value >= 0x20 && chr.Value <= 0x3f) {
-                    chr.Value += (char)(0xe200 - 0x20);
+                    //chr.Value += (char)(0xe200 - 0x20);
+                    chr.Value += (char)(graphicsBase - 0x20);
                 }
 
                 if (chr.Value >= 0x60 && chr.Value <= 0x7f) {
-                    chr.Value += (char)(0xe220 - 0x60);
+                    //chr.Value += (char)(0xe220 - 0x60);
+                    chr.Value += (char)((graphicsBase + 0x20) - 0x40);
                 }
+                
+                _holdGraphicsCharacter = chr.Value;
             }
         }
 
@@ -191,7 +203,7 @@ public class DisplayManager {
         //  only if it is a ne instance of a Char. The Display object must contain the
         //  control value.
         if (chr.IsControl) {
-            if (_holdGraphics && _holdGraphicsCharacter != ' ') {
+            if (chr.IsGraphicsHold && _holdGraphicsCharacter != ' ') {
                 chr.Value = _holdGraphicsCharacter;
             }
             else {
@@ -304,13 +316,18 @@ public class DisplayManager {
             chr.Background = "Black";
             chr.IsGraphic = false;
             chr.IsControl = false;
+            chr.IsSeparated = false;
+            chr.IsConcealed = false;
         }
         else {
             // get previous char
             chr.Foreground = prevChr.Foreground;
             chr.Background = prevChr.Background;
             chr.IsGraphic = prevChr.IsGraphic;
-
+            chr.IsControl = prevChr.IsControl;
+            chr.IsSeparated = prevChr.IsSeparated;
+            chr.IsConcealed = prevChr.IsConcealed;
+            chr.IsGraphicsHold = prevChr.IsGraphicsHold;
         }
     }
 
@@ -421,8 +438,10 @@ public class DisplayManager {
             case Conceal:
                 break;
             case Contiguous:
+                chr.IsSeparated = false;
                 break;
             case Separated:
+                chr.IsSeparated = true;
                 break;
 
             case NewBackground:
@@ -459,11 +478,11 @@ public class DisplayManager {
                 break;
 
             case HoldGraphics:
-                _holdGraphics = true;
+                chr.IsGraphicsHold = true;
                 break;
 
             case ReleaseGraphics:
-                _holdGraphics = false;
+                chr.IsGraphicsHold = false;
                 break;
         }
 

@@ -12,7 +12,9 @@ public class Char {
 
     public bool IsControl  { get; set; }
     public bool IsConcealed{get;set;}
+    public bool IsSeparated{get;set;}
     public bool IsGraphic{ get; set; }
+    public bool IsGraphicsHold{ get; set; }
     public char Value { get; set; }
     public int Index { get; set; }
     public string Foreground { get; set; }
