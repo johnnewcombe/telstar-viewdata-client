@@ -16,5 +16,5 @@ public class Row {
     }
 
     public List<Char> Chars { get; set; }
-    public bool ReadOnly { get; set; }
+    public bool ReadOnly { get; }
 }

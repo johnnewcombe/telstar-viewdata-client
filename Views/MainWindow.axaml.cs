@@ -74,22 +74,17 @@ public partial class MainWindow : Window {
 
     private void ConcealButton_OnClick(object? sender, RoutedEventArgs e) {
     }
-
-    // TODO: Use this to display stored pages from the view model
+    
     private void UpdateDisplay() {
+        
         var chars = ViewModel.DisplayManagerData;
 
         if (chars is null) {
             return;
         }
 
-        if (chars.Count > 1) {
-            Debug.Print($"Chars to Update: {chars.Count}");
-        }
-
         foreach (var c in chars) {
             
-            if (c is null) continue;
             var label = (Label)((Viewbox)display.Children[c.Index]).Child;
             //label.Content = c.IsControl ? "\xe200" : $"{c.Value}";
             label.Content = c.Value;

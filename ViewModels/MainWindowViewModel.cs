@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -17,10 +18,11 @@ public partial class MainWindowViewModel {
     private string _status;
     private Display.DisplayManager _displayManager;
     private List<Char> _displayManagerData;
-    private CyclicBuffer _cyclicBuffer = new CyclicBuffer();
+    private CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
     private CancellationTokenSource _cancellationTokenSource;
 
     private TCPClient _tcp;
+    //private TcpClientNew _tcp;
 
     /// <summary>
     /// Constructor
@@ -34,7 +36,8 @@ public partial class MainWindowViewModel {
 
     public void Connect() {
         try {
-            // start a new task to process inclomming data
+
+            // start a new task to process incoming data
             _cancellationTokenSource = new CancellationTokenSource();
             Task.Factory.StartNew(ProcessReceiveBuffer, _cancellationTokenSource.Token);
 
@@ -43,18 +46,27 @@ public partial class MainWindowViewModel {
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
+
+            //open the new client
+            //_tcp = new TcpClientNew(_cyclicBuffer);
+            //_tcp.Connect();
+
             Status = "Online";
+
         }
         catch (Exception ex) {
-            // Catch errors in Connection and Recieve Callbacks
+            // Catch errors in Connection and receive Callbacks
             Debug.Print("Error : " + ex.ToString());
         }
     }
 
     public void Disconnect() {
+
         _tcp.Disconnect();
+
         //  cancel the data processing task
         _cancellationTokenSource.Cancel();
+
         Status = "Offline";
     }
 
@@ -64,12 +76,15 @@ public partial class MainWindowViewModel {
             return;
         }
 
+        //foreach (char c in data) {
+        //    _tcp.Send(c);
+        //}
         if (_tcp.Write(data)) {
-            //Debug.Print("Sent=>{0}", data);
+            Debug.Print("Sent=>{0}", data);
         }
     }
 
-    // Connection Status Listner
+    // Connection Status Listener
     private void OnConnect(bool status) {
         Debug.Print("Connected! : " + status.ToString());
     }
@@ -78,7 +93,7 @@ public partial class MainWindowViewModel {
     private void OnReceived(string data) {
 
         foreach (var c in data) {
-            _cyclicBuffer.Add(c);
+                _cyclicBuffer.Add(c);
         }
     }
 
@@ -91,14 +106,22 @@ public partial class MainWindowViewModel {
     /// separate task.
     /// </summary>
     private void ProcessReceiveBuffer() {
-        // get data from buffer and process for viewdata  
+        // get data from buffer and process for viewdata 
+
+
         while (true) {
 
             if (_cyclicBuffer.Count > 0) {
 
                 var c = _cyclicBuffer.Remove();
+                
+                Debug.Print($"Processing: {c}");
                 // add data to the display
                 var dData = _displayManager.ProcessChar(c);
+
+                //Debug.Print($"Display data: {dData.Count} bytes.");
+
+                //Thread.Sleep(30);
 
                 if (dData.Count > 0) {
                     // updating this property will invoke the OnPropertyChanged event
@@ -106,12 +129,13 @@ public partial class MainWindowViewModel {
                     DisplayManagerData = dData;
                 }
             }
+
+            if (_cancellationTokenSource.Token.IsCancellationRequested) {
+                Debug.Print("'ProcessReceiveBuffer' task ended.");
+                return;
+            }
         }
 
-        if (_cancellationTokenSource.Token.IsCancellationRequested) {
-            Debug.Print("Task Ended!");
-            return;
-        }
     }
 
     public string Status {

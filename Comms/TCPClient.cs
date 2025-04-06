@@ -40,7 +40,6 @@ namespace TelstarClient.Comms {
         /// </summary>
         /// <param name="data">Received Data</param>
         public delegate void DataReceivedEventHandler(string data);
-
         public event DataReceivedEventHandler OnDataReceivedEvent;
 
         /// <summary>
@@ -48,7 +47,6 @@ namespace TelstarClient.Comms {
         /// </summary>
         /// <param name="status">Connection Status</param>
         public delegate void OnConnectEventHandler(bool status);
-
         public event OnConnectEventHandler OnConnectEvent;
 
         #endregion
@@ -99,6 +97,8 @@ namespace TelstarClient.Comms {
 
                 // Connect to server non-Blocking method
                 socket.Blocking = false;
+                
+                // create and pass a callback for when it connects.
                 AsyncCallback onconnect = new AsyncCallback(OnConnect);
                 socket.BeginConnect(epServer, onconnect, socket);
             }
@@ -210,7 +210,7 @@ namespace TelstarClient.Comms {
             }
         }
 
-        // Setup Recieve Callback for Async Listning
+        // Setup Receive Callback for Async Listening
         private void SetupRecieveCallback(Socket _socket) {
             try {
                 AsyncCallback receiveData = new AsyncCallback(OnReceivedData);
@@ -222,7 +222,7 @@ namespace TelstarClient.Comms {
             }
         }
 
-        // Recieve data from TCP
+        // Receive data from TCP
         private void OnReceivedData(IAsyncResult ar) {
             Socket _socket = (Socket)ar.AsyncState;
 
