@@ -19,7 +19,7 @@ public class CyclicBuffer {
     private int _bufferSize;
     private int inPtr = 0;
     private int outtPtr = 0;
-    private static object iLock = new object();
+    private static Lock iLock = new Lock();
 
     /// <summary>
     /// Constructor.
@@ -40,7 +40,7 @@ public class CyclicBuffer {
     /// </summary>
     public char[] InternalBuffer {
         get {
-            lock (iLock) {
+            lock (iLock) { // not really needed
                 return _buffer;
             }
         }

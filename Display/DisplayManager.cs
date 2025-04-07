@@ -6,6 +6,7 @@ using System.IO.Pipelines;
 using Avalonia.Styling;
 using Avalonia.Utilities;
 using TelstarClient.Models;
+using TelstarClient.Extensions;
 
 namespace TelstarClient.Display;
 
@@ -125,7 +126,7 @@ public class DisplayManager {
             return result;
         }
 
-        // get the current character from the position index e.g. 0-959
+        // get the character from the current cursor position
         var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
 
         // first get the attributes from the previous cell (or defaults if col 0)
@@ -146,7 +147,9 @@ public class DisplayManager {
             // however, a space (or held graphic) will be displayed
             // in the UI.
 
-            // apply new attributes from this control code
+            // apply new attributes from this control code and collect
+            // any other cells that need updating e.g. to the end of
+            // the row etc.
             result.AddRange(ApplyNewAttributes(ref chr));
 
             // reset the escapeMode flag
@@ -180,7 +183,7 @@ public class DisplayManager {
 
                 if (chr.Value >= 0x60 && chr.Value <= 0x7f) {
                     //chr.Value += (char)(0xe220 - 0x60);
-                    chr.Value += (char)((graphicsBase + 0x20) - 0x40);
+                    chr.Value += (char)(graphicsBase - 0x40);
                 }
                 
                 _holdGraphicsCharacter = chr.Value;
@@ -211,7 +214,7 @@ public class DisplayManager {
             }
         }
 
-        result.Insert(0, chr);
+        result.Insert(0, chr.DeepClone());
         return result;
     }
 
@@ -279,7 +282,7 @@ public class DisplayManager {
             return null;
         }
 
-        return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
+        return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1].DeepClone();
     }
 
     /// <summary>
@@ -293,7 +296,7 @@ public class DisplayManager {
         var results = new List<Char>();
 
         for (var i = _cursor.Col + 1; i < Models.Display.COLS; i++) {
-            results.Add(_display.Rows[_cursor.Row].Chars[i]);
+            results.Add(_display.Rows[_cursor.Row].Chars[i].DeepClone());
         }
 
         return results;
@@ -459,6 +462,7 @@ public class DisplayManager {
                     r.Background = colour;
                 }
 
+                // the Chars in the row are deep clones of those in the display
                 result.AddRange(row);
                 break;
 

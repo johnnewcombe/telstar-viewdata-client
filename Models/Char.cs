@@ -10,6 +10,7 @@ public class Char {
         Background = background;
     }
 
+    // NOTE, changing anything here MUST be reflected in the Extensions Class also.
     public bool IsControl  { get; set; }
     public bool IsConcealed{get;set;}
     public bool IsSeparated{get;set;}
