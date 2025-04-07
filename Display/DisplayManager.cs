@@ -180,7 +180,7 @@ public class DisplayManager {
 
                 if (chr.Value >= 0x60 && chr.Value <= 0x7f) {
                     //chr.Value += (char)(0xe220 - 0x60);
-                    chr.Value += (char)((graphicsBase + 0x20) - 0x40);
+                    chr.Value += (char)(graphicsBase - 0x40);
                 }
                 
                 _holdGraphicsCharacter = chr.Value;
