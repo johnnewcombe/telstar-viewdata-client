@@ -20,6 +20,7 @@ public partial class MainWindowViewModel {
     private List<Char> _displayManagerData;
     private CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
     private CancellationTokenSource _cancellationTokenSource;
+    private static Lock iLock = new Lock();
 
     private TCPClient _tcp;
     //private TcpClientNew _tcp;
@@ -39,7 +40,11 @@ public partial class MainWindowViewModel {
 
             // start a new task to process incoming data
             _cancellationTokenSource = new CancellationTokenSource();
-            Task.Factory.StartNew(ProcessReceiveBuffer, _cancellationTokenSource.Token);
+            Action process = ProcessReceiveBuffer;
+            var t = Task.Run(process, _cancellationTokenSource.Token);
+            if (t.Exception != null) {
+                throw t.Exception;
+            }
 
             // open the tcp client
             _tcp = new TCPClient("glasstty.com", 6502);
@@ -93,7 +98,7 @@ public partial class MainWindowViewModel {
     private void OnReceived(string data) {
 
         foreach (var c in data) {
-                _cyclicBuffer.Add(c);
+            _cyclicBuffer.Add(c);
         }
     }
 
@@ -108,20 +113,18 @@ public partial class MainWindowViewModel {
     private void ProcessReceiveBuffer() {
         // get data from buffer and process for viewdata 
 
-
         while (true) {
 
             if (_cyclicBuffer.Count > 0) {
 
                 var c = _cyclicBuffer.Remove();
-                
-                Debug.Print($"Processing: {c}");
+
                 // add data to the display
                 var dData = _displayManager.ProcessChar(c);
 
                 //Debug.Print($"Display data: {dData.Count} bytes.");
 
-                //Thread.Sleep(30);
+                //Thread.Sleep(50);
 
                 if (dData.Count > 0) {
                     // updating this property will invoke the OnPropertyChanged event
@@ -131,10 +134,11 @@ public partial class MainWindowViewModel {
             }
 
             if (_cancellationTokenSource.Token.IsCancellationRequested) {
-                Debug.Print("'ProcessReceiveBuffer' task ended.");
-                return;
+                break;
             }
         }
+
+        Debug.Print("'ProcessReceiveBuffer' task ended.");
 
     }
 
@@ -147,10 +151,25 @@ public partial class MainWindowViewModel {
     }
 
     public List<Char> DisplayManagerData {
-        get { return _displayManagerData; }
+        get {
+            //var chars = new List<Models.Char>();
+            //for (int i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
+            //    chars.Add(new Char('#',"Yellow","Blue") {
+            //        Index = i
+            //    });
+            //}
+            //return chars;
+
+            // to update the view
+            lock (iLock) {
+                return _displayManagerData;
+            }
+        }
         set {
-            _displayManagerData = value;
-            OnPropertyChanged(nameof(DisplayManagerData));
+            lock (iLock) {
+                _displayManagerData = value;
+                OnPropertyChanged(nameof(DisplayManagerData));
+            }
         }
 
     }

@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Printing;
 using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -15,10 +17,12 @@ using TelstarClient.Display;
 using TelstarClient.Models;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
+using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.Views;
 
 public partial class MainWindow : Window {
+    
     public MainWindowViewModel ViewModel { get; set; }
 
     public MainWindow() {
@@ -43,7 +47,7 @@ public partial class MainWindow : Window {
             case nameof(ViewModel.DisplayManagerData):
                 try {
                     // execute on the main thread
-                    Dispatcher.UIThread.Post(UpdateDisplay);
+                    Dispatcher.UIThread.Post(UpdateDisplay, DispatcherPriority.Background);
                 }
                 catch (Exception ex) {
                     Debug.WriteLine(ex.Message);
@@ -51,7 +55,7 @@ public partial class MainWindow : Window {
 
                 break;
             case nameof(ViewModel.Status):
-                Dispatcher.UIThread.Post(UpdateStatus);
+                Dispatcher.UIThread.Post(UpdateStatus, DispatcherPriority.Background);
                 break;
         }
     }
@@ -68,7 +72,7 @@ public partial class MainWindow : Window {
         var button = (Button)sender;
         ViewModel.Send((string)button.Tag);
     }
-
+    
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e) {
     }
 
