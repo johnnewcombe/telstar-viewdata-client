@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing.Imaging.Effects;
 using System.Dynamic;
 using System.IO.Pipelines;
+using System.Threading.Tasks;
 using Avalonia.Styling;
 using Avalonia.Utilities;
 using TelstarClient.Models;
@@ -104,26 +105,32 @@ public class DisplayManager {
         _cursor = new Cursor();
     }
 
-    public List<Char> ProcessChar(char character) {
-        var result = new List<Char>();
-        
+    public Models.Display Display {
+        set { _display = value; }
+        get { return _display; }
+    }
+
+    public bool ProcessChar(char character) {
+        //var result = new List<Char>();
+        var result = false;
+
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
 
             // clear screen is a special case, the display structure has been
             // cleared but we have to send a list of blank characters back to the UI
-            if (character == HomeClear) {
-                result.AddRange(ClearScreen());
-            }
+            //if (character == HomeClear) {
+            //    result.AddRange(ClearScreen());
+            //}
 
             // nothing further to do so exit
-            return result;
+            return false;
         }
 
         // if current row is read only e.g. lower line of a Double Height row then
         // it will be readonly
         if (_display.Rows[_cursor.Row].ReadOnly) {
-            return result;
+            return false;
         }
 
         // get the character from the current cursor position
@@ -150,7 +157,7 @@ public class DisplayManager {
             // apply new attributes from this control code and collect
             // any other cells that need updating e.g. to the end of
             // the row etc.
-            result.AddRange(ApplyNewAttributes(ref chr));
+            ApplyNewAttributes(ref chr);
 
             // reset the escapeMode flag
             _escapedMode = false;
@@ -185,7 +192,7 @@ public class DisplayManager {
                     //chr.Value += (char)(0xe220 - 0x60);
                     chr.Value += (char)(graphicsBase - 0x40);
                 }
-                
+
                 _holdGraphicsCharacter = chr.Value;
             }
         }
@@ -214,8 +221,8 @@ public class DisplayManager {
             }
         }
 
-        result.Insert(0, chr.DeepClone());
-        return result;
+        //result.Insert(0, chr.DeepClone());
+        return true;
     }
 
     public void SetCursorPosition(int column, int row) {
@@ -342,9 +349,9 @@ public class DisplayManager {
     /// </summary>
     /// <param name="chr"></param>
     /// <returns></returns>
-    private List<Char> ApplyNewAttributes(ref Char chr) {
+    private bool ApplyNewAttributes(ref Char chr) {
 
-        var result = new List<Char>();
+        var result = true;
 
         if (!_escapedMode || chr.Value <= 0x40 || chr.Value > 0x5f) {
             return result;
@@ -353,8 +360,7 @@ public class DisplayManager {
         chr.IsControl = true;
 
         var prevChr = GetPreviousCharacter();
-
-
+        
         // TODO: We need to consider the following.
         //  * Control characters can be placed anywhere
         //    on the screen and often affect the remainder
@@ -463,7 +469,7 @@ public class DisplayManager {
                 }
 
                 // the Chars in the row are deep clones of those in the display
-                result.AddRange(row);
+                //result.AddRange(row);
                 break;
 
             case BlackBackground:
@@ -478,7 +484,7 @@ public class DisplayManager {
                     r.Background = Black;
                 }
 
-                result.AddRange(row);
+                //result.AddRange(row);
                 break;
 
             case HoldGraphics:
@@ -487,6 +493,9 @@ public class DisplayManager {
 
             case ReleaseGraphics:
                 chr.IsGraphicsHold = false;
+                break;
+            default:
+                result = false;
                 break;
         }
 

@@ -17,7 +17,7 @@ public partial class MainWindowViewModel {
 
     private string _status;
     private Display.DisplayManager _displayManager;
-    private List<Char> _displayManagerData;
+    private Models.Display _displayManagerData;
     private CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
     private CancellationTokenSource _cancellationTokenSource;
     private static Lock iLock = new Lock();
@@ -35,16 +35,16 @@ public partial class MainWindowViewModel {
 
     #region TCP Client Control and Events
 
-    public void Connect() {
+    public async void Connect() {
         try {
 
             // start a new task to process incoming data
-            _cancellationTokenSource = new CancellationTokenSource();
-            Action process = ProcessReceiveBuffer;
-            var t = Task.Run(process, _cancellationTokenSource.Token);
-            if (t.Exception != null) {
-                throw t.Exception;
-            }
+            //_cancellationTokenSource = new CancellationTokenSource();
+            //Action process = ProcessReceiveBuffer;
+            //var t = Task.Run(process, _cancellationTokenSource.Token);
+            //if (t.Exception != null) {
+            //    throw t.Exception;
+            //}
 
             // open the tcp client
             _tcp = new TCPClient("glasstty.com", 6502);
@@ -97,9 +97,15 @@ public partial class MainWindowViewModel {
     // Data Received Listner
     private void OnReceived(string data) {
 
+        // add data to the cyclic buffer
         foreach (var c in data) {
             _cyclicBuffer.Add(c);
         }
+        
+        // at this point we are not on the UI thread but one created by the TCPClient
+        // this is a fire and forget call, the TCP Client will not wait for a result
+        Dispatcher.UIThread.Post(ProcessReceiveBuffer);
+        
     }
 
     #endregion
@@ -107,40 +113,22 @@ public partial class MainWindowViewModel {
     #region Data Processing and Notification
 
     /// <summary>
-    /// Method to process the receive buffer. This is executed as a
-    /// separate task.
+    /// Method to process the receive buffer. This is called from
+    /// the OnDataReceived event but on the UI Thread as a seperate
+    /// Task.
     /// </summary>
     private void ProcessReceiveBuffer() {
+
         // get data from buffer and process for viewdata 
-
-        while (true) {
-
-            if (_cyclicBuffer.Count > 0) {
-
-                var c = _cyclicBuffer.Remove();
-
-                // add data to the display
-                var dData = _displayManager.ProcessChar(c);
-
-                //Debug.Print($"Display data: {dData.Count} bytes.");
-
-                //Thread.Sleep(50);
-
-                if (dData.Count > 0) {
-                    // updating this property will invoke the OnPropertyChanged event
-                    // to update the view
-                    DisplayManagerData = dData;
-                }
-            }
-
-            if (_cancellationTokenSource.Token.IsCancellationRequested) {
-                break;
+        if (_cyclicBuffer.Count > 0) {
+            if (_displayManager.ProcessChar( _cyclicBuffer.Remove())) {
+                // updating this property will invoke the OnPropertyChanged event
+                // to update the view
+                DisplayManagerData = _displayManager.Display;
             }
         }
-
-        Debug.Print("'ProcessReceiveBuffer' task ended.");
-
     }
+
 
     public string Status {
         get { return _status; }
@@ -150,7 +138,7 @@ public partial class MainWindowViewModel {
         }
     }
 
-    public List<Char> DisplayManagerData {
+    public Models.Display DisplayManagerData {
         get {
             //var chars = new List<Models.Char>();
             //for (int i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {

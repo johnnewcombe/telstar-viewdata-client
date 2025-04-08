@@ -47,7 +47,7 @@ public partial class MainWindow : Window {
             case nameof(ViewModel.DisplayManagerData):
                 try {
                     // execute on the main thread
-                    Dispatcher.UIThread.Post(UpdateDisplay, DispatcherPriority.Background);
+                    UpdateDisplay();
                 }
                 catch (Exception ex) {
                     Debug.WriteLine(ex.Message);
@@ -55,7 +55,7 @@ public partial class MainWindow : Window {
 
                 break;
             case nameof(ViewModel.Status):
-                Dispatcher.UIThread.Post(UpdateStatus, DispatcherPriority.Background);
+                UpdateStatus();
                 break;
         }
     }
@@ -81,19 +81,21 @@ public partial class MainWindow : Window {
     
     private void UpdateDisplay() {
         
-        var chars = ViewModel.DisplayManagerData;
+        var data = ViewModel.DisplayManagerData;
 
-        if (chars is null) {
+        if (data is null) {
             return;
         }
 
-        foreach (var c in chars) {
-            
-            var label = (Label)((Viewbox)display.Children[c.Index]).Child;
-            //label.Content = c.IsControl ? "\xe200" : $"{c.Value}";
-            label.Content = c.Value;
-            label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
-            label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+        foreach (var r in data.Rows) {
+            foreach (var c in r.Chars) {
+                
+                var label = (Label)((Viewbox)display.Children[c.Index]).Child;
+                //label.Content = c.IsControl ? "\xe200" : $"{c.Value}";
+                label.Content = c.Value;
+                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
+                label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+            }
         }
     }
 

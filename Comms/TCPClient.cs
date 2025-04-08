@@ -60,7 +60,7 @@ namespace TelstarClient.Comms {
 
         // Socket Parameters
         private Socket socket;
-        private byte[] readerBuffer = new byte[64];
+        private byte[] readerBuffer = new byte[1024];
 
         #endregion
 
