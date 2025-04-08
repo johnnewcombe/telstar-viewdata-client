@@ -303,7 +303,7 @@ public class DisplayManager {
         var results = new List<Char>();
 
         for (var i = _cursor.Col + 1; i < Models.Display.COLS; i++) {
-            results.Add(_display.Rows[_cursor.Row].Chars[i].DeepClone());
+            results.Add(_display.Rows[_cursor.Row].Chars[i]);
         }
 
         return results;
