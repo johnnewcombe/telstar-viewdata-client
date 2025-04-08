@@ -29,13 +29,13 @@ public class MainWindowViewModel {
 
     public void Connect() {
         try {
-            
+
             // open the tcp client
             _tcp = new TCPClient("glasstty.com", 6502);
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
-            
+
             Status = "Online";
         }
         catch (Exception ex) {
@@ -63,7 +63,11 @@ public class MainWindowViewModel {
 
     // Connection Status Listener
     private void OnConnect(bool status) {
-        Debug.Print("Connected! : " + status.ToString());
+
+        if (status) {
+
+            Debug.Print("Connected! : " + status.ToString());
+        }
     }
 
     // Data Received Listener
@@ -73,13 +77,10 @@ public class MainWindowViewModel {
         foreach (var c in data) {
             _cyclicBuffer.Add(c);
         }
-
-        // TODO: FIX, FIX, This means that once all data has been received,
-        //  cyclic buffer processing will stop.
         // at this point we are not on the UI thread but one created by the TCPClient
         // this is a fire and forget call, the TCP Client will not wait for a result
+        // Dispatcher.UIThread.Post(ProcessReceiveBuffer);
         Dispatcher.UIThread.Post(ProcessReceiveBuffer);
-
     }
 
     #endregion
@@ -94,7 +95,7 @@ public class MainWindowViewModel {
     private void ProcessReceiveBuffer() {
 
         Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
-        
+
         // get data from buffer and process for viewdata 
         while (_cyclicBuffer.Count > 0) {
             if (_displayManager.ProcessChar(_cyclicBuffer.Remove())) {
@@ -103,10 +104,9 @@ public class MainWindowViewModel {
                 DisplayManagerData = _displayManager.Display;
             }
         }
-        
+
         Debug.Print("ProcessReceiveBuffer Exit");
     }
-
 
     public string Status {
         get { return _status; }
@@ -117,9 +117,7 @@ public class MainWindowViewModel {
     }
 
     public Models.Display DisplayManagerData {
-        get {
-            return _displayManagerData;
-        }
+        get { return _displayManagerData; }
         set {
             _displayManagerData = value;
             OnPropertyChanged(nameof(DisplayManagerData));
