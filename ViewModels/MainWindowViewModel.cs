@@ -1,26 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
 using TelstarClient.Comms;
-using TelstarClient.Models;
-using Char = TelstarClient.Models.Char;
+
 
 namespace TelstarClient.ViewModels;
 
-public partial class MainWindowViewModel {
+public class MainWindowViewModel {
 
     private string _status;
-    private Display.DisplayManager _displayManager;
+    private readonly Display.DisplayManager _displayManager;
     private Models.Display _displayManagerData;
-    private CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
-    private CancellationTokenSource _cancellationTokenSource;
-    //private static Lock iLock = new Lock();
+    private readonly CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
 
     private TCPClient _tcp;
     //private TcpClientNew _tcp;
@@ -35,43 +27,26 @@ public partial class MainWindowViewModel {
 
     #region TCP Client Control and Events
 
-    public async void Connect() {
+    public void Connect() {
         try {
-
-            // start a new task to process incoming data
-            //_cancellationTokenSource = new CancellationTokenSource();
-            //Action process = ProcessReceiveBuffer;
-            //var t = Task.Run(process, _cancellationTokenSource.Token);
-            //if (t.Exception != null) {
-            //    throw t.Exception;
-            //}
-
+            
             // open the tcp client
             _tcp = new TCPClient("glasstty.com", 6502);
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
-
-            //open the new client
-            //_tcp = new TcpClientNew(_cyclicBuffer);
-            //_tcp.Connect();
-
+            
             Status = "Online";
-
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
-            Debug.Print("Error : " + ex.ToString());
+            Debug.Print($"Error : {ex}");
         }
     }
 
     public void Disconnect() {
 
         _tcp.Disconnect();
-
-        //  cancel the data processing task
-        _cancellationTokenSource.Cancel();
-
         Status = "Offline";
     }
 
@@ -81,9 +56,6 @@ public partial class MainWindowViewModel {
             return;
         }
 
-        //foreach (char c in data) {
-        //    _tcp.Send(c);
-        //}
         if (_tcp.Write(data)) {
             Debug.Print("Sent=>{0}", data);
         }
@@ -94,7 +66,7 @@ public partial class MainWindowViewModel {
         Debug.Print("Connected! : " + status.ToString());
     }
 
-    // Data Received Listner
+    // Data Received Listener
     private void OnReceived(string data) {
 
         // add data to the cyclic buffer
@@ -102,6 +74,8 @@ public partial class MainWindowViewModel {
             _cyclicBuffer.Add(c);
         }
 
+        // TODO: FIX, FIX, This means that once all data has been received,
+        //  cyclic buffer processing will stop.
         // at this point we are not on the UI thread but one created by the TCPClient
         // this is a fire and forget call, the TCP Client will not wait for a result
         Dispatcher.UIThread.Post(ProcessReceiveBuffer);
@@ -114,19 +88,23 @@ public partial class MainWindowViewModel {
 
     /// <summary>
     /// Method to process the receive buffer. This is called from
-    /// the OnDataReceived event but on the UI Thread as a seperate
+    /// the OnDataReceived event but on the UI Thread as a separate
     /// Task.
     /// </summary>
     private void ProcessReceiveBuffer() {
 
+        Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
+        
         // get data from buffer and process for viewdata 
-        if (_cyclicBuffer.Count > 0) {
+        while (_cyclicBuffer.Count > 0) {
             if (_displayManager.ProcessChar(_cyclicBuffer.Remove())) {
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
                 DisplayManagerData = _displayManager.Display;
             }
         }
+        
+        Debug.Print("ProcessReceiveBuffer Exit");
     }
 
 
