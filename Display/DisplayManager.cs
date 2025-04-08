@@ -289,7 +289,7 @@ public class DisplayManager {
             return null;
         }
 
-        return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1].DeepClone();
+        return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
     }
 
     /// <summary>

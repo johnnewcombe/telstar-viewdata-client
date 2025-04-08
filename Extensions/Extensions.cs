@@ -4,6 +4,7 @@ namespace TelstarClient.Extensions;
 
 public static class Extensions {
 
+    /*
     public static Char DeepClone(this Char chr) {
         
         var result = new Char(chr.Value, chr.Foreground, chr.Background) {
@@ -17,4 +18,5 @@ public static class Extensions {
 
         return result;
     }
+    */
 }
