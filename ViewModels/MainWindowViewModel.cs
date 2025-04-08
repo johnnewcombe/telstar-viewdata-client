@@ -20,7 +20,7 @@ public partial class MainWindowViewModel {
     private Models.Display _displayManagerData;
     private CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
     private CancellationTokenSource _cancellationTokenSource;
-    private static Lock iLock = new Lock();
+    //private static Lock iLock = new Lock();
 
     private TCPClient _tcp;
     //private TcpClientNew _tcp;
@@ -101,11 +101,11 @@ public partial class MainWindowViewModel {
         foreach (var c in data) {
             _cyclicBuffer.Add(c);
         }
-        
+
         // at this point we are not on the UI thread but one created by the TCPClient
         // this is a fire and forget call, the TCP Client will not wait for a result
         Dispatcher.UIThread.Post(ProcessReceiveBuffer);
-        
+
     }
 
     #endregion
@@ -121,7 +121,7 @@ public partial class MainWindowViewModel {
 
         // get data from buffer and process for viewdata 
         if (_cyclicBuffer.Count > 0) {
-            if (_displayManager.ProcessChar( _cyclicBuffer.Remove())) {
+            if (_displayManager.ProcessChar(_cyclicBuffer.Remove())) {
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
                 DisplayManagerData = _displayManager.Display;
@@ -140,26 +140,12 @@ public partial class MainWindowViewModel {
 
     public Models.Display DisplayManagerData {
         get {
-            //var chars = new List<Models.Char>();
-            //for (int i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
-            //    chars.Add(new Char('#',"Yellow","Blue") {
-            //        Index = i
-            //    });
-            //}
-            //return chars;
-
-            // to update the view
-            lock (iLock) {
-                return _displayManagerData;
-            }
+            return _displayManagerData;
         }
         set {
-            lock (iLock) {
-                _displayManagerData = value;
-                OnPropertyChanged(nameof(DisplayManagerData));
-            }
+            _displayManagerData = value;
+            OnPropertyChanged(nameof(DisplayManagerData));
         }
-
     }
 
     // implementation of INotify for properties
