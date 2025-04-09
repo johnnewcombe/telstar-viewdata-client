@@ -288,28 +288,11 @@ public class DisplayManager {
         if (_cursor.Col == 0) {
             return null;
         }
-
         return _display.GetChar(_cursor.Row, _cursor.Col - 1);
-        //return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
     }
 
-    /// <summary>
-    /// Returns all Char positions from after current cursor position
-    /// to the end of the row, i.e. NOT including the character at the
-    /// current position. 
-    /// </summary>
-    /// <returns></returns>
-    public List<Char> GetToEndOfRow() {
 
-        var results = new List<Char>();
 
-        for (var i = _cursor.Col + 1; i < Models.Display.COLS; i++) {
-            //results.Add(_display.Rows[_cursor.Row].Chars[i]);
-            results.Add(_display.GetChar(_cursor.Row,i));
-        }
-
-        return results;
-    }
 
     /// <summary>
     /// Adds new attributes based on the control character passed.
@@ -463,7 +446,8 @@ public class DisplayManager {
                 chr.Background = colour;
 
                 // set the background of the rest of the row
-                var row = GetToEndOfRow();
+                var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+                
                 foreach (var r in row) {
                     // TODO: check for a control that would cancel this e.g. another
                     //  NewBackground or an BlackBackground
@@ -480,7 +464,8 @@ public class DisplayManager {
                 chr.Background = Black;
 
                 // set the background of the rest of the row
-                row = GetToEndOfRow();
+                row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+
                 foreach (var r in row) {
                     // TODO: check for a control that would cancel this e.g. NewBackground
                     r.Background = Black;
