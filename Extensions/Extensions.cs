@@ -1,22 +1,33 @@
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TelstarClient.Models;
 
 namespace TelstarClient.Extensions;
 
 public static class Extensions {
 
-    /*
-    public static Char DeepClone(this Char chr) {
-        
-        var result = new Char(chr.Value, chr.Foreground, chr.Background) {
-            IsGraphic = chr.IsGraphic,
-            IsControl = chr.IsControl,
-            Index = chr.Index,
-            IsConcealed = chr.IsConcealed,
-            IsSeparated = chr.IsSeparated,
-            IsGraphicsHold = chr.IsGraphicsHold
-        };
+    private const string DefaultForeground = "White";
+    private const string DefaultBackground = "Black";
 
-        return result;
+    public static void Clear(this Models.Display display) {
+
+        foreach (var c in display.Chars) {
+            c.Foreground = DefaultForeground;
+            c.Background = DefaultBackground;
+            c.Value = Models.Display.SPC;
+            c.IsControl = false;
+            c.IsConcealed = false;
+            c.IsSeparated = false;
+            c.IsGraphic = false;
+            c.IsGraphicsHold = false;
+        }
     }
-    */
+
+    public static bool IsRowReadOnly(this Models.Display display, int row) {
+        return false;
+    }
+
+    public static Char GetChar(this Models.Display display, int row, int col) {
+        return display.Chars[(row * Models.Display.COLS) + col];
+    }
 }

@@ -16,7 +16,7 @@ public class DisplayManager {
 
     // this is a speacial case with Avalonia in that a space value of 0x20
     // does not render the background so the blank graphic is used instead
-    public const char SPC = '\xe200';
+
 
     #region Primary Controls C0
 
@@ -129,12 +129,12 @@ public class DisplayManager {
 
         // if current row is read only e.g. lower line of a Double Height row then
         // it will be readonly
-        if (_display.Rows[_cursor.Row].ReadOnly) {
+        if (_display.IsRowReadOnly(_cursor.Row)) {
             return false;
         }
 
         // get the character from the current cursor position
-        var chr = _display.Rows[_cursor.Row].Chars[_cursor.Col];
+        var chr = _display.GetChar(_cursor.Row, _cursor.Col);
 
         // first get the attributes from the previous cell (or defaults if col 0)
         ApplyCurrentAttributes(ref chr);
@@ -255,7 +255,7 @@ public class DisplayManager {
             case HomeClear:
                 // update display model
                 // the UI will be updated
-                _display = CreateDisplay();
+                _display.Clear();
                 _cursor.Home();
                 break;
             case Home:
@@ -289,7 +289,8 @@ public class DisplayManager {
             return null;
         }
 
-        return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
+        return _display.GetChar(_cursor.Row, _cursor.Col - 1);
+        //return _display.Rows[_cursor.Row].Chars[_cursor.Col - 1];
     }
 
     /// <summary>
@@ -303,7 +304,8 @@ public class DisplayManager {
         var results = new List<Char>();
 
         for (var i = _cursor.Col + 1; i < Models.Display.COLS; i++) {
-            results.Add(_display.Rows[_cursor.Row].Chars[i]);
+            //results.Add(_display.Rows[_cursor.Row].Chars[i]);
+            results.Add(_display.GetChar(_cursor.Row,i));
         }
 
         return results;
@@ -360,7 +362,7 @@ public class DisplayManager {
         chr.IsControl = true;
 
         var prevChr = GetPreviousCharacter();
-        
+
         // TODO: We need to consider the following.
         //  * Control characters can be placed anywhere
         //    on the screen and often affect the remainder
@@ -509,43 +511,17 @@ public class DisplayManager {
     }
 
     private Models.Display CreateDisplay() {
-        var index = 0;
 
         var display = new Models.Display();
-        display.Rows = new List<Row>();
+        display.Chars = new List<Char>();
 
-        for (var i = 0; i < Models.Display.ROWS; i++) {
-            var row = new Row(false);
-            row.Chars = new List<Char>();
-
-            for (var j = 0; j < Models.Display.COLS; j++) {
-                var chr = new Char(SPC, White, Black);
-                chr.Index = index++;
-                row.Chars.Add(chr);
-            }
-
-            display.Rows.Add(row);
+        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+            var chr = new Char(Models.Display.SPC, White, Black);
+            chr.Index = i;
+            display.Chars.Add(chr);
         }
 
         return display;
     }
-
-    /// <summary>
-    /// Clear the screen by creating a new one.
-    /// </summary>
-    private List<Char> ClearScreen() {
-        // clear the model data
-
-        // list of Chars to be returned these
-        // will be used to update the UI
-        var clearScreen = new List<Char>();
-        for (var i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
-            var c = new Char(SPC, White, Black) {
-                Index = i
-            };
-            clearScreen.Add(c);
-        }
-
-        return clearScreen;
-    }
+    
 }

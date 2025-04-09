@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using Avalonia.Threading;
 using TelstarClient.Comms;
+using TelstarClient.Extensions;
 
 
 namespace TelstarClient.ViewModels;
@@ -11,7 +14,7 @@ public class MainWindowViewModel {
 
     private string _status;
     private readonly Display.DisplayManager _displayManager;
-    private Models.Display _displayManagerData;
+    //private List<Models.Char> _displayManagerData = new List<Models.Char>();
     private readonly CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
 
     private TCPClient _tcp;
@@ -35,7 +38,7 @@ public class MainWindowViewModel {
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
-
+            
             Status = "Online";
         }
         catch (Exception ex) {
@@ -65,7 +68,6 @@ public class MainWindowViewModel {
     private void OnConnect(bool status) {
 
         if (status) {
-
             Debug.Print("Connected! : " + status.ToString());
         }
     }
@@ -101,7 +103,7 @@ public class MainWindowViewModel {
             if (_displayManager.ProcessChar(_cyclicBuffer.Remove())) {
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
-                DisplayManagerData = _displayManager.Display;
+                DisplayManagerData = _displayManager.Display.Chars;
             }
         }
 
@@ -116,10 +118,10 @@ public class MainWindowViewModel {
         }
     }
 
-    public Models.Display DisplayManagerData {
-        get { return _displayManagerData; }
+    public List<Models.Char> DisplayManagerData {
+        get { return _displayManager.Display.Chars; }
         set {
-            _displayManagerData = value;
+            _displayManager.Display.Chars = value;
             OnPropertyChanged(nameof(DisplayManagerData));
         }
     }

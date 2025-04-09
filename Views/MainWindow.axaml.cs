@@ -22,7 +22,7 @@ using Char = TelstarClient.Models.Char;
 namespace TelstarClient.Views;
 
 public partial class MainWindow : Window {
-    
+
     public MainWindowViewModel ViewModel { get; set; }
 
     public MainWindow() {
@@ -72,37 +72,36 @@ public partial class MainWindow : Window {
         var button = (Button)sender;
         ViewModel.Send((string)button.Tag);
     }
-    
+
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e) {
     }
 
     private void ConcealButton_OnClick(object? sender, RoutedEventArgs e) {
     }
-    
+
     private void UpdateDisplay() {
-        
+
         var data = ViewModel.DisplayManagerData;
 
         if (data is null) {
             return;
         }
 
-        foreach (var r in data.Rows) {
-            foreach (var c in r.Chars) {
-                
-                var label = (Label)((Viewbox)display.Children[c.Index]).Child;
-                //label.Content = c.IsControl ? "\xe200" : $"{c.Value}";
-                label.Content = c.Value;
-                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
-                label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
-            }
+        foreach (var c in data) {
+
+            var label = (Label)((Viewbox)display.Children[c.Index]).Child;
+            
+            label.Content = c.Value;
+            label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
+            label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+
         }
     }
 
     private void UpdateStatus() {
-        status.Content=ViewModel.Status;
+        status.Content = ViewModel.Status;
     }
-    
+
     private static Viewbox InitCharacterLabel(int charNumber) {
         var thicknessZero = Thickness.Parse("0");
 

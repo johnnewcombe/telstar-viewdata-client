@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace TelstarClient.Models;
 
 public class Char {
+    
     public Char(char value, string foreground, string background) {
         Value = value;
         Foreground = foreground;
