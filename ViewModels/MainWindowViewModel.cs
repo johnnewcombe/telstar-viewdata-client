@@ -10,7 +10,7 @@ using TelstarClient.Extensions;
 
 namespace TelstarClient.ViewModels;
 
-public class MainWindowViewModel {
+public class MainWindowViewModel : ViewModelBase{
 
     private string _status;
     private readonly Display.DisplayManager _displayManager;
@@ -124,13 +124,6 @@ public class MainWindowViewModel {
             _displayManager.Display.Chars = value;
             OnPropertyChanged(nameof(DisplayManagerData));
         }
-    }
-
-    // implementation of INotify for properties
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged(string propertyDisplayData) {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyDisplayData));
     }
 
     #endregion

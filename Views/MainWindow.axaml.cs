@@ -1,23 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing.Printing;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.LogicalTree;
 using Avalonia.Media;
-using Avalonia.Threading;
-using TelstarClient.Display;
-using TelstarClient.Models;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
-using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.Views;
 
@@ -37,7 +27,7 @@ public partial class MainWindow : Window {
         //initialise the display
         display.Children.Clear();
         for (int i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
-            var g = InitCharacterLabel(0x20);
+            var g = InitCharacterLabel(Models.Display.SPC);
             display.Children.Add(g);
         }
     }
