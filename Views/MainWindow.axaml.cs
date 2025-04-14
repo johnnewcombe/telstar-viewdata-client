@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -34,7 +35,7 @@ public partial class MainWindow : Window {
 
     private void PropertyChangedEventHandler(object sender, PropertyChangedEventArgs e) {
         switch (e.PropertyName) {
-            case nameof(ViewModel.DisplayManagerData):
+            case nameof(ViewModel.DisplayData):
                 try {
                     // execute on the main thread
                     UpdateDisplay();
@@ -50,6 +51,11 @@ public partial class MainWindow : Window {
         }
     }
 
+    private void Window_KeyDown(object sender, KeyEventArgs e)
+    {
+        ViewModel.Send(e.KeySymbol);
+    }
+    
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
         ViewModel.Connect();
     }
@@ -71,7 +77,7 @@ public partial class MainWindow : Window {
 
     private void UpdateDisplay() {
 
-        var data = ViewModel.DisplayManagerData;
+        var data = ViewModel.DisplayData;
 
         if (data is null) {
             return;

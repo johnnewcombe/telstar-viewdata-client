@@ -3,28 +3,27 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows.Input;
 using Avalonia.Threading;
 using TelstarClient.Comms;
 using TelstarClient.Extensions;
-
+using TelstarClient.Models;
 
 namespace TelstarClient.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase{
-
+    
     private string _status;
-    private readonly Display.DisplayManager _displayManager;
+    private readonly Display.DisplayManager _displayManager = new Display.DisplayManager();
     //private List<Models.Char> _displayManagerData = new List<Models.Char>();
     private readonly CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
-
+    private Models.KeyMapper _keyMapper = new KeyMapper();
     private TCPClient _tcp;
-    //private TcpClientNew _tcp;
 
     /// <summary>
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
-        _displayManager = new Display.DisplayManager();
         Status = "Offline";
     }
 
@@ -48,16 +47,20 @@ public class MainWindowViewModel : ViewModelBase{
     }
 
     public void Disconnect() {
-
-        _tcp.Disconnect();
+        if (_tcp is not null) {
+            _tcp.Disconnect();
+        }
         Status = "Offline";
     }
 
     public void Send(string data) {
 
-        if (_tcp == null) {
+        // key mapper
+        if (data == null || _tcp == null) {
             return;
         }
+        
+        data = _keyMapper.Map(data);
 
         if (_tcp.Write(data)) {
             Debug.Print("Sent=>{0}", data);
@@ -103,7 +106,7 @@ public class MainWindowViewModel : ViewModelBase{
             if (_displayManager.ProcessChar(_cyclicBuffer.Remove())) {
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
-                DisplayManagerData = _displayManager.Display.Chars;
+                DisplayData = _displayManager.Display.Chars;
             }
         }
 
@@ -118,11 +121,11 @@ public class MainWindowViewModel : ViewModelBase{
         }
     }
 
-    public List<Models.Char> DisplayManagerData {
+    public List<Models.Char> DisplayData {
         get { return _displayManager.Display.Chars; }
         set {
             _displayManager.Display.Chars = value;
-            OnPropertyChanged(nameof(DisplayManagerData));
+            OnPropertyChanged();
         }
     }
 
