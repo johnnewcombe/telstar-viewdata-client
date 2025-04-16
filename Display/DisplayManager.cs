@@ -90,6 +90,12 @@ public class DisplayManager {
     
     private const string Offline = "Brown";
     private const string Online = "Green";
+    private const string Connecting = "Yellow";
+    #endregion
+
+    # region Misc Constants
+    
+    private const int StatusPadding = 10;
 
     #endregion
 
@@ -235,14 +241,14 @@ public class DisplayManager {
     }
 
     public void SetStatusOnline() {
-        Display.SetStatusText(1,"Online    ",Online);
+        Display.SetStatusText(1,"Online".PadRight(StatusPadding),Online);
     }
 
     public void SetStatusOffline() {
-        Display.SetStatusText(1,"Offline   ",Offline);
+        Display.SetStatusText(1,"Offline".PadRight(StatusPadding),Offline);
     }
     public void SetStatusConnecting() {
-        Display.SetStatusText(1,"Connecting",Offline);
+        Display.SetStatusText(1,"Connecting".PadRight(StatusPadding),Connecting);
     }
     
     private bool ProcessC0Controls(char character) {

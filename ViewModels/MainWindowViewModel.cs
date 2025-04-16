@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Threading;
 using TelstarClient.Comms;
@@ -24,8 +25,18 @@ public class MainWindowViewModel : ViewModelBase{
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
+        DisplayWelcomeMessage();
     }
 
+    public async Task DisplayWelcomeMessage()
+    {
+        await Task.Delay(100);
+        _displayManager.SetStatusOffline();
+        //
+        //
+        OnPropertyChanged(nameof(DisplayData));
+    }
+    
     #region TCP Client Control and Events
 
     public void Connect() {
