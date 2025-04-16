@@ -87,6 +87,9 @@ public class DisplayManager {
     private const string Cyan = "Cyan";
     private const string White = "White";
     private const string Black = "Black";
+    
+    private const string Offline = "Brown";
+    private const string Online = "Green";
 
     #endregion
 
@@ -229,9 +232,19 @@ public class DisplayManager {
 
         _cursor.Row = row;
         _cursor.Col = column;
-
     }
 
+    public void SetStatusOnline() {
+        Display.SetStatusText(1,"Online    ",Online);
+    }
+
+    public void SetStatusOffline() {
+        Display.SetStatusText(1,"Offline   ",Offline);
+    }
+    public void SetStatusConnecting() {
+        Display.SetStatusText(1,"Connecting",Offline);
+    }
+    
     private bool ProcessC0Controls(char character) {
 
         // is this a Control code

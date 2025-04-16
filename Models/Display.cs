@@ -11,5 +11,3 @@ public class Display {
     public int[] RowReferences = new int[25];
     public List<Char> Chars { get; set; }
 }
-
-

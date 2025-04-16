@@ -24,7 +24,6 @@ public class MainWindowViewModel : ViewModelBase{
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
-        _displayManager.Display.SetStatus(1,"Offline","Red");
     }
 
     #region TCP Client Control and Events
@@ -37,7 +36,9 @@ public class MainWindowViewModel : ViewModelBase{
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
-
+            
+            _displayManager.SetStatusConnecting();
+            OnPropertyChanged(nameof(DisplayData));
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
@@ -49,7 +50,7 @@ public class MainWindowViewModel : ViewModelBase{
         if (_tcp is not null) {
             _tcp.Disconnect();
         }
-        _displayManager.Display.SetStatus(1,"Offline","Red");
+        _displayManager.SetStatusOffline();
         OnPropertyChanged(nameof(DisplayData));
     }
 
@@ -71,10 +72,9 @@ public class MainWindowViewModel : ViewModelBase{
     private void OnConnect(bool status) {
 
         if (status) {
-            _displayManager.Display.SetStatus(1,"Online ","Green");
-        }
+            _displayManager.SetStatusOnline();        }
         else {
-            _displayManager.Display.SetStatus(1,"Offline","Red");
+            _displayManager.SetStatusOffline();
         }
     }
 
@@ -91,6 +91,7 @@ public class MainWindowViewModel : ViewModelBase{
         Dispatcher.UIThread.Post(ProcessReceiveBuffer);
     }
 
+    
     #endregion
 
     #region Data Processing and Notification

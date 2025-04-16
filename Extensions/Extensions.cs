@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.Extensions;
@@ -85,20 +84,21 @@ public static class Extensions {
     }
 
     /// <summary>
-    /// Displays a status message on the 25th row (row 24) of the display.
+    /// Displays a status message on the 25th row (row 24) of the display starting at the specified column.
+    /// The colour values are those defined by Avalonia.
     /// </summary>
     /// <param name="display"></param>
     /// <param name="col"></param>
     /// <param name="status"></param>
-    public static void SetStatus(this Models.Display display, int col, string status, string forgroundColour="Yellow") {
-
-        //TODO: enumerate the colours rather than string
+    /// <param name="foregroundColour"></param>
+    /// <param name="backgroundColour"></param>
+    public static void SetStatusText(this Models.Display display, int col, string status, string foregroundColour="Yellow", string backgroundColour="Black") {
         
         foreach (var c in status) {
             
             var cell = display.Chars[24 * Models.Display.COLS + col];
             cell.Value = c;
-            cell.Foreground=forgroundColour;
+            cell.Foreground=foregroundColour;
             cell.Background = DefaultBackground;
             col++;
 
