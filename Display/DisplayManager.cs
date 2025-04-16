@@ -13,93 +13,7 @@ using TelstarClient.Extensions;
 namespace TelstarClient.Display;
 
 public class DisplayManager {
-    // character constants
 
-    // this is a speacial case with Avalonia in that a space value of 0x20
-    // does not render the background so the blank graphic is used instead
-
-/*
-    #region Primary Controls C0
-
-    public const char NullChar = '\x00';
-    public const char STX = '\x02';
-    public const char ETX = '\x03';
-    public const char ENQ = '\x03';
-    public const char ACK = '\x03';
-    public const char BS = '\x08';
-    public const char HT = '\x09';
-    public const char LF = '\x0a';
-    public const char VT = '\x0b';
-    public const char HomeClear = '\x0c';
-    public const char CR = '\x0d';
-    public const char SO = '\x0e';
-    public const char SI = '\x0f';
-    public const char CurOn = '\x11';
-    public const char DC2 = '\x12';
-    public const char DC3 = '\x13';
-    public const char CurOff = '\x14';
-    public const char Esc = '\x1b';
-    public const char SS2 = '\x1c';
-    public const char SS3 = '\x1d';
-    public const char Home = '\x1e';
-
-    #endregion
-
-    # region Parallel Controls C1
-
-    public const char AlphaRed = '\x41';
-    public const char AlphaGreen = '\x42';
-    public const char AlphaYellow = '\x43';
-    public const char AlphaBlue = '\x44';
-    public const char AlphaMagenta = '\x45';
-    public const char AlphaCyan = '\x46';
-    public const char AlphaWhite = '\x47';
-
-    public const char Flash = '\x48';
-    public const char Steady = '\x49';
-    public const char NormalHeight = '\x4c';
-    public const char DoubleHeight = '\x4d';
-
-    public const char GraphicRed = '\x51';
-    public const char GraphicGreen = '\x52';
-    public const char GraphicYellow = '\x53';
-    public const char GraphicBlue = '\x54';
-    public const char GraphicMagenta = '\x55';
-    public const char GraphicCyan = '\x56';
-    public const char GraphicWhite = '\x57';
-
-    public const char Conceal = '\x58';
-    public const char Contiguous = '\x59';
-    public const char Separated = '\x5a';
-    public const char BlackBackground = '\x5c';
-    public const char NewBackground = '\x5d';
-    public const char HoldGraphics = '\x5e';
-    public const char ReleaseGraphics = '\x5f';
-
-    #endregion
-
-    #region Avalonia Colours
-
-    private const string Red = "Red";
-    private const string Green = "Chartreuse";
-    private const string Yellow = "Yellow";
-    private const string Blue = "Blue";
-    private const string Magenta = "Magenta";
-    private const string Cyan = "Cyan";
-    private const string White = "White";
-    private const string Black = "Black";
-    
-    private const string Offline = "Brown";
-    private const string Online = "Green";
-    private const string Connecting = "Yellow";
-    #endregion
-
-    # region Misc Constants
-    
-    private const int StatusPadding = 10;
-
-    #endregion
-*/
     #region Private Variables
 
     private bool _escapedMode;
@@ -108,6 +22,7 @@ public class DisplayManager {
     private Cursor _cursor;
     private char _holdGraphicsCharacter = ' ';
     private FontMapper _fontMapper;
+    private ColourMapper _colourMapper;
 
     #endregion
 
@@ -115,6 +30,7 @@ public class DisplayManager {
         _display = CreateDisplay();
         _cursor = new Cursor();
         _fontMapper = new FontMapper();
+        _colourMapper = new ColourMapper();
     }
 
     public Models.Display Display {
@@ -122,11 +38,12 @@ public class DisplayManager {
         get { return _display; }
     }
 
-    public void  Write(string text) {
+    public void Write(string text) {
         foreach (var c in text) {
             WriteChar(c);
         }
     }
+
     public bool WriteChar(char character) {
         //var result = new List<Char>();
         var result = false;
@@ -217,7 +134,7 @@ public class DisplayManager {
         // we return a list as it may be necessary to update the rest of a row.
 
         // substitute viewdata characters for suitable font characters as required
-        chr.Value=_fontMapper.Map(chr.Value);
+        chr.Value = _fontMapper.Map(chr.Value);
 
         // TODO: This cannot be used if chr is a reference to the chr in the DisplayGrid
         //  only if it is a ne instance of a Char. The Display object must contain the
@@ -242,19 +159,20 @@ public class DisplayManager {
     }
 
     public void SetStatusOnline() {
-        Display.SetStatusText(1,"Online".PadRight(Constants.StatusPadding),Constants.Online);
+        Display.SetStatusText(1, "Online".PadRight(Constants.StatusPadding), Constants.Online);
     }
 
     public void SetStatusOffline() {
-        Display.SetStatusText(1,"Offline".PadRight(Constants.StatusPadding),Constants.Offline);
+        Display.SetStatusText(1, "Offline".PadRight(Constants.StatusPadding), Constants.Offline);
     }
+
     public void SetStatusConnecting() {
-        Display.SetStatusText(1,"Connecting".PadRight(Constants.StatusPadding),Constants.Connecting);
+        Display.SetStatusText(1, "Connecting".PadRight(Constants.StatusPadding), Constants.Connecting);
     }
-    
+
     private bool ProcessC0Controls(char character) {
 
-        // is this a Control code
+        // is this the character passed from the comms link
         if (character >= 0x20) return false;
 
         // if any of these get detected then CHAR_NULL character is returned otherwise
@@ -308,11 +226,9 @@ public class DisplayManager {
         if (_cursor.Col == 0) {
             return null;
         }
+
         return _display.GetChar(_cursor.Row, _cursor.Col - 1);
     }
-
-
-
 
     /// <summary>
     /// Adds the current attributes based on the control character passed.
@@ -321,8 +237,6 @@ public class DisplayManager {
     /// <returns></returns>
     private void ApplyCurrentAttributes(ref Char chr) {
 
-        
-        
         var updateds = new List<Char>();
         var prevChr = GetPreviousCharacter();
 
@@ -406,8 +320,18 @@ public class DisplayManager {
         //  * We only need to update display chars
         //    that are different.
 
-        switch (chr.Value) {
+        // check to see if we have a foreground change
+        if (chr.Value > 0x40 && chr.Value <= 0x47) {
+            SetForeground(ref chr, _colourMapper.Map(chr.Value));
+            chr.IsGraphic = false;
+        }
+        else if (chr.Value > 0x50 && chr.Value <= 0x57) {
+            SetForeground(ref chr, _colourMapper.Map(chr.Value));
+            chr.IsGraphic = true;
+        }
 
+        switch (chr.Value) {
+/*
             case Constants.AlphaRed:
                 SetForeground(ref chr, Constants.Red);
                 chr.IsGraphic = false;
@@ -442,7 +366,7 @@ public class DisplayManager {
                 //chr.Foreground = White;
                 chr.IsGraphic = false;
                 break;
-
+*/
             case Constants.Flash:
                 break;
             case Constants.Steady:
@@ -452,7 +376,7 @@ public class DisplayManager {
                 break;
             case Constants.DoubleHeight:
                 break;
-
+/*
             case Constants.GraphicRed:
                 //chr.Foreground = Red;
                 SetForeground(ref chr, Constants.Red);
@@ -488,7 +412,7 @@ public class DisplayManager {
                 //chr.Foreground = White;
                 chr.IsGraphic = true;
                 break;
-
+*/
             case Constants.Conceal:
                 break;
             case Constants.Contiguous:
@@ -522,7 +446,7 @@ public class DisplayManager {
     }
 
     private void SetForeground(ref Char chr, string colour) {
-        
+
         // set the character's foreground
         chr.Foreground = colour;
 
@@ -534,27 +458,29 @@ public class DisplayManager {
             if (c.IsControl && c.IsForegroundColourChange()) {
                 break;
             }
+
             c.Foreground = colour;
         }
     }
 
     private void SetBackground(ref Char chr, string colour) {
-       
+
         // set the character's background
         chr.Background = colour;
 
         // set the background of the rest of the row
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-                
+
         foreach (var c in row) {
             // if next char is a Black Background or New Background, then all done
             if (c.IsControl && (c.Value == Constants.BlackBackground || c.Value == Constants.NewBackground)) {
                 break;
             }
+
             c.Background = colour;
         }
     }
-    
+
     private Models.Display CreateDisplay() {
 
         var display = new Models.Display();
@@ -562,7 +488,7 @@ public class DisplayManager {
 
         // note that we are creating a 40*25 screen not a 40*24,
         // the last lie will be used for status info
-        for (var i = 0; i < (Models.Display.ROWS+1) * Models.Display.COLS; i++) {
+        for (var i = 0; i < (Models.Display.ROWS + 1) * Models.Display.COLS; i++) {
             var chr = new Char(Models.Display.SPC, Constants.White, Constants.Black);
             chr.Index = i;
             display.Chars.Add(chr);
@@ -570,5 +496,5 @@ public class DisplayManager {
 
         return display;
     }
-    
+
 }

@@ -8,7 +8,7 @@ public static class Extensions {
 
     private const string DefaultForeground = "White";
     private const string DefaultBackground = "Black";
-
+    
     public static bool IsForegroundColourChange(this Char chr) {
         return chr.IsGraphicsHold && (
             (chr.Value > 40 && chr.Value <= 0x47) ||
