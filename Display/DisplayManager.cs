@@ -314,12 +314,14 @@ public class DisplayManager {
 
 
     /// <summary>
-    /// Adds new attributes based on the control character passed.
+    /// Adds the current attributes based on the control character passed.
     /// </summary>
     /// <param name="chr"></param>
     /// <returns></returns>
     private void ApplyCurrentAttributes(ref Char chr) {
 
+        
+        
         var updateds = new List<Char>();
         var prevChr = GetPreviousCharacter();
 
@@ -346,10 +348,29 @@ public class DisplayManager {
     }
 
     /// <summary>
-    /// Adds any new attributes that this control character might require.
-    /// Returns a list of chars in addition to the argument passed, that
-    /// need the UI display updating e.g. a New Background might require
-    /// the rest of the row to be updated.
+    /// Adds any new attributes to the character that this control character
+    /// might require.
+    ///
+    /// If a character on the screen is updated, this may very well affect
+    /// the following characters up until the end of the row. There are
+    /// some basic rules to be followed i.e.
+    ///
+    /// Rules:
+    /// 
+    /// * A foreground colour change affects all following characters in the row up
+    ///   until another colour change is found.
+    /// * A new background control character affects all following characters in the
+    ///   row until a black background control character is found.
+    /// * New background control character is applied to the cell containing the NB
+    ///   control code.
+    /// * A double height control character affects all following characters in the row
+    ///   until a normal height control character is found.
+    /// * Any row containing a double height character will cause the row below to be
+    ///   read only.
+    /// * Flash affects all following characters in the row until a steady control
+    ///   character is found.
+    /// * Separated graphics control character affects all following characters in the row until a
+    ///   Contiguous graphics control character is found.
     /// </summary>
     /// <param name="chr"></param>
     /// <returns></returns>
@@ -460,37 +481,12 @@ public class DisplayManager {
             case NewBackground:
 
                 var colour = prevChr is null ? White : prevChr.Foreground;
-
-                // set the character's background
-                chr.Background = colour;
-
-                // set the background of the rest of the row
-                var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-                
-                foreach (var r in row) {
-                    // TODO: check for a control that would cancel this e.g. another
-                    //  NewBackground or an BlackBackground
-                    r.Background = colour;
-                }
-
-                // the Chars in the row are deep clones of those in the display
-                //result.AddRange(row);
+                SetBackground(ref chr, colour);
                 break;
 
             case BlackBackground:
-
-                // set the character's background
-                chr.Background = Black;
-
-                // set the background of the rest of the row
-                row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-
-                foreach (var r in row) {
-                    // TODO: check for a control that would cancel this e.g. NewBackground
-                    r.Background = Black;
-                }
-
-                //result.AddRange(row);
+                
+                SetBackground(ref chr, Black);
                 break;
 
             case HoldGraphics:
@@ -508,6 +504,21 @@ public class DisplayManager {
         return result;
     }
 
+    private void SetBackground(ref Char chr, string colour) {
+       
+        // set the character's background
+        chr.Background = colour;
+
+        // set the background of the rest of the row
+        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+                
+        foreach (var r in row) {
+            // TODO: check for a control that would cancel this e.g. another
+            //  NewBackground or an BlackBackground
+            r.Background = colour;
+        }
+    }
+    
     private Models.Display CreateDisplay() {
 
         var display = new Models.Display();
