@@ -9,6 +9,7 @@ public class DisplayManager {
     #region Private Variables
 
     private bool _escapedMode;
+
     //private bool _graphicsMode;
     private Models.Display _display;
     private Cursor _cursor;
@@ -86,9 +87,7 @@ public class DisplayManager {
 
             if (chr.IsGraphic) {
 
-                int graphicsBase;
 
-                graphicsBase = chr.IsSeparated ? 0xe2c0 : 0xe200;
                 /*
                  * Normal graphics the base numbers are
                  * e200 for 20-3f
@@ -98,21 +97,32 @@ public class DisplayManager {
                  * e2c0 for 20-3f
                  * e2e0 for 60-7f
                  */
+                var graphicsBase = chr.IsSeparated ? 0xe2c0 : 0xe200;
 
                 // sort out graphics by selecting the appropriate character in the font
                 if (chr.Value >= 0x20 && chr.Value <= 0x3f) {
-                    //chr.Value += (char)(0xe200 - 0x20);
                     chr.Value += (char)(graphicsBase - 0x20);
                 }
 
                 if (chr.Value >= 0x60 && chr.Value <= 0x7f) {
-                    //chr.Value += (char)(0xe220 - 0x60);
                     chr.Value += (char)(graphicsBase - 0x40);
                 }
 
+                // store the graphics value for any future hold graphics requirements
                 _holdGraphicsCharacter = chr.Value;
             }
+            
+            // need to handle double height
+            if (chr.IsDoubleHeightBottom) {
+                chr.Value = (char)(chr.Value + 0xe100);
+            }
+            else if (chr.IsDoubleHeightTop)
+            {
+                chr.Value = (char)(chr.Value + 0xe000);
+            }
         }
+
+
 
         // Move cursor for next character, irrespective of
         // how many are being updated or whether this is a parallel control
@@ -226,7 +236,7 @@ public class DisplayManager {
     /// <param name="chr"></param>
     /// <returns></returns>
     private void ApplyCurrentAttributes(ref Char chr) {
-        
+
         var prevChr = GetPreviousCharacter();
 
         // get current attributes based on the previous Char
@@ -238,6 +248,8 @@ public class DisplayManager {
             chr.IsControl = false;
             chr.IsSeparated = false;
             chr.IsConcealed = false;
+            chr.IsDoubleHeightTop = false;
+            chr.IsDoubleHeightBottom = false;
         }
         else {
             // get previous char
@@ -248,6 +260,9 @@ public class DisplayManager {
             chr.IsSeparated = prevChr.IsSeparated;
             chr.IsConcealed = prevChr.IsConcealed;
             chr.IsGraphicsHold = prevChr.IsGraphicsHold;
+            chr.IsDoubleHeightTop = prevChr.IsDoubleHeightTop;
+            chr.IsDoubleHeightBottom = prevChr.IsDoubleHeightBottom;
+
         }
     }
 
@@ -295,23 +310,24 @@ public class DisplayManager {
         var prevChr = GetPreviousCharacter();
 
         // check to see if we have a foreground change
-        if (chr.IsForegroundColourChange())
-        {
+        if (chr.IsForegroundColourChange()) {
             SetForeground(ref chr, _colourMapper.Map(chr.Value));
             chr.IsGraphic = chr.IsGraphicColourChange();
         }
 
         switch (chr.Value) {
-            
-            case Constants.Flash:
+
+            case Constants.Flash: //TODO 
                 break;
-            case Constants.Steady:
+            case Constants.Steady: //TODO 
                 break;
             case Constants.NormalHeight:
+                chr.IsDoubleHeightTop = false;
                 break;
             case Constants.DoubleHeight:
+                chr.IsDoubleHeightTop = true;
                 break;
-            case Constants.Conceal:
+            case Constants.Conceal: //TODO 
                 break;
             case Constants.Contiguous:
                 chr.IsSeparated = false;
