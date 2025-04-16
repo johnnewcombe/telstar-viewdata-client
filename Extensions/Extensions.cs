@@ -8,12 +8,33 @@ public static class Extensions {
 
     private const string DefaultForeground = "White";
     private const string DefaultBackground = "Black";
+
+    /// <summary>
+    /// Returns true if the character is an lpha colour change control.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    public static bool IsAlphaColourChange(this Char chr) {
+        return chr.IsControl && (chr.Value > 0x40 && chr.Value <= 0x47);
+    }
+
+    /// <summary>
+    /// Returns true if the character is a graphic colour change control.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    public static bool IsGraphicColourChange(this Char chr) {
+        return chr.IsControl && (chr.Value > 0x50 && chr.Value <= 0x57);
+    }
     
+    /// <summary>
+    /// Returns true if the character is either an Alpha colour change control or a
+    /// graphic colour change control..
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
     public static bool IsForegroundColourChange(this Char chr) {
-        return chr.IsGraphicsHold && (
-            (chr.Value > 40 && chr.Value <= 0x47) ||
-            (chr.Value > 50 && chr.Value <= 0x57)
-        );
+        return IsAlphaColourChange(chr) || IsGraphicColourChange(chr);
     }
 
     /// <summary>

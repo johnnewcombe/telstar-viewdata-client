@@ -1,12 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing.Imaging.Effects;
-using System.Dynamic;
-using System.IO.Pipelines;
-using System.Threading.Tasks;
-using Avalonia.Controls.Platform.Surfaces;
-using Avalonia.Styling;
-using Avalonia.Utilities;
 using TelstarClient.Models;
 using TelstarClient.Extensions;
 
@@ -17,7 +9,7 @@ public class DisplayManager {
     #region Private Variables
 
     private bool _escapedMode;
-    private bool _graphicsMode;
+    //private bool _graphicsMode;
     private Models.Display _display;
     private Cursor _cursor;
     private char _holdGraphicsCharacter = ' ';
@@ -45,8 +37,6 @@ public class DisplayManager {
     }
 
     public bool WriteChar(char character) {
-        //var result = new List<Char>();
-        var result = false;
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
@@ -159,15 +149,15 @@ public class DisplayManager {
     }
 
     public void SetStatusOnline() {
-        Display.SetStatusText(1, "Online".PadRight(Constants.StatusPadding), Constants.Online);
+        Display.SetStatusText(1, "CONNECTED".PadRight(Constants.StatusPadding), Constants.Green);
     }
 
     public void SetStatusOffline() {
-        Display.SetStatusText(1, "Offline".PadRight(Constants.StatusPadding), Constants.Offline);
+        Display.SetStatusText(1, "DISCONNECTED".PadRight(Constants.StatusPadding), Constants.Green);
     }
 
     public void SetStatusConnecting() {
-        Display.SetStatusText(1, "Connecting".PadRight(Constants.StatusPadding), Constants.Connecting);
+        Display.SetStatusText(1, "CONNECTING".PadRight(Constants.StatusPadding), Constants.Green);
     }
 
     private bool ProcessC0Controls(char character) {
@@ -236,8 +226,7 @@ public class DisplayManager {
     /// <param name="chr"></param>
     /// <returns></returns>
     private void ApplyCurrentAttributes(ref Char chr) {
-
-        var updateds = new List<Char>();
+        
         var prevChr = GetPreviousCharacter();
 
         // get current attributes based on the previous Char
@@ -295,124 +284,33 @@ public class DisplayManager {
     /// </summary>
     /// <param name="chr"></param>
     /// <returns></returns>
-    private bool ApplyNewAttributes(ref Char chr) {
-
-        var result = true;
+    private void ApplyNewAttributes(ref Char chr) {
 
         if (!_escapedMode || chr.Value <= 0x40 || chr.Value > 0x5f) {
-            return result;
+            return;
         }
 
         chr.IsControl = true;
 
         var prevChr = GetPreviousCharacter();
 
-        // TODO: We need to consider the following.
-        //  * Control characters can be placed anywhere
-        //    on the screen and often affect the remainder
-        //    of the row up until the next control char.
-        //  * A colour change will need to update all
-        //    following the control up until the next
-        //    colour change.
-        //  * A new background needs to update the
-        //    rest of the row up until the next
-        //    NewBackground or BlackBackground.
-        //  * We only need to update display chars
-        //    that are different.
-
         // check to see if we have a foreground change
-        if (chr.Value > 0x40 && chr.Value <= 0x47) {
+        if (chr.IsForegroundColourChange())
+        {
             SetForeground(ref chr, _colourMapper.Map(chr.Value));
-            chr.IsGraphic = false;
-        }
-        else if (chr.Value > 0x50 && chr.Value <= 0x57) {
-            SetForeground(ref chr, _colourMapper.Map(chr.Value));
-            chr.IsGraphic = true;
+            chr.IsGraphic = chr.IsGraphicColourChange();
         }
 
         switch (chr.Value) {
-/*
-            case Constants.AlphaRed:
-                SetForeground(ref chr, Constants.Red);
-                chr.IsGraphic = false;
-                break;
-            case Constants.AlphaGreen:
-                SetForeground(ref chr, Constants.Green);
-                //chr.Foreground = Green;
-                chr.IsGraphic = false;
-                break;
-            case Constants.AlphaYellow:
-                SetForeground(ref chr, Constants.Yellow);
-                //chr.Foreground = Yellow;
-                chr.IsGraphic = false;
-                break;
-            case Constants.AlphaBlue:
-                SetForeground(ref chr, Constants.Blue);
-                //chr.Foreground = Blue;
-                chr.IsGraphic = false;
-                break;
-            case Constants.AlphaMagenta:
-                SetForeground(ref chr, Constants.Magenta);
-                //chr.Foreground = Magenta;
-                chr.IsGraphic = false;
-                break;
-            case Constants.AlphaCyan:
-                SetForeground(ref chr, Constants.Cyan);
-                //chr.Foreground = Cyan;
-                chr.IsGraphic = false;
-                break;
-            case Constants.AlphaWhite:
-                SetForeground(ref chr, Constants.White);
-                //chr.Foreground = White;
-                chr.IsGraphic = false;
-                break;
-*/
+            
             case Constants.Flash:
                 break;
             case Constants.Steady:
                 break;
-
             case Constants.NormalHeight:
                 break;
             case Constants.DoubleHeight:
                 break;
-/*
-            case Constants.GraphicRed:
-                //chr.Foreground = Red;
-                SetForeground(ref chr, Constants.Red);
-                chr.IsGraphic = true;
-                break;
-            case Constants.GraphicGreen:
-                SetForeground(ref chr, Constants.Green);
-                //chr.Foreground = Green;
-                chr.IsGraphic = true;
-                break;
-            case Constants.GraphicYellow:
-                SetForeground(ref chr, Constants.Yellow);
-                //chr.Foreground = Yellow;
-                chr.IsGraphic = true;
-                break;
-            case Constants.GraphicBlue:
-                SetForeground(ref chr, Constants.Blue);
-                //chr.Foreground = Blue;
-                chr.IsGraphic = true;
-                break;
-            case Constants.GraphicMagenta:
-                SetForeground(ref chr, Constants.Magenta);
-                //chr.Foreground = Magenta;
-                chr.IsGraphic = true;
-                break;
-            case Constants.GraphicCyan:
-                SetForeground(ref chr, Constants.Cyan);
-                //chr.Foreground = Cyan;
-                chr.IsGraphic = true;
-                break;
-            case Constants.GraphicWhite:
-                SetForeground(ref chr, Constants.White);
-                //chr.Foreground = White;
-                chr.IsGraphic = true;
-                break;
-*/
             case Constants.Conceal:
                 break;
             case Constants.Contiguous:
@@ -421,28 +319,23 @@ public class DisplayManager {
             case Constants.Separated:
                 chr.IsSeparated = true;
                 break;
-
             case Constants.NewBackground:
                 SetBackground(ref chr, prevChr is null ? Constants.White : prevChr.Foreground);
                 break;
-
             case Constants.BlackBackground:
                 SetBackground(ref chr, Constants.Black);
                 break;
-
             case Constants.HoldGraphics:
                 chr.IsGraphicsHold = true;
                 break;
-
             case Constants.ReleaseGraphics:
                 chr.IsGraphicsHold = false;
                 break;
             default:
-                result = false;
                 break;
         }
 
-        return result;
+        return;
     }
 
     private void SetForeground(ref Char chr, string colour) {
