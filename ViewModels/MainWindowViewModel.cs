@@ -31,6 +31,9 @@ public class MainWindowViewModel : ViewModelBase{
     public async Task DisplayWelcomeMessage()
     {
         await Task.Delay(100);
+        
+        
+        _displayManager.Write(Display.MainMenu.GetLogo());
         _displayManager.SetStatusOffline();
         //
         //

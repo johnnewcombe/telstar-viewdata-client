@@ -121,19 +121,17 @@ public class DisplayManager {
         get { return _display; }
     }
 
+    public void  Write(string text) {
+        foreach (var c in text) {
+            WriteChar(c);
+        }
+    }
     public bool WriteChar(char character) {
         //var result = new List<Char>();
         var result = false;
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
-
-            // clear screen is a special case, the display structure has been
-            // cleared but we have to send a list of blank characters back to the UI
-            //if (character == HomeClear) {
-            //    result.AddRange(ClearScreen());
-            //}
-
             // nothing further to do so exit
             return false;
         }
