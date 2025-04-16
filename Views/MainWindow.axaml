@@ -29,7 +29,7 @@
         <!-- Main Area -->
         <!--<Grid ShowGridLines="False" Grid.Row="1" ColumnDefinitions="Auto,*">-->
         <Grid ShowGridLines="False" Grid.Row="1" ColumnDefinitions="*,Auto">
-            <UniformGrid Grid.Column="0" Margin="20,20,0,10" Name="display" Columns="40" Rows="24" Background="Black"></UniformGrid>
+            <UniformGrid Grid.Column="0" Margin="20,20,0,10" Name="display" Columns="40" Rows="25" Background="Black"></UniformGrid>
             <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1">
                 <UniformGrid Columns="3" Margin="20">
                     <Button Focusable="False" CornerRadius="10" Tag="1" Classes="keypad" Click="Keypad_OnClick" HorizontalAlignment="Center"
@@ -98,10 +98,6 @@
                             <Label Content="Disconnect"></Label>
                         </StackPanel>
                     </Button>
-                    <StackPanel Margin="25,25,0,0" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <Label Classes="icon" Content="&#xe256;"></Label>
-                        <Label Name="status" Content="Offline"></Label>
-                    </StackPanel>
                 </StackPanel>
             </StackPanel>
 

@@ -24,7 +24,7 @@ public class MainWindowViewModel : ViewModelBase{
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
-        Status = "Offline";
+        _displayManager.Display.SetStatus(1,"Offline","Red");
     }
 
     #region TCP Client Control and Events
@@ -37,8 +37,7 @@ public class MainWindowViewModel : ViewModelBase{
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
-            
-            Status = "Online";
+
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
@@ -50,7 +49,8 @@ public class MainWindowViewModel : ViewModelBase{
         if (_tcp is not null) {
             _tcp.Disconnect();
         }
-        Status = "Offline";
+        _displayManager.Display.SetStatus(1,"Offline","Red");
+        OnPropertyChanged(nameof(DisplayData));
     }
 
     public void Send(string data) {
@@ -71,7 +71,10 @@ public class MainWindowViewModel : ViewModelBase{
     private void OnConnect(bool status) {
 
         if (status) {
-            Debug.Print("Connected! : " + status.ToString());
+            _displayManager.Display.SetStatus(1,"Online ","Green");
+        }
+        else {
+            _displayManager.Display.SetStatus(1,"Offline","Red");
         }
     }
 

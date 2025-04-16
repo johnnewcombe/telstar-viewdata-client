@@ -500,7 +500,9 @@ public class DisplayManager {
         var display = new Models.Display();
         display.Chars = new List<Char>();
 
-        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+        // note that we are creating a 40*25 screen not a 40*24,
+        // the last lie will be used for status info
+        for (var i = 0; i < (Models.Display.ROWS+1) * Models.Display.COLS; i++) {
             var chr = new Char(Models.Display.SPC, White, Black);
             chr.Index = i;
             display.Chars.Add(chr);

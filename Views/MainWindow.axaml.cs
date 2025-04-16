@@ -19,7 +19,8 @@ public partial class MainWindow : Window {
     public MainWindow() {
         InitializeComponent();
 
-        ViewModel = new MainWindowViewModel();
+        //ViewModel = new MainWindowViewModel();
+        ViewModel = DataContext as MainWindowViewModel;
         ViewModel.PropertyChanged += this.PropertyChangedEventHandler;
 
         // remove title bar etc.
@@ -27,7 +28,9 @@ public partial class MainWindow : Window {
 
         //initialise the display
         display.Children.Clear();
-        for (int i = 0; i < Models.Display.COLS * Models.Display.ROWS; i++) {
+        
+        // note that we create an extra row of labels for the status line
+        for (int i = 0; i < Models.Display.COLS * (Models.Display.ROWS+1); i++) {
             var g = InitCharacterLabel(Models.Display.SPC);
             display.Children.Add(g);
         }
@@ -44,9 +47,6 @@ public partial class MainWindow : Window {
                     Debug.WriteLine(ex.Message);
                 }
 
-                break;
-            case nameof(ViewModel.Status):
-                UpdateStatus();
                 break;
         }
     }
@@ -93,11 +93,7 @@ public partial class MainWindow : Window {
 
         }
     }
-
-    private void UpdateStatus() {
-        status.Content = ViewModel.Status;
-    }
-
+    
     private static Viewbox InitCharacterLabel(int charNumber) {
         var thicknessZero = Thickness.Parse("0");
 

@@ -16,7 +16,9 @@ public static class Extensions {
     /// <param name="display"></param>
     public static void Clear(this Models.Display display) {
 
-        foreach (var c in display.Chars) {
+        // display is 25 rows (0-24) but we don't clear the last (status) row
+        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+            var c = display.Chars[i];
             c.Foreground = DefaultForeground;
             c.Background = DefaultBackground;
             c.Value = Models.Display.SPC;
@@ -80,5 +82,31 @@ public static class Extensions {
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Displays a status message on the 25th row (row 24) of the display.
+    /// </summary>
+    /// <param name="display"></param>
+    /// <param name="col"></param>
+    /// <param name="status"></param>
+    public static void SetStatus(this Models.Display display, int col, string status, string forgroundColour="Yellow") {
+
+        //TODO: enumerate the colours rather than string
+        
+        foreach (var c in status) {
+            
+            var cell = display.Chars[24 * Models.Display.COLS + col];
+            cell.Value = c;
+            cell.Foreground=forgroundColour;
+            cell.Background = DefaultBackground;
+            col++;
+
+            if (col >= Models.Display.COLS) {
+                break;
+            }
+
+        }
+        
     }
 }
