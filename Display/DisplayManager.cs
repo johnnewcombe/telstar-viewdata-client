@@ -4,6 +4,7 @@ using System.Drawing.Imaging.Effects;
 using System.Dynamic;
 using System.IO.Pipelines;
 using System.Threading.Tasks;
+using Avalonia.Controls.Platform.Surfaces;
 using Avalonia.Styling;
 using Avalonia.Utilities;
 using TelstarClient.Models;
@@ -17,7 +18,7 @@ public class DisplayManager {
     // this is a speacial case with Avalonia in that a space value of 0x20
     // does not render the background so the blank graphic is used instead
 
-
+/*
     #region Primary Controls C0
 
     public const char NullChar = '\x00';
@@ -98,7 +99,7 @@ public class DisplayManager {
     private const int StatusPadding = 10;
 
     #endregion
-
+*/
     #region Private Variables
 
     private bool _escapedMode;
@@ -241,14 +242,14 @@ public class DisplayManager {
     }
 
     public void SetStatusOnline() {
-        Display.SetStatusText(1,"Online".PadRight(StatusPadding),Online);
+        Display.SetStatusText(1,"Online".PadRight(Constants.StatusPadding),Constants.Online);
     }
 
     public void SetStatusOffline() {
-        Display.SetStatusText(1,"Offline".PadRight(StatusPadding),Offline);
+        Display.SetStatusText(1,"Offline".PadRight(Constants.StatusPadding),Constants.Offline);
     }
     public void SetStatusConnecting() {
-        Display.SetStatusText(1,"Connecting".PadRight(StatusPadding),Connecting);
+        Display.SetStatusText(1,"Connecting".PadRight(Constants.StatusPadding),Constants.Connecting);
     }
     
     private bool ProcessC0Controls(char character) {
@@ -259,37 +260,37 @@ public class DisplayManager {
         // if any of these get detected then CHAR_NULL character is returned otherwise
         // the passed character is returned unaltered.
         switch (character) {
-            case BS:
+            case Constants.BS:
                 _cursor.Backspace();
                 break;
-            case HT:
+            case Constants.HT:
                 _cursor.HorizontalTab();
                 break;
-            case LF:
+            case Constants.LF:
                 _cursor.LineFeed();
                 break;
-            case VT:
+            case Constants.VT:
                 _cursor.VerticalTab();
                 break;
-            case HomeClear:
+            case Constants.HomeClear:
                 // update display model
                 // the UI will be updated
                 _display.Clear();
                 _cursor.Home();
                 break;
-            case Home:
+            case Constants.Home:
                 _cursor.Home();
                 break;
-            case CR:
+            case Constants.CR:
                 _cursor.CarriageReturn();
                 break;
-            case '\x11':
+            case Constants.CurOn:
                 _cursor.Visible = true;
                 break;
-            case '\x14':
+            case Constants.CurOff:
                 _cursor.Visible = false;
                 break;
-            case '\x1b':
+            case Constants.Esc:
                 _escapedMode = true;
                 break;
         }
@@ -360,8 +361,14 @@ public class DisplayManager {
     /// * A foreground colour change affects all following characters in the row up
     ///   until another colour change is found.
     /// * A new background control character affects all following characters in the
-    ///   row until a black background control character is found.
-    /// * New background control character is applied to the cell containing the NB
+    ///   row until either another new background is found or if s a black
+    ///   background control character is found.
+    /// * A new background control character is applied to the cell containing the NB
+    ///   control code.
+    /// * A black background control character affects all following characters in the
+    ///   row until either another black background is found or if a new
+    ///   background control character is found.
+    /// * A black background control character is applied to the cell containing the NB
     ///   control code.
     /// * A double height control character affects all following characters in the row
     ///   until a normal height control character is found.
@@ -401,99 +408,109 @@ public class DisplayManager {
 
         switch (chr.Value) {
 
-            case AlphaRed:
-                chr.Foreground = Red;
+            case Constants.AlphaRed:
+                SetForeground(ref chr, Constants.Red);
                 chr.IsGraphic = false;
                 break;
-            case AlphaGreen:
-                chr.Foreground = Green;
+            case Constants.AlphaGreen:
+                SetForeground(ref chr, Constants.Green);
+                //chr.Foreground = Green;
                 chr.IsGraphic = false;
                 break;
-            case AlphaYellow:
-                chr.Foreground = Yellow;
+            case Constants.AlphaYellow:
+                SetForeground(ref chr, Constants.Yellow);
+                //chr.Foreground = Yellow;
                 chr.IsGraphic = false;
                 break;
-            case AlphaBlue:
-                chr.Foreground = Blue;
+            case Constants.AlphaBlue:
+                SetForeground(ref chr, Constants.Blue);
+                //chr.Foreground = Blue;
                 chr.IsGraphic = false;
                 break;
-            case AlphaMagenta:
-                chr.Foreground = Magenta;
+            case Constants.AlphaMagenta:
+                SetForeground(ref chr, Constants.Magenta);
+                //chr.Foreground = Magenta;
                 chr.IsGraphic = false;
                 break;
-            case AlphaCyan:
-                chr.Foreground = Cyan;
+            case Constants.AlphaCyan:
+                SetForeground(ref chr, Constants.Cyan);
+                //chr.Foreground = Cyan;
                 chr.IsGraphic = false;
                 break;
-            case AlphaWhite:
-                chr.Foreground = White;
+            case Constants.AlphaWhite:
+                SetForeground(ref chr, Constants.White);
+                //chr.Foreground = White;
                 chr.IsGraphic = false;
                 break;
 
-            case Flash:
+            case Constants.Flash:
                 break;
-            case Steady:
-                break;
-
-            case NormalHeight:
-                break;
-            case DoubleHeight:
+            case Constants.Steady:
                 break;
 
-            case GraphicRed:
-                chr.Foreground = Red;
+            case Constants.NormalHeight:
+                break;
+            case Constants.DoubleHeight:
+                break;
+
+            case Constants.GraphicRed:
+                //chr.Foreground = Red;
+                SetForeground(ref chr, Constants.Red);
                 chr.IsGraphic = true;
                 break;
-            case GraphicGreen:
-                chr.Foreground = Green;
+            case Constants.GraphicGreen:
+                SetForeground(ref chr, Constants.Green);
+                //chr.Foreground = Green;
                 chr.IsGraphic = true;
                 break;
-            case GraphicYellow:
-                chr.Foreground = Yellow;
+            case Constants.GraphicYellow:
+                SetForeground(ref chr, Constants.Yellow);
+                //chr.Foreground = Yellow;
                 chr.IsGraphic = true;
                 break;
-            case GraphicBlue:
-                chr.Foreground = Blue;
+            case Constants.GraphicBlue:
+                SetForeground(ref chr, Constants.Blue);
+                //chr.Foreground = Blue;
                 chr.IsGraphic = true;
                 break;
-            case GraphicMagenta:
-                chr.Foreground = Magenta;
+            case Constants.GraphicMagenta:
+                SetForeground(ref chr, Constants.Magenta);
+                //chr.Foreground = Magenta;
                 chr.IsGraphic = true;
                 break;
-            case GraphicCyan:
-                chr.Foreground = Cyan;
+            case Constants.GraphicCyan:
+                SetForeground(ref chr, Constants.Cyan);
+                //chr.Foreground = Cyan;
                 chr.IsGraphic = true;
                 break;
-            case GraphicWhite:
-                chr.Foreground = White;
+            case Constants.GraphicWhite:
+                SetForeground(ref chr, Constants.White);
+                //chr.Foreground = White;
                 chr.IsGraphic = true;
                 break;
 
-            case Conceal:
+            case Constants.Conceal:
                 break;
-            case Contiguous:
+            case Constants.Contiguous:
                 chr.IsSeparated = false;
                 break;
-            case Separated:
+            case Constants.Separated:
                 chr.IsSeparated = true;
                 break;
 
-            case NewBackground:
-
-                var colour = prevChr is null ? White : prevChr.Foreground;
-                SetBackground(ref chr, colour);
+            case Constants.NewBackground:
+                SetBackground(ref chr, prevChr is null ? Constants.White : prevChr.Foreground);
                 break;
 
-            case BlackBackground:
-                
-                SetBackground(ref chr, Black);
+            case Constants.BlackBackground:
+                SetBackground(ref chr, Constants.Black);
                 break;
 
-            case HoldGraphics:
+            case Constants.HoldGraphics:
                 chr.IsGraphicsHold = true;
                 break;
 
-            case ReleaseGraphics:
+            case Constants.ReleaseGraphics:
                 chr.IsGraphicsHold = false;
                 break;
             default:
@@ -504,6 +521,23 @@ public class DisplayManager {
         return result;
     }
 
+    private void SetForeground(ref Char chr, string colour) {
+        
+        // set the character's foreground
+        chr.Foreground = colour;
+
+        // set the background of the rest of the row
+        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+
+        foreach (var c in row) {
+            // if next char is a foreground colour change then all done
+            if (c.IsControl && c.IsForegroundColourChange()) {
+                break;
+            }
+            c.Foreground = colour;
+        }
+    }
+
     private void SetBackground(ref Char chr, string colour) {
        
         // set the character's background
@@ -512,10 +546,12 @@ public class DisplayManager {
         // set the background of the rest of the row
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
                 
-        foreach (var r in row) {
-            // TODO: check for a control that would cancel this e.g. another
-            //  NewBackground or an BlackBackground
-            r.Background = colour;
+        foreach (var c in row) {
+            // if next char is a Black Background or New Background, then all done
+            if (c.IsControl && (c.Value == Constants.BlackBackground || c.Value == Constants.NewBackground)) {
+                break;
+            }
+            c.Background = colour;
         }
     }
     
@@ -527,7 +563,7 @@ public class DisplayManager {
         // note that we are creating a 40*25 screen not a 40*24,
         // the last lie will be used for status info
         for (var i = 0; i < (Models.Display.ROWS+1) * Models.Display.COLS; i++) {
-            var chr = new Char(Models.Display.SPC, White, Black);
+            var chr = new Char(Models.Display.SPC, Constants.White, Constants.Black);
             chr.Index = i;
             display.Chars.Add(chr);
         }

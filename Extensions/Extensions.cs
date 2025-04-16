@@ -9,6 +9,13 @@ public static class Extensions {
     private const string DefaultForeground = "White";
     private const string DefaultBackground = "Black";
 
+    public static bool IsForegroundColourChange(this Char chr) {
+        return chr.IsGraphicsHold && (
+            (chr.Value > 40 && chr.Value <= 0x47) ||
+            (chr.Value > 50 && chr.Value <= 0x57)
+        );
+    }
+
     /// <summary>
     /// Clears the display by setting each character back to its default (blank) values.
     /// </summary>
@@ -72,7 +79,7 @@ public static class Extensions {
     /// </summary>
     /// <returns></returns>
     public static List<Char> GetRemainderOfRow(this Models.Display display, int row, int col) {
-        
+
         var result = new List<Char>();
 
         for (var i = col + 1; i < Models.Display.COLS; i++) {
@@ -92,13 +99,14 @@ public static class Extensions {
     /// <param name="status"></param>
     /// <param name="foregroundColour"></param>
     /// <param name="backgroundColour"></param>
-    public static void SetStatusText(this Models.Display display, int col, string status, string foregroundColour="Yellow", string backgroundColour="Black") {
-        
+    public static void SetStatusText(this Models.Display display, int col, string status,
+        string foregroundColour = "Yellow", string backgroundColour = "Black") {
+
         foreach (var c in status) {
-            
+
             var cell = display.Chars[24 * Models.Display.COLS + col];
             cell.Value = c;
-            cell.Foreground=foregroundColour;
+            cell.Foreground = foregroundColour;
             cell.Background = DefaultBackground;
             col++;
 
@@ -107,6 +115,6 @@ public static class Extensions {
             }
 
         }
-        
+
     }
 }
