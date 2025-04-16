@@ -106,12 +106,14 @@ public class DisplayManager {
     private Models.Display _display;
     private Cursor _cursor;
     private char _holdGraphicsCharacter = ' ';
+    private FontMapper _fontMapper;
 
     #endregion
 
     public DisplayManager() {
         _display = CreateDisplay();
         _cursor = new Cursor();
+        _fontMapper = new FontMapper();
     }
 
     public Models.Display Display {
@@ -119,7 +121,7 @@ public class DisplayManager {
         get { return _display; }
     }
 
-    public bool ProcessChar(char character) {
+    public bool WriteChar(char character) {
         //var result = new List<Char>();
         var result = false;
 
@@ -215,8 +217,8 @@ public class DisplayManager {
         // update the char appropriately
         // we return a list as it may be necessary to update the rest of a row.
 
-        // substitute ascii to viewdata characters as required
-        AsciiToViewdata(ref chr);
+        // substitute viewdata characters for suitable font characters as required
+        chr.Value=_fontMapper.Map(chr.Value);
 
         // TODO: This cannot be used if chr is a reference to the chr in the DisplayGrid
         //  only if it is a ne instance of a Char. The Display object must contain the
@@ -506,12 +508,6 @@ public class DisplayManager {
         }
 
         return result;
-    }
-
-    private void AsciiToViewdata(ref Char chr) {
-
-        if (chr.Value == 0x20) chr.Value = (char)0xe200;
-        if (chr.Value == 0x5f) chr.Value = (char)0x23;
     }
 
     private Models.Display CreateDisplay() {

@@ -18,7 +18,7 @@ public class MainWindowViewModel : ViewModelBase{
     private readonly Display.DisplayManager _displayManager = new Display.DisplayManager();
     //private List<Models.Char> _displayManagerData = new List<Models.Char>();
     private readonly CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
-    private Models.KeyMapper _keyMapper = new KeyMapper();
+    private KeyMapper _keyMapper = new KeyMapper();
     private TCPClient _tcp;
 
     /// <summary>
@@ -118,7 +118,9 @@ public class MainWindowViewModel : ViewModelBase{
 
         // get data from buffer and process for viewdata 
         while (_cyclicBuffer.Count > 0) {
-            if (_displayManager.ProcessChar(_cyclicBuffer.Remove())) {
+            
+            if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
+                
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
                 DisplayData = _displayManager.Display.Chars;

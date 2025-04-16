@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using Avalonia.Input;
 
-namespace TelstarClient.Models;
+namespace TelstarClient.ViewModels;
 
 public class KeyMapper {
     

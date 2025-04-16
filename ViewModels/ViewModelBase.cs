@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Avalonia.Controls.Notifications;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -19,5 +21,11 @@ public class ViewModelBase : INotifyPropertyChanged
         field = value;
         OnPropertyChanged(propertyName);
         return true;
+    }
+    
+    public async Task Execute(Action action, int timeoutInMilliseconds)
+    {
+        await Task.Delay(timeoutInMilliseconds);
+        action();
     }
 }
