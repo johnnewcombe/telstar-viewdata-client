@@ -1,72 +1,51 @@
+using System.Collections.Generic;
 using System.Text;
+using TelstarClient.Models;
 
 namespace TelstarClient.Display;
 
 public static class MainMenu {
 
+	private const byte R = 0x41;
+	private const byte G = 0x42;
+	private const byte Y = 0x43;
+	private const byte B = 0x44;
+	private const byte M = 0x45;
+	private const byte C = 0x46;
+	private const byte W = 0x47;
+
+	private const byte a = 0x51;
+	private const byte g = 0x52;
+	private const byte y = 0x53;
+	private const byte b = 0x54;
+	private const byte m = 0x55;
+	private const byte c = 0x56;
+	private const byte w = 0x57;
+
+	private const byte esc = 0x1b;
+
+	/// <summary>
+	/// Returns the welcome logo in viewdata byte format.
+	/// </summary>
+	/// <returns></returns>
 	public static string GetLogo() {
 		
 		var logo = new StringBuilder();
-		//logo.Append("\e\x43T E L S T A R");
-		logo.Append("\r\n\n\n\n\n\n\n\n\n");
-
-		logo.Append("                   \e\x42\x54\r\n");
-		logo.Append("                 \e\x42\x54\e\x41\x45\e\x46\x4c\r\n");
-		logo.Append("               \e\x42\x54\e\x41\x45\e\x46\x4c\e\x44\x53\e\x47\x54\r\n");
-		logo.Append("             \e\x42\x54\e\x41\x45\e\x46\x4c\e\x44\x53\e\x47\x54\e\x45\x41\e\x43\x52\r\n");
-		logo.Append("               \e\x46\x4c\e\x44\x53\e\x47\x54\e\x45\x41\e\x43\x52\r\n");
-		logo.Append("                 \e\x47\x54\e\x45\x41\e\x43\x52\r\n");
-		logo.Append("                   \e\x43\x52");
+		logo.Append("\r\n\n\n");
+		logo.Append(Converters.ConvertFromMarkup("           [D]Viewdata Terminal[N]\r\n\r\n\r\n\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("                   [G]T\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("                 [G]T[R]E[C]L\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("               [G]T[R]E[C]L[B]S[W]T\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("             [G]T[R]E[C]L[B]S[W]T[M]A[Y]R\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("               [C]L[B]S[W]T[M]A[Y]R\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("                 [W]T[M]A[Y]R\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("                   [Y]R\r\n"));
+		
 		return logo.ToString();
 		
+		// TODO use markup?? or edit.tf format.
+		// i.e. define a string and convert it to bytes
+		//var row = new List<byte>(){esc,G,(byte)'T'};
+
 	}
-	/*
-
-       ;   '0123456789012345678901234567890123456789'
-       asc '0---------1---------2---------3-------00'
-       asc '0---------1---------2---------3-------01'
-       db BS,HT
-       asc '0---------1---------2---------3-------02'
-       asc '0---------1---------2---------3-------03'
-       db CR
-       asc '0---------1---------2---------3-------04'
-       db LF
-       db VT
-       asc '0---------1---------2---------3-------05'
-       db CR,LF,VT
-       asc '0---------1---------2---------3-------06'
-       db LF,CR,VT
-       asc '0---------1---------2---------3-------07'
-       db BS,HT
-       asc '0---------1---------2---------3-------08'
-       db HT,BS
-       db $1e,VT,VT,VT,VT,VT,VT,VT,VT,VT,VT,VT,VT,VT,VT,VT
-       asc '0---------1---------2---------3-------09'
-       asc '0---------1---------2---------3-------10'
-       db $1E,LF,LF,LF,LF,LF,LF,LF,LF,LF,LF,LF
-       asc '0---------1---------2---------3-------11'
-       asc '0---------1---------2---------3-------12'
-       db CR,HT,BS
-       asc '0---------1---------2---------3-------13'
-       db CR,BS
-       asc '3'
-       db HT,BS
-       asc '0---------1---------2---------3-------14'
-       asc '0---------1---------2---------3-------15'
-       db LF,LF,CR,VT,VT
-       asc '0---------1---------2---------3-------16'
-       db CR,LF,LF,VT,VT
-       asc '0---------1---------2---------3-------17'
-       db CR,LF,CR,VT,CR,LF,VT
-       asc '0---------1---------2---------3-------18'
-       db CR,CR,CR,LF,CR,CR,CR,LF,VT,VT
-       asc '0---------1---------2---------3-------19'
-       asc '0---------1---------2---------3-------20'
-       asc '0---------1---------2---------3-------21'
-       asc '0---------1---------2---------3-------22'
-       asc '0---------1---------2---------3-------23'
-
-
-
-     */
 }
