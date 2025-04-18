@@ -10,6 +10,46 @@ public static class Extensions {
     private const string DefaultBackground = "Black";
 
     /// <summary>
+    /// All the properties of this object, except the Value, are copied to the
+    /// destination object
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <param name="dest"></param>
+    public static void CloneAttributes(this Char chr, ref Char dest) {
+
+        ArgumentNullException.ThrowIfNull(dest);
+
+        dest.Foreground = chr.Foreground;
+        dest.Background = chr.Background;
+        dest.IsGraphic = chr.IsGraphic;
+        dest.IsControl = chr.IsControl;
+        dest.IsSeparated = chr.IsSeparated;
+        dest.IsConcealed = chr.IsConcealed;
+        dest.IsGraphicsHold = chr.IsGraphicsHold;
+        dest.IsDoubleHeightTop = chr.IsDoubleHeightTop;
+        dest.IsDoubleHeightBottom = chr.IsDoubleHeightBottom;
+        
+    }
+
+    /// <summary>
+    /// Sets the object properties, except the Value, to default values.
+    /// </summary>
+    /// <param name="chr"></param>
+    public static void SetDefaultAttributes(this Char chr) {
+        chr.Background = "White";
+        chr.Background = "Black";
+        chr.IsGraphic = false;
+        chr.IsControl = false;
+        chr.IsSeparated = false;
+        chr.IsConcealed = false;
+        chr.IsGraphicsHold = false;
+        chr.IsDoubleHeightTop = false;
+        chr.IsDoubleHeightBottom = false;
+    }
+    
+    #region Char Extensions
+
+    /// <summary>
     /// Returns true if the character is an lpha colour change control.
     /// </summary>
     /// <param name="chr"></param>
@@ -26,7 +66,7 @@ public static class Extensions {
     public static bool IsGraphicColourChange(this Char chr) {
         return chr.IsControl && (chr.Value > 0x50 && chr.Value <= 0x57);
     }
-    
+
     /// <summary>
     /// Returns true if the character is either an Alpha colour change control or a
     /// graphic colour change control..
@@ -36,6 +76,10 @@ public static class Extensions {
     public static bool IsForegroundColourChange(this Char chr) {
         return IsAlphaColourChange(chr) || IsGraphicColourChange(chr);
     }
+
+    #endregion
+
+    #region Display Extensions
 
     /// <summary>
     /// Clears the display by setting each character back to its default (blank) values.
@@ -139,3 +183,5 @@ public static class Extensions {
 
     }
 }
+
+# endregion

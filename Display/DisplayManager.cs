@@ -241,28 +241,10 @@ public class DisplayManager {
 
         // get current attributes based on the previous Char
         if (prevChr == null) {
-            // must be at the start of a row so use default settings
-            chr.Background = "White";
-            chr.Background = "Black";
-            chr.IsGraphic = false;
-            chr.IsControl = false;
-            chr.IsSeparated = false;
-            chr.IsConcealed = false;
-            chr.IsDoubleHeightTop = false;
-            chr.IsDoubleHeightBottom = false;
+            chr.SetDefaultAttributes();
         }
         else {
-            // get previous char
-            chr.Foreground = prevChr.Foreground;
-            chr.Background = prevChr.Background;
-            chr.IsGraphic = prevChr.IsGraphic;
-            chr.IsControl = prevChr.IsControl;
-            chr.IsSeparated = prevChr.IsSeparated;
-            chr.IsConcealed = prevChr.IsConcealed;
-            chr.IsGraphicsHold = prevChr.IsGraphicsHold;
-            chr.IsDoubleHeightTop = prevChr.IsDoubleHeightTop;
-            chr.IsDoubleHeightBottom = prevChr.IsDoubleHeightBottom;
-
+            prevChr.CloneAttributes(ref chr);
         }
     }
 
@@ -325,7 +307,7 @@ public class DisplayManager {
                 chr.IsDoubleHeightTop = false;
                 break;
             case Constants.DoubleHeight:
-                chr.IsDoubleHeightTop = true;
+                SetDoubleHeight(ref chr);
                 break;
             case Constants.Conceal: //TODO 
                 break;
@@ -390,6 +372,26 @@ public class DisplayManager {
         }
     }
 
+    private void SetDoubleHeight(ref Char chr) {
+        chr.IsDoubleHeightTop = true;
+        
+        // set the row below but only if we are not on the last row
+        if (_cursor.Row < Models.Display.ROWS - 1) {
+            
+            var chrBelow = _display.Chars[(_cursor.Row+1) * Models.Display.COLS + _cursor.Col];
+            
+            // make it like the char above
+            ApplyCurrentAttributes(ref chrBelow);
+            
+            // mark it asa bottom character
+            chrBelow.IsDoubleHeightTop = false;
+            chrBelow.IsDoubleHeightBottom = true;
+            
+            // update the value
+            chrBelow.Value = chr.Value;
+        }
+    }
+    
     private Models.Display CreateDisplay() {
 
         var display = new Models.Display();
