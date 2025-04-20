@@ -53,25 +53,41 @@ public class DisplayManager {
 
         // get the character from the current cursor position
         var chr = _display.GetChar(_cursor.Row, _cursor.Col);
-
+        
         // first get the attributes from the previous cell (or defaults if col 0)
-        ApplyCurrentAttributes(ref chr);
+        var prevChr = GetPreviousCharacter();
 
-        // update the value, this could be a control code or an alpha mosaic
-        // and could get changed if we needed to point to a graphic or double
-        // height character etc. within the font.
-        chr.Value = character;
+        // get current attributes based on the previous Char
+        if (prevChr == null) {
+            chr.SetDefaultAttributes();
+        }
+        else {
+            prevChr.CloneAttributes(ref chr);
+        }
 
         // if we get here then the current char is not a C0 control code
-        // (char < 0x20)
-        if (_escapedMode) {
-            // if the _escapeMode flag is set then this has been done
-            // by the previous character and the current character is
-            // a viewdata control code so set the flag. Note that the
-            // actual control code is stored in the display model,
-            // however, a space (or held graphic) will be displayed
-            // in the UI.
+        // i.e. char < 0x20.
 
+        // if the _escapeMode flag is set then this has been done
+        // by the previous character and the current character is
+        // a viewdata control code. Note that the actual control
+        // code is stored in the display model, however, a space
+        // (or held graphic) will be displayed in the UI.
+        if (_escapedMode) {
+
+            // If the current char is a DH and the new one is not we need
+            // to reduce the number of DH chars in the row, however, if
+            // the current char is not a DH and the new one is then increment
+            // the row reference
+            if (chr.Value == Constants.DoubleHeight && character !=Constants.DoubleHeight) {
+                _display.RowReferences[_cursor.Row]--;
+            } else if (chr.Value != Constants.DoubleHeight && character == Constants.DoubleHeight) {
+                _display.RowReferences[_cursor.Row]++;
+            }
+
+            // update the value
+            chr.Value = character;
+            
             // apply new attributes from this control code and collect
             // any other cells that need updating e.g. to the end of
             // the row etc.
@@ -85,9 +101,11 @@ public class DisplayManager {
             // not a control code
             chr.IsControl = false;
 
+            // update the value
+            chr.Value = character;
+            
             if (chr.IsGraphic) {
-
-
+                
                 /*
                  * Normal graphics the base numbers are
                  * e200 for 20-3f
@@ -111,18 +129,13 @@ public class DisplayManager {
                 // store the graphics value for any future hold graphics requirements
                 _holdGraphicsCharacter = chr.Value;
             }
-            
-            // need to handle double height
-            if (chr.IsDoubleHeightBottom) {
-                chr.Value = (char)(chr.Value + 0xe100);
-            }
-            else if (chr.IsDoubleHeightTop)
-            {
-                chr.Value = (char)(chr.Value + 0xe000);
-            }
+
         }
-
-
+        
+        // could be a DH alpha or graphic
+        if (chr.IsDoubleHeight) {
+            SetDoubleHeight(ref chr);
+        }
 
         // Move cursor for next character, irrespective of
         // how many are being updated or whether this is a parallel control
@@ -231,24 +244,6 @@ public class DisplayManager {
     }
 
     /// <summary>
-    /// Adds the current attributes based on the control character passed.
-    /// </summary>
-    /// <param name="chr"></param>
-    /// <returns></returns>
-    private void ApplyCurrentAttributes(ref Char chr) {
-
-        var prevChr = GetPreviousCharacter();
-
-        // get current attributes based on the previous Char
-        if (prevChr == null) {
-            chr.SetDefaultAttributes();
-        }
-        else {
-            prevChr.CloneAttributes(ref chr);
-        }
-    }
-
-    /// <summary>
     /// Adds any new attributes to the character that this control character
     /// might require.
     ///
@@ -304,10 +299,10 @@ public class DisplayManager {
             case Constants.Steady: //TODO 
                 break;
             case Constants.NormalHeight:
-                chr.IsDoubleHeightTop = false;
+                chr.IsDoubleHeight = false;
                 break;
             case Constants.DoubleHeight:
-                SetDoubleHeight(ref chr);
+                chr.IsDoubleHeight = true;
                 break;
             case Constants.Conceal: //TODO 
                 break;
@@ -372,26 +367,37 @@ public class DisplayManager {
         }
     }
 
+    /// <summary>
+    /// This routine simply sets the lower part of double height text or graphic characters.
+    /// </summary>
+    /// <param name="chr"></param>
     private void SetDoubleHeight(ref Char chr) {
-        chr.IsDoubleHeightTop = true;
-        
-        // set the row below but only if we are not on the last row
-        if (_cursor.Row < Models.Display.ROWS - 1) {
-            
-            var chrBelow = _display.Chars[(_cursor.Row+1) * Models.Display.COLS + _cursor.Col];
-            
+
+        // set the chr below but only if we are not on the last row
+        // the DH control code doesn't need changing.
+        if (!chr.IsControl && _cursor.Row < Models.Display.ROWS - 1) {
+
+            var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + _cursor.Col];
+
             // make it like the char above
-            ApplyCurrentAttributes(ref chrBelow);
-            
-            // mark it asa bottom character
-            chrBelow.IsDoubleHeightTop = false;
-            chrBelow.IsDoubleHeightBottom = true;
-            
+            chr.CloneAttributes(ref chrBelow);
+
+            // mark it as a lower character rather than top
+            //chrBelow.IsDoubleHeightLower = true;
+
             // update the value
-            chrBelow.Value = chr.Value;
+            var val = chr.Value;
+            if (chr.IsGraphic && !chr.IsBlastThrough()) {
+                chr.Value = (char)(val + 0x40); // graphics font char already set, DH (upper) is 0x40 above
+                chrBelow.Value = (char)(val + 0x80); // graphics font char already set, DH (lower) is 0x48 above
+            }
+            else {
+                chr.Value = (char)(val + 0xe020 - 0x20); // chars start from 0x20
+                chrBelow.Value = (char)(val + 0xe120 - 0x20); // chars start from 0x20
+            }
         }
     }
-    
+
     private Models.Display CreateDisplay() {
 
         var display = new Models.Display();

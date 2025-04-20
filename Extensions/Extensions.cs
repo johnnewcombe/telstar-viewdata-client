@@ -9,6 +9,8 @@ public static class Extensions {
     private const string DefaultForeground = "White";
     private const string DefaultBackground = "Black";
 
+    #region Char Extensions
+    
     /// <summary>
     /// All the properties of this object, except the Value, are copied to the
     /// destination object
@@ -26,8 +28,8 @@ public static class Extensions {
         dest.IsSeparated = chr.IsSeparated;
         dest.IsConcealed = chr.IsConcealed;
         dest.IsGraphicsHold = chr.IsGraphicsHold;
-        dest.IsDoubleHeightTop = chr.IsDoubleHeightTop;
-        dest.IsDoubleHeightBottom = chr.IsDoubleHeightBottom;
+        dest.IsDoubleHeight = chr.IsDoubleHeight;
+        //dest.IsDoubleHeightLower = chr.IsDoubleHeightLower;
         
     }
 
@@ -43,11 +45,23 @@ public static class Extensions {
         chr.IsSeparated = false;
         chr.IsConcealed = false;
         chr.IsGraphicsHold = false;
-        chr.IsDoubleHeightTop = false;
-        chr.IsDoubleHeightBottom = false;
+        chr.IsDoubleHeight = false;
+        //chr.IsDoubleHeightLower = false;
     }
-    
-    #region Char Extensions
+
+    /// <summary>
+    /// Returns true if the character is 'blast through', i.e. should be displayed
+    /// as an alpha character when in graphic mode.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    public static bool IsBlastThrough(this Char chr) {
+
+        if (chr.IsGraphic && chr.Value >= 0x40 && chr.Value <= 0x5A) {
+            return true;
+        }
+        return false;
+    } 
 
     /// <summary>
     /// Returns true if the character is an lpha colour change control.

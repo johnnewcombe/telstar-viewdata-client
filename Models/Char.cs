@@ -17,8 +17,8 @@ public class Char {
     public bool IsSeparated{get;set;}
     public bool IsGraphic{ get; set; }
     public bool IsGraphicsHold{ get; set; }
-    public bool IsDoubleHeightTop{ get; set; }
-    public bool IsDoubleHeightBottom{ get; set; }
+    public bool IsDoubleHeight{ get; set; }
+    //public bool IsDoubleHeightLower{ get; set; }
     public char Value { get; set; }
     public int Index { get; set; }
     public string Foreground { get; set; }
