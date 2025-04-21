@@ -129,7 +129,7 @@ public static class Extensions {
     public static bool IsRowReadOnly(this Models.Display display, int row) {
 
         // the row will be read only if the row above has a double height reference
-        if (row > 0 && display.RowReferences[row - 1] > 1) {
+        if (row > 0 && display.RowReferences[row - 1] > 0) {
             return true;
         }
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using TelstarClient.Models;
 using TelstarClient.Extensions;
 
@@ -83,6 +84,7 @@ public class DisplayManager {
                 _display.RowReferences[_cursor.Row]--;
             } else if (chr.Value != Constants.DoubleHeight && character == Constants.DoubleHeight) {
                 _display.RowReferences[_cursor.Row]++;
+                
             }
 
             // update the value
