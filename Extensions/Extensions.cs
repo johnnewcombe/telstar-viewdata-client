@@ -46,7 +46,6 @@ public static class Extensions {
         chr.IsConcealed = false;
         chr.IsGraphicsHold = false;
         chr.IsDoubleHeight = false;
-        //chr.IsDoubleHeightLower = false;
     }
 
     /// <summary>
@@ -113,6 +112,11 @@ public static class Extensions {
             c.IsGraphic = false;
             c.IsGraphicsHold = false;
         }
+
+        // clear the row references
+        for (var i = 0; i < Models.Display.ROWS; i++) {
+            display.RowReferences[i] = 0;
+        }
     }
 
     /// <summary>
@@ -125,8 +129,6 @@ public static class Extensions {
     public static bool IsRowReadOnly(this Models.Display display, int row) {
 
         // the row will be read only if the row above has a double height reference
-        // TODO: This is not true as a DH followed by a NH would give a reference of 0 i.e.
-        //  not readonly but it should be as any DH height on the row requires the row below to be blank.
         if (row > 0 && display.RowReferences[row - 1] > 1) {
             return true;
         }
