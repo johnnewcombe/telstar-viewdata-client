@@ -198,6 +198,23 @@ public static class Extensions {
         }
 
     }
+
+    /// <summary>
+    /// Copies the attributes for all characters in the specified row to
+    /// the row below.
+    /// </summary>
+    /// <param name="display"></param>
+    /// <param name="row"></param>
+    public static void CloneAttributesToRowBelow(this Models.Display display, int row) {
+
+        if (row < Models.Display.ROWS - 1) {
+            for (var i = 0; i < Models.Display.COLS; i++) {
+                var chrTop = display.Chars[(row) * Models.Display.COLS + i];
+                var chrBottom = display.Chars[(row + 1) * Models.Display.COLS + i];
+                chrTop.CloneAttributes(ref chrBottom);
+            }
+        }
+    }
 }
 
 # endregion

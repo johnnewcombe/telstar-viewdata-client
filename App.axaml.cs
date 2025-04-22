@@ -1,9 +1,13 @@
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using System.Reflection;
 using Avalonia.Markup.Xaml;
+using log4net;
+using log4net.Repository;
 using TelstarClient.ViewModels;
 using TelstarClient.Views;
 
@@ -11,6 +15,8 @@ namespace TelstarClient;
 
 public partial class App : Application
 {
+    private static readonly ILog log = LogManager.GetLogger(typeof(App));
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -28,7 +34,7 @@ public partial class App : Application
                 DataContext = new MainWindowViewModel(),
             };
         }
-
+        
         base.OnFrameworkInitializationCompleted();
     }
 

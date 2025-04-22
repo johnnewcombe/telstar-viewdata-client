@@ -378,14 +378,16 @@ public class DisplayManager {
         // set the chr below but only if we are not on the last row
         // the DH control code doesn't need changing.
         if (!chr.IsControl && _cursor.Row < Models.Display.ROWS - 1) {
+            
+            // copy all the attributes from the upper row to the lower one
+            // TODO This only needs to be done for the first DH char received
+            //  for the row although rarely is there more than one anyway.
+            //  It may even be possible to just apply the background attribute
+            //  for the chars before the DH control and all attributes for the
+            //  control and following chars, it doesn't save much though.
+            _display.CloneAttributesToRowBelow(_cursor.Row);
 
             var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + _cursor.Col];
-
-            // make it like the char above
-            chr.CloneAttributes(ref chrBelow);
-
-            // mark it as a lower character rather than top
-            //chrBelow.IsDoubleHeightLower = true;
 
             // update the value
             var val = chr.Value;
