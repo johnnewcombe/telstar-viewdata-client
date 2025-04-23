@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TelstarClient.Display;
 using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.Extensions;
@@ -10,7 +11,7 @@ public static class Extensions {
     private const string DefaultBackground = "Black";
 
     #region Char Extensions
-    
+
     /// <summary>
     /// All the properties of this object, except the Value, are copied to the
     /// destination object
@@ -30,7 +31,7 @@ public static class Extensions {
         dest.IsGraphicsHold = chr.IsGraphicsHold;
         dest.IsDoubleHeight = chr.IsDoubleHeight;
         //dest.IsDoubleHeightLower = chr.IsDoubleHeightLower;
-        
+
     }
 
     /// <summary>
@@ -59,8 +60,9 @@ public static class Extensions {
         if (chr.IsGraphic && chr.Value >= 0x40 && chr.Value <= 0x5A) {
             return true;
         }
+
         return false;
-    } 
+    }
 
     /// <summary>
     /// Returns true if the character is an lpha colour change control.
@@ -88,6 +90,15 @@ public static class Extensions {
     /// <returns></returns>
     public static bool IsForegroundColourChange(this Char chr) {
         return IsAlphaColourChange(chr) || IsGraphicColourChange(chr);
+    }
+
+    /// <summary>
+    /// Returns true if the character represents a new or black (kill) backgroung control.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    public static bool IsBackgroundColourChange(this Char chr) {
+        return chr.IsControl && (chr.Value == Constants.NewBackground || chr.Value == Constants.NewBackground);
     }
 
     #endregion
@@ -213,6 +224,12 @@ public static class Extensions {
                 var chrBottom = display.Chars[(row + 1) * Models.Display.COLS + i];
                 chrTop.CloneAttributes(ref chrBottom);
             }
+
+            // TODO a kill background doesn't seem to work on the lower row.
+            //
+            //
+
+
         }
     }
 }

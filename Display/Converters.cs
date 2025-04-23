@@ -76,6 +76,7 @@ public static class Converters {
         markup = markup.Replace("[N]", NORMAL_HEIGHT);
         markup = markup.Replace("[D]", DOUBLE_HEIGHT);
         markup = markup.Replace("[-]", END_BACKGROUND);
+        markup = markup.Replace("[k]", END_BACKGROUND);
         markup = markup.Replace("[n]", NEW_BACKGROUND);
         markup = markup.Replace("[r]", MOSAIC_RED);
         markup = markup.Replace("[g]", MOSAIC_GREEN);

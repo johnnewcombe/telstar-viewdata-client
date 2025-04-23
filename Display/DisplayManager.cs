@@ -54,7 +54,7 @@ public class DisplayManager {
 
         // get the character from the current cursor position
         var chr = _display.GetChar(_cursor.Row, _cursor.Col);
-        
+
         // first get the attributes from the previous cell (or defaults if col 0)
         var prevChr = GetPreviousCharacter();
 
@@ -80,16 +80,17 @@ public class DisplayManager {
             // to reduce the number of DH chars in the row, however, if
             // the current char is not a DH and the new one is then increment
             // the row reference
-            if (chr.Value == Constants.DoubleHeight && character !=Constants.DoubleHeight) {
+            if (chr.Value == Constants.DoubleHeight && character != Constants.DoubleHeight) {
                 _display.RowReferences[_cursor.Row]--;
-            } else if (chr.Value != Constants.DoubleHeight && character == Constants.DoubleHeight) {
+            }
+            else if (chr.Value != Constants.DoubleHeight && character == Constants.DoubleHeight) {
                 _display.RowReferences[_cursor.Row]++;
-                
+
             }
 
             // update the value
             chr.Value = character;
-            
+
             // apply new attributes from this control code and collect
             // any other cells that need updating e.g. to the end of
             // the row etc.
@@ -105,9 +106,9 @@ public class DisplayManager {
 
             // update the value
             chr.Value = character;
-            
+
             if (chr.IsGraphic) {
-                
+
                 /*
                  * Normal graphics the base numbers are
                  * e200 for 20-3f
@@ -133,8 +134,8 @@ public class DisplayManager {
             }
 
         }
-        
-        // could be a DH alpha or graphic
+
+        // could be a DH control, DH alpha or DH graphic
         if (chr.IsDoubleHeight) {
             SetDoubleHeight(ref chr);
         }
@@ -360,12 +361,18 @@ public class DisplayManager {
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
 
         foreach (var c in row) {
+            
+            // if next char is a foreground colour change then all done
+            if (c.IsControl && c.IsBackgroundColourChange()) {
+                break;
+            }
+            c.Background = colour;
+
             // if next char is a Black Background or New Background, then all done
             if (c.IsControl && (c.Value == Constants.BlackBackground || c.Value == Constants.NewBackground)) {
                 break;
             }
-
-            c.Background = colour;
+            
         }
     }
 
@@ -377,20 +384,38 @@ public class DisplayManager {
 
         // set the chr below but only if we are not on the last row
         // the DH control code doesn't need changing.
-        if (!chr.IsControl && _cursor.Row < Models.Display.ROWS - 1) {
-            
-            // copy all the attributes from the upper row to the lower one
-            // TODO This only needs to be done for the first DH char received
-            //  for the row although rarely is there more than one anyway.
-            //  It may even be possible to just apply the background attribute
-            //  for the chars before the DH control and all attributes for the
-            //  control and following chars, it doesn't save much though.
-            _display.CloneAttributesToRowBelow(_cursor.Row);
+        if (_cursor.Row < Models.Display.ROWS - 1) {
 
+            // copy all the attributes from the upper row to the lower one
+            // TODO This needs to be done whenever writing to the top row when
+            //  there is a DH in the row.
+            //  It may even be possible to just apply the background/foreground
+            //  attribute for the chars before the DH control and all attributes for the
+            //  control and following chars.
+            //  New/Kill background applies to both rows before and after a DH
+
+            // get the character below
             var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + _cursor.Col];
 
-            // update the value
+            //_display.CloneAttributesToRowBelow(_cursor.Row);
+            for (var i = 0; i < Models.Display.COLS; i++) {
+                var chrUpper = _display.Chars[_cursor.Row * Models.Display.COLS + i];
+                var chrLower = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + i];
+                chrLower.Foreground = chrUpper.Foreground;
+                chrLower.Background = chrUpper.Background;
+            }
+
+            // controls dont get modified
+            if (chr.IsControl) {
+                return;
+            }
+
+            // attributes already updated so just update the value
             var val = chr.Value;
+
+            // modify value to set the upper and lower font values
+            // Capitals when in graphics mode are displayed as there normal alpha characters
+            // these are referred to as Blast Through characters.
             if (chr.IsGraphic && !chr.IsBlastThrough()) {
                 chr.Value = (char)(val + 0x40); // graphics font char already set, DH (upper) is 0x40 above
                 chrBelow.Value = (char)(val + 0x80); // graphics font char already set, DH (lower) is 0x48 above
