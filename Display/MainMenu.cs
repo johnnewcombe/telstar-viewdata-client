@@ -40,6 +40,8 @@ public static class MainMenu {
 		logo.Append(Converters.ConvertFromMarkup("               [C]L[B]S[W]T[M]A[Y]R\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                 [W]T[M]A[Y]R\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                   [Y]R\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("012345678900123456789001234567890\r\n"));
+		
 		
 		return logo.ToString();
 		

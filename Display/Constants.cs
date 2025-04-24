@@ -72,16 +72,6 @@ public static class Constants {
     public const string White = "White";
     public const string Black = "Black";
     
-    //public const string Offline = "Brown";
-    //public const string Online = "Green";
-    //public const string Connecting = "Yellow";
-    
     #endregion
-
-    # region Misc Constants
     
-    public const int StatusPadding = 16;
-
-    #endregion
-
 }

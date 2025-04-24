@@ -12,10 +12,16 @@ using TelstarClient.Models;
 
 namespace TelstarClient.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase{
-    
+public class MainWindowViewModel : ViewModelBase {
+
+    private const string connectedStatus = "CONNECTED";
+    private const string disconnectedStatus = "DISCONNECTED";
+    private const string connectingStatus = "CONNECTING";
+
     private string _status;
+
     private readonly Display.DisplayManager _displayManager = new Display.DisplayManager();
+
     //private List<Models.Char> _displayManagerData = new List<Models.Char>();
     private readonly CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
     private KeyMapper _keyMapper = new KeyMapper();
@@ -28,18 +34,17 @@ public class MainWindowViewModel : ViewModelBase{
         DisplayWelcomeMessage();
     }
 
-    public async Task DisplayWelcomeMessage()
-    {
+    public async Task DisplayWelcomeMessage() {
         await Task.Delay(100);
-        
-        
+
+
         _displayManager.Write(Display.MainMenu.GetLogo());
-        _displayManager.SetStatusOffline();
+        _displayManager.Display.SetStatusText(disconnectedStatus);
         //
         //
         OnPropertyChanged(nameof(DisplayData));
     }
-    
+
     #region TCP Client Control and Events
 
     public void Connect() {
@@ -50,13 +55,14 @@ public class MainWindowViewModel : ViewModelBase{
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
             _tcp.Connect();
-            
-            _displayManager.SetStatusConnecting();
+
+            _displayManager.Display.SetStatusText(connectingStatus);
+
             OnPropertyChanged(nameof(DisplayData));
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
-            Debug.Print($"Error : {ex}");
+            Debug.WriteLine($"Error : {ex}");
         }
     }
 
@@ -64,7 +70,8 @@ public class MainWindowViewModel : ViewModelBase{
         if (_tcp is not null) {
             _tcp.Disconnect();
         }
-        _displayManager.SetStatusOffline();
+
+        _displayManager.Display.SetStatusText(disconnectedStatus);
         OnPropertyChanged(nameof(DisplayData));
     }
 
@@ -74,11 +81,11 @@ public class MainWindowViewModel : ViewModelBase{
         if (data == null || _tcp == null) {
             return;
         }
-        
+
         data = _keyMapper.Map(data);
 
         if (_tcp.Write(data)) {
-            Debug.Print("Sent=>{0}", data);
+            //Debug.Print("Sent=>{0}", data);
         }
     }
 
@@ -86,9 +93,11 @@ public class MainWindowViewModel : ViewModelBase{
     private void OnConnect(bool status) {
 
         if (status) {
-            _displayManager.SetStatusOnline();        }
+            _displayManager.Display.SetStatusText(connectedStatus);
+        }
         else {
-            _displayManager.SetStatusOffline();
+            _displayManager.Display.SetStatusText(disconnectedStatus);
+            ;
         }
     }
 
@@ -99,13 +108,13 @@ public class MainWindowViewModel : ViewModelBase{
         foreach (var c in data) {
             _cyclicBuffer.Add(c);
         }
+
         // at this point we are not on the UI thread but one created by the TCPClient
         // this is a fire and forget call, the TCP Client will not wait for a result
         // Dispatcher.UIThread.Post(ProcessReceiveBuffer);
         Dispatcher.UIThread.Post(ProcessReceiveBuffer);
     }
 
-    
     #endregion
 
     #region Data Processing and Notification
@@ -117,20 +126,20 @@ public class MainWindowViewModel : ViewModelBase{
     /// </summary>
     private void ProcessReceiveBuffer() {
 
-        Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
+        //Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
 
         // get data from buffer and process for viewdata 
         while (_cyclicBuffer.Count > 0) {
-            
+
             if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
-                
+
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
                 DisplayData = _displayManager.Display.Chars;
             }
         }
 
-        Debug.Print("ProcessReceiveBuffer Exit");
+        //Debug.Print("ProcessReceiveBuffer Exit");
     }
 
     public string Status {

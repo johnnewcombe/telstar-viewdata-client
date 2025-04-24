@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using Avalonia.Logging;
 using TelstarClient.Models;
 using TelstarClient.Extensions;
 
@@ -40,6 +41,9 @@ public class DisplayManager {
 
     public bool WriteChar(char character) {
 
+        
+        //Trace.WriteLine($"Row{_cursor.Row}, Col{_cursor.Col} {character}");
+
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
             // nothing further to do so exit
@@ -49,6 +53,7 @@ public class DisplayManager {
         // if current row is read only e.g. lower line of a Double Height row then
         // it will be readonly
         if (_display.IsRowReadOnly(_cursor.Row)) {
+            _cursor.HorizontalTab();
             return false;
         }
 
@@ -150,7 +155,7 @@ public class DisplayManager {
 
         // display blank for controls or hold graphics character if appropriate
         if (chr.IsControl) {
-            if (chr.IsGraphicsHold && _holdGraphicsCharacter != Models.Display.SPC) {
+            if (chr.IsGraphicsHold) {
                 chr.Value = _holdGraphicsCharacter;
             }
             else {
@@ -166,19 +171,7 @@ public class DisplayManager {
         _cursor.Row = row;
         _cursor.Col = column;
     }
-
-    public void SetStatusOnline() {
-        Display.SetStatusText(1, "CONNECTED".PadRight(Constants.StatusPadding), Constants.Green);
-    }
-
-    public void SetStatusOffline() {
-        Display.SetStatusText(1, "DISCONNECTED".PadRight(Constants.StatusPadding), Constants.Green);
-    }
-
-    public void SetStatusConnecting() {
-        Display.SetStatusText(1, "CONNECTING".PadRight(Constants.StatusPadding), Constants.Green);
-    }
-
+    
     private bool ProcessC0Controls(char character) {
 
         // is this the character passed from the comms link
@@ -286,6 +279,7 @@ public class DisplayManager {
         if (chr.IsForegroundColourChange()) {
             SetForeground(ref chr, _colourMapper.Map(chr.Value));
             chr.IsGraphic = chr.IsGraphicColourChange();
+            return;
         }
 
         switch (chr.Value) {
@@ -321,6 +315,9 @@ public class DisplayManager {
                 chr.IsGraphicsHold = false;
                 break;
             default:
+                // this is an invalid code for Prestel so reset char value
+                chr.IsControl = false;
+                chr.Value = Models.Display.SPC;
                 break;
         }
 

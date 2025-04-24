@@ -30,7 +30,6 @@ public static class Extensions {
         dest.IsConcealed = chr.IsConcealed;
         dest.IsGraphicsHold = chr.IsGraphicsHold;
         dest.IsDoubleHeight = chr.IsDoubleHeight;
-        //dest.IsDoubleHeightLower = chr.IsDoubleHeightLower;
 
     }
 
@@ -151,6 +150,7 @@ public static class Extensions {
         if (display.RowReferences[row] > 0) {
             return true;
         }
+
         return false;
     }
 
@@ -182,6 +182,7 @@ public static class Extensions {
         if (index < Models.Display.ROWS * Models.Display.COLS) {
             return display.Chars[chr.Index + Models.Display.COLS];
         }
+
         throw new IndexOutOfRangeException("The character requested is beyond the bounds of the display.");
     }
 
@@ -212,8 +213,15 @@ public static class Extensions {
     /// <param name="status"></param>
     /// <param name="foregroundColour"></param>
     /// <param name="backgroundColour"></param>
-    public static void SetStatusText(this Models.Display display, int col, string status,
-        string foregroundColour = "Yellow", string backgroundColour = "Black") {
+    public static void SetStatusText(this Models.Display display, string status,
+        string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
+
+        for (var i = 0; i < Models.Display.COLS; i++) {
+            var cell = display.Chars[24 * Models.Display.COLS + i];
+            cell.Value = Models.Display.SPC;
+        }
+
+        var col = (Models.Display.COLS / 2) - (status.Length / 2);
 
         foreach (var c in status) {
 
@@ -226,9 +234,7 @@ public static class Extensions {
             if (col >= Models.Display.COLS) {
                 break;
             }
-
         }
-
     }
 
     /// <summary>
