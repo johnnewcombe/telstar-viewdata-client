@@ -172,6 +172,20 @@ public static class Extensions {
     }
 
     /// <summary>
+    /// Returns the character below the specified character from the display.
+    /// </summary>
+    /// <param name="display"></param>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    public static Char GetCharBelow(this Models.Display display, Char chr) {
+        var index = chr.Index + Models.Display.COLS;
+        if (index < Models.Display.ROWS * Models.Display.COLS) {
+            return display.Chars[chr.Index + Models.Display.COLS];
+        }
+        throw new IndexOutOfRangeException("The character requested is beyond the bounds of the display.");
+    }
+
+    /// <summary>
     /// Returns all Char positions from after current cursor position
     /// to the end of the row, i.e. NOT including the character at the
     /// current position. 

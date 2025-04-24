@@ -465,7 +465,7 @@ public class DisplayManager {
             // upper row will already have been done so copy to lower row including this char
             
             // copy the background colour to the immediate char in the row below
-            _display.Chars[chr.Index + Models.Display.COLS].Background = chr.Background;
+            _display.GetCharBelow(chr).Background = chr.Background;
 
             // copy the remainer of the row
             var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
@@ -477,8 +477,8 @@ public class DisplayManager {
                 }
 
                 // copy the background colour to all chars in the row below
-                _display.Chars[c.Index + Models.Display.COLS].Background = c.Background;
-
+                //_display.Chars[c.Index + Models.Display.COLS].Background = c.Background;
+                _display.GetCharBelow(c).Background = c.Background;
             }
         }
         // FG control
@@ -488,9 +488,8 @@ public class DisplayManager {
                 if (c.IsForegroundColourChange()) {
                     break;
                 }
-
                 // copy the background colour to all chars in the row below
-                _display.Chars[c.Index + Models.Display.COLS].Foreground = c.Foreground;
+                _display.GetCharBelow(c).Foreground = c.Foreground;
             }
         }
 
