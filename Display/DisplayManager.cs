@@ -13,10 +13,10 @@ public class DisplayManager {
 
     //private bool _graphicsMode;
     private Models.Display _display;
-    private Cursor _cursor;
-    private char _holdGraphicsCharacter = ' ';
-    private FontMapper _fontMapper;
-    private ColourMapper _colourMapper;
+    private readonly Cursor _cursor;
+    private char _holdGraphicsCharacter = Models.Display.SPC;
+    private readonly FontMapper _fontMapper;
+    private readonly ColourMapper _colourMapper;
 
     #endregion
 
@@ -80,6 +80,9 @@ public class DisplayManager {
             // to reduce the number of DH chars in the row, however, if
             // the current char is not a DH and the new one is then increment
             // the row reference
+            // TODO what about overwriting a control e.g. when all DHs have been
+            //  overwritten and RowReference is back at zero, surely the row below
+            //  will need to be restored or cleared etc.
             if (chr.Value == Constants.DoubleHeight && character != Constants.DoubleHeight) {
                 _display.RowReferences[_cursor.Row]--;
             }
@@ -109,15 +112,6 @@ public class DisplayManager {
 
             if (chr.IsGraphic) {
 
-                /*
-                 * Normal graphics the base numbers are
-                 * e200 for 20-3f
-                 * e220 for 60-7f
-                 *
-                 * Seperated
-                 * e2c0 for 20-3f
-                 * e2e0 for 60-7f
-                 */
                 var graphicsBase = chr.IsSeparated ? 0xe2c0 : 0xe200;
 
                 // sort out graphics by selecting the appropriate character in the font
@@ -140,38 +134,30 @@ public class DisplayManager {
         // note that a NH will not have a double height property set
         // if KB appears after a NH then it may still need to kill the
         // background in the lower row
+        // TODO Simplify or move to ProcessDoubleHeight()
         if (chr.IsDoubleHeight ||
-            (chr.IsControl && chr.Value == Constants.NormalHeight) ||
             (chr.IsControl && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
             (chr.IsControl && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row))) {
             ProcessDoubleHeight(ref chr);
         }
 
-        // Move cursor for next character, irrespective of
-        // how many are being updated or whether this is a parallel control
-        // or a normal character.
-        // Note that we will not reach this code for any C0 controls.
+        // Move cursor for next character, note that we will not reach
+        // this code for any C0 controls.
         _cursor.HorizontalTab();
-
-        // update the char appropriately
-        // we return a list as it may be necessary to update the rest of a row.
 
         // substitute viewdata characters for suitable font characters as required
         chr.Value = _fontMapper.Map(chr.Value);
 
-        // TODO: This cannot be used if chr is a reference to the chr in the DisplayGrid
-        //  only if it is a ne instance of a Char. The Display object must contain the
-        //  control value.
+        // display blank for controls or hold graphics character if appropriate
         if (chr.IsControl) {
-            if (chr.IsGraphicsHold && _holdGraphicsCharacter != ' ') {
+            if (chr.IsGraphicsHold && _holdGraphicsCharacter != Models.Display.SPC) {
                 chr.Value = _holdGraphicsCharacter;
             }
             else {
-                chr.Value = '\xe200';
+                chr.Value = Models.Display.SPC;
             }
         }
-
-        //result.Insert(0, chr.DeepClone());
+        
         return true;
     }
 
@@ -342,6 +328,11 @@ public class DisplayManager {
     }
 
 // TODO combine with SetBackground??
+    /// <summary>
+    /// Helper function to set a colour change.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <param name="colour"></param>
     private void SetForeground(ref Char chr, string colour) {
 
         // set the character's foreground
@@ -360,6 +351,11 @@ public class DisplayManager {
         }
     }
 
+    /// <summary>
+    /// Helper function to set a colour change.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <param name="colour"></param>
     private void SetBackground(ref Char chr, string colour) {
 
         // set the character's background
@@ -380,6 +376,10 @@ public class DisplayManager {
         }
     }
 
+    /// <summary>
+    /// Helper function to process a DH control code.
+    /// </summary>
+    /// <param name="chr"></param>
     private void SetDoubleHeight(ref Char chr) {
 
         chr.IsDoubleHeight = true;
@@ -407,6 +407,10 @@ public class DisplayManager {
         }
     }
 
+    /// <summary>
+    /// Helper function to process a NH control.
+    /// </summary>
+    /// <param name="chr"></param>
     private void SetNormalHeight(ref Char chr) {
 
         chr.IsDoubleHeight = false;
@@ -437,9 +441,6 @@ public class DisplayManager {
         // get the character below
         var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + _cursor.Col];
 
-        // several scenarios exist i.e.
-        // TODO what about overwriting a control e.g. when all DHs have been overwritten and RowReference is back at zero
-        
         // DH graphic char
         if (!chr.IsControl && chr.IsGraphic && !chr.IsBlastThrough()) {
             // convert to upper and lower font values
