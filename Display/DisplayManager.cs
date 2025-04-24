@@ -135,8 +135,15 @@ public class DisplayManager {
 
         }
 
-        // could be a DH control, DH alpha or DH graphic, NB etc
-        if (chr.IsDoubleHeight) {
+        // process a DH control, DH alpha, DH graphic, NB etc.
+        // or a Normal height control
+        // note that a NH will not have a double height property set
+        // if KB appears after a NH then it may still need to kill the
+        // background in the lower row
+        if (chr.IsDoubleHeight ||
+            (chr.IsControl && chr.Value == Constants.NormalHeight) ||
+            (chr.IsControl && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
+            (chr.IsControl && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row))) {
             SetDoubleHeight(ref chr);
         }
 
@@ -334,16 +341,17 @@ public class DisplayManager {
         return;
     }
 
+// TODO combine with SetBackground??
     private void SetForeground(ref Char chr, string colour) {
 
         // set the character's foreground
         chr.Foreground = colour;
 
-        // set the background of the rest of the row
+        // set the colour of the rest of the row
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
 
         foreach (var c in row) {
-            // if next char is a foreground colour change then all done
+            // if next char is a colour change then all done
             if (c.IsControl && c.IsForegroundColourChange()) {
                 break;
             }
@@ -362,17 +370,12 @@ public class DisplayManager {
 
         foreach (var c in row) {
 
-            // if next char is a foreground colour change then all done
+            // if next char is a colour change then all done
             if (c.IsControl && c.IsBackgroundColourChange()) {
                 break;
             }
 
             c.Background = colour;
-
-            // if next char is a Black Background or New Background, then all done
-            if (c.IsControl && (c.Value == Constants.BlackBackground || c.Value == Constants.NewBackground)) {
-                break;
-            }
 
         }
     }
@@ -384,7 +387,7 @@ public class DisplayManager {
     private void SetDoubleHeight(ref Char chr) {
 
         // if we are on the last row or the char is not marked as DH then do nothing
-        if (_cursor.Row >= Models.Display.ROWS - 1 || !chr.IsDoubleHeight) {
+        if (_cursor.Row >= Models.Display.ROWS - 1) {
             return;
         }
 
@@ -395,14 +398,15 @@ public class DisplayManager {
         //var val = chr.Value;
 
         // several scenarios exist i.e.
-
+        // TODO what about overwriting a control etc
         // DH Control
+        // TODO this bit could be done in the Add new attributes code like NB
         if (chr.IsControl && chr.Value == Constants.DoubleHeight) {
             // set DH to all chars until EOL or another DH or NH
             var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
             foreach (var c in row) {
-                if (c.IsControl && (chr.Value == Constants.DoubleHeight ||
-                                    chr.Value == Constants.NormalHeight)) {
+                if (c.IsControl && (c.Value == Constants.DoubleHeight ||
+                                    c.Value == Constants.NormalHeight)) {
                     break;
                 }
 
@@ -415,23 +419,24 @@ public class DisplayManager {
             row = _display.GetRemainderOfRow(_cursor.Row, 0);
             foreach (var c in row) {
                 // copy the colours to all chars in the row below
-                _display.Chars[c.Index + Models.Display.COLS].Background = c.Background;
-                _display.Chars[c.Index + Models.Display.COLS].Foreground = c.Foreground;
+                var index = c.Index + Models.Display.COLS;
+                _display.Chars[index].Background = c.Background;
+                _display.Chars[index].Foreground = c.Foreground;
             }
         }
 
         // NH control
+        // TODO this bit could be done in the Add new attributes code like NB
         else if (chr.IsControl && chr.Value == Constants.NormalHeight) {
 
             // reset DH to all chars until EOL or another DH or NH
             var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
             foreach (var c in row) {
-                if (c.IsControl && (chr.Value == Constants.DoubleHeight ||
-                                    chr.Value == Constants.NormalHeight)) {
+                if (c.IsControl && (c.Value == Constants.DoubleHeight ||
+                                    c.Value == Constants.NormalHeight)) {
                     break;
                 }
 
-                // set DH to all chars until EOL or another DH or NH
                 c.IsDoubleHeight = false;
             }
         }
@@ -454,21 +459,41 @@ public class DisplayManager {
         }
 
         // NB or KB control
-        else if (chr.IsControl && (chr.Value == Constants.NewBackground || 
+        else if (chr.IsControl && (chr.Value == Constants.NewBackground ||
                                    chr.Value == Constants.BlackBackground)) {
-            // set background to end of upper and lower rows or until KB or another NB.
-            // upper row will already have been done so copy lower row
-            var row = _display.GetRemainderOfRow(_cursor.Row + 1, _cursor.Col);
+            // set background to end of lower row or until KB or another NB.
+            // upper row will already have been done so copy to lower row including this char
+            
+            // copy the background colour to the immediate char in the row below
+            _display.Chars[chr.Index + Models.Display.COLS].Background = chr.Background;
+
+            // copy the remainer of the row
+            var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
             foreach (var c in row) {
-                if (c.IsControl && (chr.Value == Constants.DoubleHeight ||
-                                    chr.Value == Constants.NormalHeight)) {
+                
+                if (c.IsControl && (c.Value == Constants.NewBackground ||
+                                    c.Value == Constants.BlackBackground)) {
                     break;
                 }
 
                 // copy the background colour to all chars in the row below
                 _display.Chars[c.Index + Models.Display.COLS].Background = c.Background;
+
             }
         }
+        // FG control
+        else if (chr.IsControl && chr.IsForegroundColourChange()) {
+            var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+            foreach (var c in row) {
+                if (c.IsForegroundColourChange()) {
+                    break;
+                }
+
+                // copy the background colour to all chars in the row below
+                _display.Chars[c.Index + Models.Display.COLS].Foreground = c.Foreground;
+            }
+        }
+
     }
 
     private Models.Display CreateDisplay() {

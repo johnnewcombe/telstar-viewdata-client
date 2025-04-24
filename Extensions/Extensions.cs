@@ -147,6 +147,13 @@ public static class Extensions {
         return false;
     }
 
+    public static bool RowHasDoubleHeight(this Models.Display display, int row) {
+        if (display.RowReferences[row] > 0) {
+            return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// Returns a reference to the character at position specified by row and column.
     /// </summary>
