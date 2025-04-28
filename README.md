@@ -37,6 +37,8 @@ Rules:
   character is found.
 * Separated graphics control character affects all following characters in the row until a
   Contiguous graphics control character is found.
+* Invalid escape codes e.g. ESC/0E or ESC/0F are treated the same as valid ones
+* in terms of displaying either a blank or a graphics hold.
 
 ## Graphics Hold Rules
 GH gets the Graphic char, note that a blank in graphics mode is a graphic char so a control that follows a blank has

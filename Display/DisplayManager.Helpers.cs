@@ -16,14 +16,7 @@ public partial class DisplayManager {
         //  and maybe other stuff
         if (chr.IsControl) {
 
-            // sometimes invalid Prestel controls appear in pages that have been imported from
-            // elsewhere, the first test page has some of these. These are simply set to a
-            // blank character
-            if (chr.IsInvalid) {
-                chr.Value = Models.Display.SPC;
-            }
-
-            else if (chr.IsGraphicsHold) {
+            if (chr.IsGraphicsHold) {
                 chr.Value = _holdGraphicsCharacter;
                 //Trace.WriteLine($" Row: {_cursor.Row}, Col:{_cursor.Col}, GH Value: {(int)chr.Value}");
 
@@ -36,6 +29,7 @@ public partial class DisplayManager {
         // substitute viewdata characters for suitable font characters as required
         chr.Value = _fontMapper.Map(chr.Value);
     }
+
 /*
     /// <summary>
     /// Returns the previous character unless the current cursor is at
@@ -58,10 +52,6 @@ public partial class DisplayManager {
     /// <param name="chr"></param>
     /// <returns></returns>
     private void ApplyNewAttributes(ref Char chr) {
-
-        //if (!_escapedMode || chr.Value <= 0x40 || chr.Value > 0x5f) {
-        //    return;
-        //}
 
         chr.IsControl = true;
 
@@ -87,10 +77,11 @@ public partial class DisplayManager {
             case Constants.Conceal: //TODO 
                 break;
             case Constants.Contiguous:
+                SetSeparatedMode(ref chr, false);
                 chr.IsSeparated = false;
                 break;
             case Constants.Separated:
-                chr.IsSeparated = true;
+                SetSeparatedMode(ref chr, true);
                 break;
             case Constants.NewBackground:
                 SetBackground(ref chr, chr.Foreground);
@@ -106,33 +97,58 @@ public partial class DisplayManager {
                 break;
             default:
                 // this is an invalid code for Prestel but we need attributes to be passed to next char
-                Trace.WriteLine($"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
+                Trace.WriteLine(
+                    $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
                 chr.IsInvalid = true;
                 break;
         }
 
     }
 
-    /// <summary>
     /// Sets the Graphics Hold status, specify true to hold graphics, false to release.
+    /// Adds any new attributes to the character that this control character
+    /// might require.
     /// </summary>
     /// <param name="chr"></param>
     /// <param name="held"></param>
     private void SetGraphicsHold(ref Char chr, bool held) {
-        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-
+ 
         chr.IsGraphicsHold = held;
-
+        
+        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+ 
         foreach (var c in row) {
-
+ 
             c.IsGraphicsHold = held;
-
+ 
             // if next char is a colour change then all done
-            if (c.IsControl && c.Value == Constants.ReleaseGraphics) {
+            if (c.IsControl && (c.Value == Constants.ReleaseGraphics)|| 
+                c.Value == Constants.HoldGraphics) {
                 break;
             }
         }
     }
+    /// <summary>
+    /// Adds any new attributes to the character that this control character
+    /// might require.
+    /// </summary>
+    /// <param name="chr"></param>
+    private void SetSeparatedMode(ref Char chr, bool separated) {
+
+        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+
+        foreach (var c in row) {
+
+            c.IsSeparated = separated;
+
+            // if next char is a colour change then all done
+            if (c.IsControl && (c.Value == Constants.Separated ||
+                                c.Value == Constants.Contiguous)) {
+                break;
+            }
+        }
+    }
+
 
 // TODO combine with SetBackground??
     /// <summary>
@@ -163,7 +179,7 @@ public partial class DisplayManager {
             }
         }
     }
-
+    
     /// <summary>
     /// Helper function to set a colour change.
     /// </summary>

@@ -118,6 +118,9 @@ public partial class DisplayManager {
                 // store the graphics value for any future hold graphics requirements
                 _holdGraphicsCharacter = chr.Value;
             }
+            else {
+                _holdGraphicsCharacter = Models.Display.SPC;
+            }
         }
         // process a DH control, DH alpha, DH graphic, NB etc.
         // or a Normal height control
