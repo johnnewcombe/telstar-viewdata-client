@@ -6,10 +6,7 @@ using Char = TelstarClient.Models.Char;
 namespace TelstarClient.Extensions;
 
 public static class Extensions {
-
-    private const string DefaultForeground = "White";
-    private const string DefaultBackground = "Black";
-
+    
     #region Char Extensions
 
     /// <summary>
@@ -69,7 +66,7 @@ public static class Extensions {
     /// <param name="chr"></param>
     /// <returns></returns>
     public static bool IsAlphaColourChange(this Char chr) {
-        return chr.IsControl && (chr.Value > 0x40 && chr.Value <= 0x47);
+        return chr.IsControl && (chr.Value >= Constants.AlphaRed && chr.Value <= Constants.AlphaWhite);
     }
 
     /// <summary>
@@ -78,7 +75,7 @@ public static class Extensions {
     /// <param name="chr"></param>
     /// <returns></returns>
     public static bool IsGraphicColourChange(this Char chr) {
-        return chr.IsControl && (chr.Value > 0x50 && chr.Value <= 0x57);
+        return chr.IsControl && (chr.Value >= Constants.GraphicRed && chr.Value <= Constants.GraphicWhite);
     }
 
     /// <summary>
@@ -97,7 +94,7 @@ public static class Extensions {
     /// <param name="chr"></param>
     /// <returns></returns>
     public static bool IsBackgroundColourChange(this Char chr) {
-        return chr.IsControl && (chr.Value == Constants.NewBackground || chr.Value == Constants.NewBackground);
+        return chr.IsControl && (chr.Value == Constants.NewBackground || chr.Value == Constants.BlackBackground);
     }
 
     #endregion
@@ -113,14 +110,15 @@ public static class Extensions {
         // display is 25 rows (0-24) but we don't clear the last (status) row
         for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
             var c = display.Chars[i];
-            c.Foreground = DefaultForeground;
-            c.Background = DefaultBackground;
+            c.Foreground = Constants.DefaultForeground;
+            c.Background = Constants.DefaultBackground;
             c.Value = Models.Display.SPC;
             c.IsControl = false;
             c.IsConcealed = false;
             c.IsSeparated = false;
             c.IsGraphic = false;
             c.IsGraphicsHold = false;
+            c.IsDoubleHeight = false;
         }
 
         // clear the row references
@@ -142,7 +140,6 @@ public static class Extensions {
         if (row > 0 && display.RowReferences[row - 1] > 0) {
             return true;
         }
-
         return false;
     }
 
@@ -150,7 +147,6 @@ public static class Extensions {
         if (display.RowReferences[row] > 0) {
             return true;
         }
-
         return false;
     }
 
@@ -165,7 +161,7 @@ public static class Extensions {
     public static Char GetChar(this Models.Display display, int row, int col) {
 
         if (row < 0 || row >= Models.Display.ROWS || col < 0 || col >= Models.Display.COLS) {
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException("The row and columm specified do not correspond to a character within the display.");
         }
 
         return display.Chars[(row * Models.Display.COLS) + col];
@@ -228,35 +224,12 @@ public static class Extensions {
             var cell = display.Chars[24 * Models.Display.COLS + col];
             cell.Value = c;
             cell.Foreground = foregroundColour;
-            cell.Background = DefaultBackground;
+            cell.Background = Constants.DefaultBackground;
             col++;
 
             if (col >= Models.Display.COLS) {
                 break;
             }
-        }
-    }
-
-    /// <summary>
-    /// Copies the attributes for all characters in the specified row to
-    /// the row below.
-    /// </summary>
-    /// <param name="display"></param>
-    /// <param name="row"></param>
-    public static void CloneAttributesToRowBelow(this Models.Display display, int row) {
-
-        if (row < Models.Display.ROWS - 1) {
-            for (var i = 0; i < Models.Display.COLS; i++) {
-                var chrTop = display.Chars[(row) * Models.Display.COLS + i];
-                var chrBottom = display.Chars[(row + 1) * Models.Display.COLS + i];
-                chrTop.CloneAttributes(ref chrBottom);
-            }
-
-            // TODO a kill background doesn't seem to work on the lower row.
-            //
-            //
-
-
         }
     }
 }

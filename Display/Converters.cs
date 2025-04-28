@@ -97,6 +97,8 @@ public static class Converters {
         markup = markup.Replace("[@]", HOME);
         markup = markup.Replace("[H]", HT);
         markup = markup.Replace("[V]", VT);
+        markup = markup.Replace("[hg]", HOLD_MOSAIC);
+        markup = markup.Replace("[rg]", RELEASE_MOSAIC);
 
         // TODO implement markup that includes spaces e.g. [12] = 12 space (0x20) characters
         //  any changes here need to be reflected in the GetMarkupLen() Util method

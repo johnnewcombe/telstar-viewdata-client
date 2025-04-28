@@ -6,7 +6,7 @@ using TelstarClient.Extensions;
 
 namespace TelstarClient.Display;
 
-public class DisplayManager {
+public partial class DisplayManager {
 
     #region Private Variables
 
@@ -15,10 +15,10 @@ public class DisplayManager {
     //private bool _graphicsMode;
     private Models.Display _display;
     private readonly Cursor _cursor;
-    private char _holdGraphicsCharacter = Models.Display.SPC;
+    private char _holdGraphicsCharacter;
     private readonly FontMapper _fontMapper;
     private readonly ColourMapper _colourMapper;
-
+    
     #endregion
 
     public DisplayManager() {
@@ -40,9 +40,8 @@ public class DisplayManager {
     }
 
     public bool WriteChar(char character) {
-
         
-        //Trace.WriteLine($"Row{_cursor.Row}, Col{_cursor.Col} {character}");
+        Trace.WriteLine($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
@@ -53,23 +52,13 @@ public class DisplayManager {
         // if current row is read only e.g. lower line of a Double Height row then
         // it will be readonly
         if (_display.IsRowReadOnly(_cursor.Row)) {
+            // despite the row being Read-Only, we still have to move the cursor on.
             _cursor.HorizontalTab();
             return false;
         }
 
         // get the character from the current cursor position
         var chr = _display.GetChar(_cursor.Row, _cursor.Col);
-
-        // first get the attributes from the previous cell (or defaults if col 0)
-        var prevChr = GetPreviousCharacter();
-
-        // get current attributes based on the previous Char
-        if (prevChr == null) {
-            chr.SetDefaultAttributes();
-        }
-        else {
-            prevChr.CloneAttributes(ref chr);
-        }
 
         // if we get here then the current char is not a C0 control code
         // i.e. char < 0x20.
@@ -96,12 +85,10 @@ public class DisplayManager {
 
             }
 
-            // update the value
+            // set the value (this may get modified later based on the font being used)
             chr.Value = character;
 
-            // apply new attributes from this control code and collect
-            // any other cells that need updating e.g. to the end of
-            // the row etc.
+            // apply new attributes based this control to the rest of the row etc.
             ApplyNewAttributes(ref chr);
 
             // reset the escapeMode flag
@@ -131,9 +118,7 @@ public class DisplayManager {
                 // store the graphics value for any future hold graphics requirements
                 _holdGraphicsCharacter = chr.Value;
             }
-
         }
-
         // process a DH control, DH alpha, DH graphic, NB etc.
         // or a Normal height control
         // note that a NH will not have a double height property set
@@ -145,23 +130,12 @@ public class DisplayManager {
             (chr.IsControl && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row))) {
             ProcessDoubleHeight(ref chr);
         }
-
+        
+        SetSpecialDisplayValues(ref chr);
+        
         // Move cursor for next character, note that we will not reach
         // this code for any C0 controls.
         _cursor.HorizontalTab();
-
-        // substitute viewdata characters for suitable font characters as required
-        chr.Value = _fontMapper.Map(chr.Value);
-
-        // display blank for controls or hold graphics character if appropriate
-        if (chr.IsControl) {
-            if (chr.IsGraphicsHold) {
-                chr.Value = _holdGraphicsCharacter;
-            }
-            else {
-                chr.Value = Models.Display.SPC;
-            }
-        }
         
         return true;
     }
@@ -171,258 +145,7 @@ public class DisplayManager {
         _cursor.Row = row;
         _cursor.Col = column;
     }
-    
-    private bool ProcessC0Controls(char character) {
 
-        // is this the character passed from the comms link
-        if (character >= 0x20) return false;
-
-        // if any of these get detected then CHAR_NULL character is returned otherwise
-        // the passed character is returned unaltered.
-        switch (character) {
-            case Constants.BS:
-                _cursor.Backspace();
-                break;
-            case Constants.HT:
-                _cursor.HorizontalTab();
-                break;
-            case Constants.LF:
-                _cursor.LineFeed();
-                break;
-            case Constants.VT:
-                _cursor.VerticalTab();
-                break;
-            case Constants.HomeClear:
-                // update display model
-                // the UI will be updated
-                _display.Clear();
-                _cursor.Home();
-                break;
-            case Constants.Home:
-                _cursor.Home();
-                break;
-            case Constants.CR:
-                _cursor.CarriageReturn();
-                break;
-            case Constants.CurOn:
-                _cursor.Visible = true;
-                break;
-            case Constants.CurOff:
-                _cursor.Visible = false;
-                break;
-            case Constants.Esc:
-                _escapedMode = true;
-                break;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Returns the previous character unless the current cursor is at
-    /// the start of the row in which case null is returned.
-    /// </summary>
-    /// <returns></returns>
-    private Char GetPreviousCharacter() {
-
-        if (_cursor.Col == 0) {
-            return null;
-        }
-
-        return _display.GetChar(_cursor.Row, _cursor.Col - 1);
-    }
-
-    /// <summary>
-    /// Adds any new attributes to the character that this control character
-    /// might require.
-    ///
-    /// If a character on the screen is updated, this may very well affect
-    /// the following characters up until the end of the row. There are
-    /// some basic rules to be followed i.e.
-    ///
-    /// Rules:
-    /// 
-    /// * A foreground colour change affects all following characters in the row up
-    ///   until another colour change is found.
-    /// * A new background control character affects all following characters in the
-    ///   row until either another new background is found or if s a black
-    ///   background control character is found.
-    /// * A new background control character is applied to the cell containing the NB
-    ///   control code.
-    /// * A black background control character affects all following characters in the
-    ///   row until either another black background is found or if a new
-    ///   background control character is found.
-    /// * A black background control character is applied to the cell containing the NB
-    ///   control code.
-    /// * A double height control character affects all following characters in the row
-    ///   until a normal height control character is found.
-    /// * Any row containing a double height character will cause the row below to be
-    ///   read only.
-    /// * Flash affects all following characters in the row until a steady control
-    ///   character is found.
-    /// * Separated graphics control character affects all following characters in the row until a
-    ///   Contiguous graphics control character is found.
-    /// </summary>
-    /// <param name="chr"></param>
-    /// <returns></returns>
-    private void ApplyNewAttributes(ref Char chr) {
-
-        if (!_escapedMode || chr.Value <= 0x40 || chr.Value > 0x5f) {
-            return;
-        }
-
-        chr.IsControl = true;
-
-        var prevChr = GetPreviousCharacter();
-
-        // check to see if we have a foreground change
-        if (chr.IsForegroundColourChange()) {
-            SetForeground(ref chr, _colourMapper.Map(chr.Value));
-            chr.IsGraphic = chr.IsGraphicColourChange();
-            return;
-        }
-
-        switch (chr.Value) {
-
-            case Constants.Flash: //TODO 
-                break;
-            case Constants.Steady: //TODO 
-                break;
-            case Constants.NormalHeight:
-                SetNormalHeight(ref chr);
-                break;
-            case Constants.DoubleHeight:
-                SetDoubleHeight(ref chr);
-                break;
-            case Constants.Conceal: //TODO 
-                break;
-            case Constants.Contiguous:
-                chr.IsSeparated = false;
-                break;
-            case Constants.Separated:
-                chr.IsSeparated = true;
-                break;
-            case Constants.NewBackground:
-                SetBackground(ref chr, prevChr is null ? Constants.White : prevChr.Foreground);
-                break;
-            case Constants.BlackBackground:
-                SetBackground(ref chr, Constants.Black);
-                break;
-            case Constants.HoldGraphics:
-                chr.IsGraphicsHold = true;
-                break;
-            case Constants.ReleaseGraphics:
-                chr.IsGraphicsHold = false;
-                break;
-            default:
-                // this is an invalid code for Prestel so reset char value
-                chr.IsControl = false;
-                chr.Value = Models.Display.SPC;
-                break;
-        }
-
-        return;
-    }
-
-// TODO combine with SetBackground??
-    /// <summary>
-    /// Helper function to set a colour change.
-    /// </summary>
-    /// <param name="chr"></param>
-    /// <param name="colour"></param>
-    private void SetForeground(ref Char chr, string colour) {
-
-        // set the character's foreground
-        chr.Foreground = colour;
-
-        // set the colour of the rest of the row
-        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-
-        foreach (var c in row) {
-            // if next char is a colour change then all done
-            if (c.IsControl && c.IsForegroundColourChange()) {
-                break;
-            }
-
-            c.Foreground = colour;
-        }
-    }
-
-    /// <summary>
-    /// Helper function to set a colour change.
-    /// </summary>
-    /// <param name="chr"></param>
-    /// <param name="colour"></param>
-    private void SetBackground(ref Char chr, string colour) {
-
-        // set the character's background
-        chr.Background = colour;
-
-        // set the background of the rest of the row
-        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-
-        foreach (var c in row) {
-
-            // if next char is a colour change then all done
-            if (c.IsControl && c.IsBackgroundColourChange()) {
-                break;
-            }
-
-            c.Background = colour;
-
-        }
-    }
-
-    /// <summary>
-    /// Helper function to process a DH control code.
-    /// </summary>
-    /// <param name="chr"></param>
-    private void SetDoubleHeight(ref Char chr) {
-
-        chr.IsDoubleHeight = true;
-
-        // set DH to all chars until EOL or another DH or NH
-        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-        foreach (var c in row) {
-            if (c.IsControl && (c.Value == Constants.DoubleHeight ||
-                                c.Value == Constants.NormalHeight)) {
-                break;
-            }
-
-            // set DH to all chars until EOL or another DH or NH
-            c.IsDoubleHeight = true;
-
-        }
-
-        //get whole row
-        row = _display.GetRemainderOfRow(_cursor.Row, 0);
-        foreach (var c in row) {
-            // copy the colours to all chars in the row below
-            var index = c.Index + Models.Display.COLS;
-            _display.Chars[index].Background = c.Background;
-            _display.Chars[index].Foreground = c.Foreground;
-        }
-    }
-
-    /// <summary>
-    /// Helper function to process a NH control.
-    /// </summary>
-    /// <param name="chr"></param>
-    private void SetNormalHeight(ref Char chr) {
-
-        chr.IsDoubleHeight = false;
-
-        // reset DH to all chars until EOL or another DH or NH
-        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-        foreach (var c in row) {
-            if (c.IsControl && (c.Value == Constants.DoubleHeight ||
-                                c.Value == Constants.NormalHeight)) {
-                break;
-            }
-
-            c.IsDoubleHeight = false;
-        }
-    }
 
     /// <summary>
     /// This routine simply sets the lower part of double height text or graphic characters.
@@ -507,6 +230,52 @@ public class DisplayManager {
         }
 
         return display;
+    }
+
+    private bool ProcessC0Controls(char character) {
+
+        // is this the character passed from the comms link
+        if (character >= 0x20) return false;
+
+        // if any of these get detected then CHAR_NULL character is returned otherwise
+        // the passed character is returned unaltered.
+        switch (character) {
+            case Constants.BS:
+                _cursor.Backspace();
+                break;
+            case Constants.HT:
+                _cursor.HorizontalTab();
+                break;
+            case Constants.LF:
+                _cursor.LineFeed();
+                break;
+            case Constants.VT:
+                _cursor.VerticalTab();
+                break;
+            case Constants.HomeClear:
+                // update display model
+                // the UI will be updated
+                _display.Clear();
+                _cursor.Home();
+                break;
+            case Constants.Home:
+                _cursor.Home();
+                break;
+            case Constants.CR:
+                _cursor.CarriageReturn();
+                break;
+            case Constants.CurOn:
+                _cursor.Visible = true;
+                break;
+            case Constants.CurOff:
+                _cursor.Visible = false;
+                break;
+            case Constants.Esc:
+                _escapedMode = true;
+                break;
+        }
+
+        return true;
     }
 
 }

@@ -31,7 +31,12 @@ public static class MainMenu {
 	public static string GetLogo() {
 		
 		var logo = new StringBuilder();
+		
 		logo.Append("\r\n\n\n");
+		logo.Append(Converters.ConvertFromMarkup("[B][n][Y]Hello World!\r\n"));
+//		logo.Append(Converters.ConvertFromMarkup(""));
+		logo.Append(Converters.ConvertFromMarkup("[g]$$$[hg][Y]Hello"));
+		
 		logo.Append(Converters.ConvertFromMarkup("         [n][B][D]Viewdata[n][Y]Terminal[N][k](c) GlassTTY 2025\r\n\r\n\r\n\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                   [G]T\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                 [G]T[R]E[C]L\r\n"));
@@ -40,7 +45,8 @@ public static class MainMenu {
 		logo.Append(Converters.ConvertFromMarkup("               [C]L[B]S[W]T[M]A[Y]R\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                 [W]T[M]A[Y]R\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                   [Y]R\r\n"));
-		logo.Append(Converters.ConvertFromMarkup("012345678900123456789001234567890\r\n"));
+
+		logo.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
 		
 		
 		return logo.ToString();

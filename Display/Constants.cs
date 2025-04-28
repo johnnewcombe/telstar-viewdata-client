@@ -72,6 +72,9 @@ public static class Constants {
     public const string White = "White";
     public const string Black = "Black";
     
+    public const string DefaultForeground = "White";
+    public const string DefaultBackground = "Black";
+    
     #endregion
     
 }
