@@ -15,15 +15,17 @@ public partial class DisplayManager {
         //  old colour not the new one. i.e. _holdGraphics need to store the graphic and colour
         //  and maybe other stuff
         if (chr.IsControl) {
+            
+                if (chr.IsGraphicsHold && !chr.IsAlphaColourChange()) {
+                    chr.Value = _holdGraphicsCharacter;
+                    //Trace.WriteLine($" Row: {_cursor.Row}, Col:{_cursor.Col}, GH Value: {(int)chr.Value}");
 
-            if (chr.IsGraphicsHold) {
-                chr.Value = _holdGraphicsCharacter;
-                //Trace.WriteLine($" Row: {_cursor.Row}, Col:{_cursor.Col}, GH Value: {(int)chr.Value}");
-
-            }
-            else {
-                chr.Value = Models.Display.SPC;
-            }
+                }
+                else {
+                    chr.Value = Models.Display.SPC;
+                    _holdGraphicsCharacter = Models.Display.SPC;
+                }
+            
         }
 
         // substitute viewdata characters for suitable font characters as required
@@ -55,8 +57,8 @@ public partial class DisplayManager {
 
         chr.IsControl = true;
 
-        // check to see if we have a foreground change
         if (chr.IsForegroundColourChange()) {
+            
             var colour = _colourMapper.Map(chr.Value);
             SetForeground(ref chr, colour, chr.IsGraphicColourChange());
             return;
@@ -102,12 +104,31 @@ public partial class DisplayManager {
                 chr.IsInvalid = true;
                 break;
         }
-
     }
 
     /// Sets the Graphics Hold status, specify true to hold graphics, false to release.
     /// Adds any new attributes to the character that this control character
     /// might require.
+    ///
+    ///
+    /// Extract from Prestel Terminal Specification:
+    /// --------------------------------------------
+    /// Generally all control characters are displayed as spaces, implying at least
+    /// one space between rectangles with different display colours in the same row.
+    /// The hold mosaic mode allows a limited range of abrupt display colour changes
+    /// by calling for the display of a held mosaic character in the rectangle
+    /// corresponding to any control character occurring during the mosaic mode.
+    /// This held character is displayed in the modes obtaining for the rectangle
+    /// in which it is displayed, except for the contiguous/separated mode which
+    /// forms part of the structure of the held mosaic character.
+    /// 
+    /// The held mosaic character is only defined during the mosaic mode. It is then
+    /// the most recent character in Columns 2a, 3a, 6a or 7a providing that there
+    /// has been no intervening change in either the alphanumeric/mosaic or the
+    /// normal/double height modes. This character is to be displayed in the
+    /// contiguous or separated mode as when it was first displayed. In the absence
+    /// of such a character the held mosaic character is taken to be a space. The
+    /// hold mosaic mode is released by RELEASE MOSAIC (5b/15).
     /// </summary>
     /// <param name="chr"></param>
     /// <param name="held"></param>
@@ -120,14 +141,15 @@ public partial class DisplayManager {
         foreach (var c in row) {
  
             c.IsGraphicsHold = held;
- 
-            // if next char is a colour change then all done
+
+            // stop?
             if (c.IsControl && (c.Value == Constants.ReleaseGraphics)|| 
                 c.Value == Constants.HoldGraphics) {
                 break;
             }
         }
     }
+    
     /// <summary>
     /// Adds any new attributes to the character that this control character
     /// might require.
@@ -141,7 +163,7 @@ public partial class DisplayManager {
 
             c.IsSeparated = separated;
 
-            // if next char is a colour change then all done
+            // stop?
             if (c.IsControl && (c.Value == Constants.Separated ||
                                 c.Value == Constants.Contiguous)) {
                 break;
@@ -167,13 +189,13 @@ public partial class DisplayManager {
 
         // set the colour of the rest of the row
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-
+        
         foreach (var c in row) {
 
             c.Foreground = colour;
             c.IsGraphic = isGraphic;
 
-            // if next char is a colour change then all done
+            // stop?
             if (c.IsControl && c.IsForegroundColourChange()) {
                 break;
             }
@@ -195,7 +217,7 @@ public partial class DisplayManager {
 
         foreach (var c in row) {
 
-            // if next char is a colour change then all done
+            // stop?
             if (c.IsControl && c.IsBackgroundColourChange()) {
                 break;
             }
@@ -216,6 +238,8 @@ public partial class DisplayManager {
         // set DH to all chars until EOL or another DH or NH
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
         foreach (var c in row) {
+            
+            // stop?
             if (c.IsControl && (c.Value == Constants.DoubleHeight ||
                                 c.Value == Constants.NormalHeight)) {
                 break;
@@ -247,6 +271,8 @@ public partial class DisplayManager {
         // reset DH to all chars until EOL or another DH or NH
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
         foreach (var c in row) {
+
+            // stop?
             if (c.IsControl && (c.Value == Constants.DoubleHeight ||
                                 c.Value == Constants.NormalHeight)) {
                 break;
@@ -255,5 +281,4 @@ public partial class DisplayManager {
             c.IsDoubleHeight = false;
         }
     }
-
 }

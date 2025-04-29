@@ -46,8 +46,8 @@ public static class Converters {
     private const string MOSAIC_CYAN = "\x1b\x56";
     private const string MOSAIC_WHITE = "\x1b\x57";
     private const string CONCEAL = "\x1b\x58";
-    private const string STOP_LINING = "\x1b\x59"; // Antiope only
-    private const string START_LINING = "\x1b\x5a"; // Antiope only
+    private const string CONTIGUOS_GRAPHICS = "\x1b\x59"; 
+    private const string SEPARATED_GRAPHICS = "\x1b\x5a"; 
     private const string CSI = "\x1b\x5b"; // Antiope only
     private const string END_BACKGROUND = "\x1b\x5c";
     private const string NEW_BACKGROUND = "\x1b\x5d";
@@ -99,6 +99,8 @@ public static class Converters {
         markup = markup.Replace("[V]", VT);
         markup = markup.Replace("[hg]", HOLD_MOSAIC);
         markup = markup.Replace("[rg]", RELEASE_MOSAIC);
+        markup = markup.Replace("[sg]", SEPARATED_GRAPHICS);
+        markup = markup.Replace("[cg]", CONTIGUOS_GRAPHICS);
 
         // TODO implement markup that includes spaces e.g. [12] = 12 space (0x20) characters
         //  any changes here need to be reflected in the GetMarkupLen() Util method

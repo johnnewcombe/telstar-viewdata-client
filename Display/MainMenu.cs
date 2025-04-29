@@ -33,7 +33,7 @@ public static class MainMenu {
 		var logo = new StringBuilder();
 		
 		logo.Append("\r\n\n\n");
-		logo.Append(Converters.ConvertFromMarkup("[B][n][Y]Hello World!\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("[b][hg][sg]s[r][cg][m]\x1b\x40[m][R][D]\r\n"));
 //		logo.Append(Converters.ConvertFromMarkup(""));
 		logo.Append(Converters.ConvertFromMarkup("[g]$$$[hg][Y]Hello"));
 		
