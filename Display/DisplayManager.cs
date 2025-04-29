@@ -18,7 +18,7 @@ public partial class DisplayManager {
     private char _holdGraphicsCharacter;
     private readonly FontMapper _fontMapper;
     private readonly ColourMapper _colourMapper;
-    
+
     #endregion
 
     public DisplayManager() {
@@ -40,7 +40,7 @@ public partial class DisplayManager {
     }
 
     public bool WriteChar(char character) {
-        
+
         Trace.WriteLine($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
 
         // process control codes and any attributes changed
@@ -122,25 +122,96 @@ public partial class DisplayManager {
                 _holdGraphicsCharacter = Models.Display.SPC;
             }
         }
+
         // process a DH control, DH alpha, DH graphic, NB etc.
         // or a Normal height control
         // note that a NH will not have a double height property set
         // if KB appears after a NH then it may still need to kill the
         // background in the lower row
-        // TODO Simplify or move to ProcessDoubleHeight()
+        // TODO Fix (see frame 91d) and simplify or move to ProcessDoubleHeight()
         if (chr.IsDoubleHeight ||
             (chr.IsControl && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
             (chr.IsControl && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row))) {
             ProcessDoubleHeight(ref chr);
         }
         
-        SetSpecialDisplayValues(ref chr);
+        if (chr.IsControl) {
+
+            if (chr.IsGraphicsHold && chr.IsGraphic) {
+                chr.Value = _holdGraphicsCharacter;
+            }
+            else {
+                chr.Value = Models.Display.SPC;
+            }
+        }
+
+        // substitute viewdata characters for suitable font characters as required
+        chr.Value = _fontMapper.Map(chr.Value);
         
         // Move cursor for next character, note that we will not reach
         // this code for any C0 controls.
         _cursor.HorizontalTab();
-        
+
         return true;
+    }
+    
+    /// <summary>
+    /// Adds any new attributes to the character that this control character
+    /// might require.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    private void ApplyNewAttributes(ref Char chr) {
+
+        chr.IsControl = true;
+
+        if (chr.IsForegroundColourChange()) {
+
+            var colour = _colourMapper.Map(chr.Value);
+            SetForeground(ref chr, colour, chr.IsGraphicColourChange());
+            return;
+        }
+
+        switch (chr.Value) {
+
+            case Constants.Flash: //TODO 
+                break;
+            case Constants.Steady: //TODO 
+                break;
+            case Constants.NormalHeight:
+                SetNormalHeight(ref chr);
+                break;
+            case Constants.DoubleHeight:
+                SetDoubleHeight(ref chr);
+                break;
+            case Constants.Conceal: //TODO 
+                break;
+            case Constants.Contiguous:
+                SetSeparatedMode(ref chr, false);
+                chr.IsSeparated = false;
+                break;
+            case Constants.Separated:
+                SetSeparatedMode(ref chr, true);
+                break;
+            case Constants.NewBackground:
+                SetBackground(ref chr, chr.Foreground);
+                break;
+            case Constants.BlackBackground:
+                SetBackground(ref chr, Constants.Black);
+                break;
+            case Constants.HoldGraphics:
+                SetGraphicsHold(ref chr, true);
+                break;
+            case Constants.ReleaseGraphics:
+                SetGraphicsHold(ref chr, false);
+                break;
+            default:
+                // this is an invalid code for Prestel but we need attributes to be passed to next char
+                Trace.WriteLine(
+                    $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
+                chr.IsInvalid = true;
+                break;
+        }
     }
 
     public void SetCursorPosition(int column, int row) {
@@ -219,22 +290,6 @@ public partial class DisplayManager {
 
     }
 
-    private Models.Display CreateDisplay() {
-
-        var display = new Models.Display();
-        display.Chars = new List<Char>();
-
-        // note that we are creating a 40*25 screen not a 40*24,
-        // the last lie will be used for status info
-        for (var i = 0; i < (Models.Display.ROWS + 1) * Models.Display.COLS; i++) {
-            var chr = new Char(Models.Display.SPC, Constants.White, Constants.Black);
-            chr.Index = i;
-            display.Chars.Add(chr);
-        }
-
-        return display;
-    }
-
     private bool ProcessC0Controls(char character) {
 
         // is this the character passed from the comms link
@@ -281,4 +336,19 @@ public partial class DisplayManager {
         return true;
     }
 
+    private Models.Display CreateDisplay() {
+
+        var display = new Models.Display();
+        display.Chars = new List<Char>();
+
+        // note that we are creating a 40*25 screen not a 40*24,
+        // the last lie will be used for status info
+        for (var i = 0; i < (Models.Display.ROWS + 1) * Models.Display.COLS; i++) {
+            var chr = new Char(Models.Display.SPC, Constants.White, Constants.Black);
+            chr.Index = i;
+            display.Chars.Add(chr);
+        }
+
+        return display;
+    }
 }
