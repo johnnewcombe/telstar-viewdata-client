@@ -8,6 +8,8 @@ public partial class DisplayManager {
 
     private void SetSpecialDisplayValues(ref Char chr) {
 
+        Trace.WriteLine($"SetSpecialDisplayValues - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)chr.Value:X2}");
+
         /// Transform Section
         // display blank for controls or hold graphics character if appropriate
         // TODO refactor this
@@ -133,8 +135,11 @@ public partial class DisplayManager {
     /// <param name="chr"></param>
     /// <param name="held"></param>
     private void SetGraphicsHold(ref Char chr, bool held) {
- 
-        chr.IsGraphicsHold = held;
+
+        // the graphics hold control itself is set to display the held char if it exists
+        if (chr.Value == Constants.HoldGraphics) {
+            chr.IsGraphicsHold = held;
+        }
         
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
  
