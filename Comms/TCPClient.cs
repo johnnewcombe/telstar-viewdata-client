@@ -104,7 +104,7 @@ namespace TelstarClient.Comms {
             }
             catch (Exception ex) {
                 OnConnectEvent(false);
-                throw new Exception($"Socket Connection Failed. Message : {ex}");
+                //throw new Exception($"Socket Connection Failed. Message : {ex}");
             }
         }
 
@@ -202,10 +202,10 @@ namespace TelstarClient.Comms {
                 }
                 else {
                     OnConnectEvent(false);
-                    throw new Exception("Cannot Establish the Socket Connection");
                 }
             }
             catch (Exception ex) {
+
                 throw ex;
             }
         }

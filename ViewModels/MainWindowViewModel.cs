@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Threading;
@@ -16,6 +17,7 @@ public class MainWindowViewModel : ViewModelBase {
 
     private const string connectedStatus = "CONNECTED";
     private const string disconnectedStatus = "DISCONNECTED";
+    private const string errorStatus = "UNABLE TO CONNECT";
     private const string connectingStatus = "CONNECTING";
 
     private string _status;
@@ -96,8 +98,10 @@ public class MainWindowViewModel : ViewModelBase {
             _displayManager.Display.SetStatusText(connectedStatus);
         }
         else {
+            _displayManager.Display.SetStatusText(errorStatus);
+            // delay
+            Thread.Sleep(750);
             _displayManager.Display.SetStatusText(disconnectedStatus);
-            ;
         }
     }
 
