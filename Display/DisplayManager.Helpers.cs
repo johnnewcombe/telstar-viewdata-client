@@ -82,10 +82,7 @@ public partial class DisplayManager {
     /// <param name="chr"></param>
     /// <param name="colour"></param>
     private void SetForeground(ref Char chr, string colour, bool isGraphic) {
-
-        // set the character's foreground
-        //chr.Foreground = colour;
-
+        
         // the colour change control only affects the chars following
         // the control itself holds the previous colour. This matters
         // where the graphic hold character is used instead of a blank
@@ -154,12 +151,15 @@ public partial class DisplayManager {
         }
 
         //get whole row
-        row = _display.GetRemainderOfRow(_cursor.Row, 0);
+        row = _display.GetRemainderOfRow(_cursor.Row, -1);
         foreach (var c in row) {
+            
+            // TODO do we need this as this is done during the
+            //  ProcessDoubleHeight() function.
             // copy the colours to all chars in the row below
-            var index = c.Index + Models.Display.COLS;
-            _display.Chars[index].Background = c.Background;
-            _display.Chars[index].Foreground = c.Foreground;
+            var cb = _display.GetCharBelow(c);
+            _display.GetCharBelow(c).Background = c.Background;
+            _display.GetCharBelow(c).Foreground = c.Foreground;
         }
     }
 

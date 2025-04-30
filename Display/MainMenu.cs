@@ -32,6 +32,7 @@ public static class MainMenu {
 		
 		var logo = new StringBuilder();
 		
+		logo.Append(Converters.ConvertFromMarkup("[w][D][sg]sss[g]UK WEATHER"));
 		logo.Append(Converters.ConvertFromMarkup("[n][B][D]Viewdata[n][Y]Terminal[N][k](c) GlassTTY 2025\r\n\r\n\r\n\r\n"));
 		logo.Append("\r\n\n\n");
 		logo.Append(Converters.ConvertFromMarkup("[w][hg]\x1b\x4f\x73[y][sg][c][hg][rg]"));

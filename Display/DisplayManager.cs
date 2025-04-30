@@ -180,6 +180,8 @@ public partial class DisplayManager {
         if (!_display.RowHasDoubleHeight(_cursor.Row)) {
             return;
         }
+        
+        // TODO what if it was DH but isn't now? do we need to blank the lower row?
 
         // At this point we know the row is double height (i.e. taking up two display rows)
         // even if there is no double height chars actually displayed.
@@ -196,6 +198,7 @@ public partial class DisplayManager {
         var chrs = _display.GetRemainderOfRow(_cursor.Row, -1);
         foreach (var c in chrs) {
             _display.GetCharBelow(c).Background = c.Background;
+            // TODO refactor as this is duplicated below for NB etc. and in SetDoubleHeight()
         }
 
         if (!chr.IsDoubleHeight) {
@@ -214,6 +217,7 @@ public partial class DisplayManager {
         }
 
         // get the character below
+        // TODO refactor this with chr.GetCharBelow()
         var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + _cursor.Col];
 
         // DH graphic char
@@ -226,7 +230,7 @@ public partial class DisplayManager {
         }
 
         // DH alpha char
-        else if (!chr.IsControl && !chr.IsGraphic) {
+        else if (!chr.IsControl && (!chr.IsGraphic || chr.IsBlastThrough())) {
             // convert to upper and lower font values
             var val = chr.Value;
             chr.Value = (char)(val + 0xe020 - 0x20); // chars start from 0x20
@@ -242,7 +246,7 @@ public partial class DisplayManager {
             // copy the background colour to the immediate char in the row below
             _display.GetCharBelow(chr).Background = chr.Background;
 
-            // copy the remainer of the row
+            // copy the remainder of the row
             var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
             foreach (var c in row) {
 
