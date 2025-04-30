@@ -32,13 +32,13 @@ public static class MainMenu {
 		
 		var logo = new StringBuilder();
 		
+		logo.Append(Converters.ConvertFromMarkup("[n][B][D]Viewdata[n][Y]Terminal[N][k](c) GlassTTY 2025\r\n\r\n\r\n\r\n"));
 		logo.Append("\r\n\n\n");
 		logo.Append(Converters.ConvertFromMarkup("[w][hg]\x1b\x4f\x73[y][sg][c][hg][rg]"));
 		logo.Append(Converters.ConvertFromMarkup("[b][hg][sg]s[r][cg][m]\x1b\x40[m][R][D]\r\n"));
 //		logo.Append(Converters.ConvertFromMarkup(""));
 		logo.Append(Converters.ConvertFromMarkup("[g]$$$[hg][Y]Hello"));
 		
-		logo.Append(Converters.ConvertFromMarkup("         [n][B][D]Viewdata[n][Y]Terminal[N][k](c) GlassTTY 2025\r\n\r\n\r\n\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                   [G]T\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("                 [G]T[R]E[C]L\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("               [G]T[R]E[C]L[B]S[W]T\r\n"));

@@ -21,6 +21,8 @@ public partial class DisplayManager {
 
     #endregion
 
+    #region Constructor
+
     public DisplayManager() {
         _display = CreateDisplay();
         _cursor = new Cursor();
@@ -28,10 +30,18 @@ public partial class DisplayManager {
         _colourMapper = new ColourMapper();
     }
 
+    #endregion
+
+    #region Public Properties
+
     public Models.Display Display {
         set { _display = value; }
         get { return _display; }
     }
+
+    #endregion
+
+    #region Public Methods
 
     public void Write(string text) {
         foreach (var c in text) {
@@ -123,18 +133,8 @@ public partial class DisplayManager {
             }
         }
 
-        // process a DH control, DH alpha, DH graphic, NB etc.
-        // or a Normal height control
-        // note that a NH will not have a double height property set
-        // if KB appears after a NH then it may still need to kill the
-        // background in the lower row
-        // TODO Fix (see frame 91d) and simplify or move to ProcessDoubleHeight()
-        if (chr.IsDoubleHeight ||
-            (chr.IsControl && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
-            (chr.IsControl && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row))) {
-            ProcessDoubleHeight(ref chr);
-        }
-        
+        ProcessDoubleHeight(ref chr);
+
         if (chr.IsControl) {
 
             if (chr.IsGraphicsHold && chr.IsGraphic) {
@@ -147,85 +147,66 @@ public partial class DisplayManager {
 
         // substitute viewdata characters for suitable font characters as required
         chr.Value = _fontMapper.Map(chr.Value);
-        
+
         // Move cursor for next character, note that we will not reach
         // this code for any C0 controls.
         _cursor.HorizontalTab();
 
         return true;
     }
-    
+
     /// <summary>
-    /// Adds any new attributes to the character that this control character
-    /// might require.
+    /// Sets the cursor position.
     /// </summary>
-    /// <param name="chr"></param>
-    /// <returns></returns>
-    private void ApplyNewAttributes(ref Char chr) {
-
-        chr.IsControl = true;
-
-        if (chr.IsForegroundColourChange()) {
-
-            var colour = _colourMapper.Map(chr.Value);
-            SetForeground(ref chr, colour, chr.IsGraphicColourChange());
-            return;
-        }
-
-        switch (chr.Value) {
-
-            case Constants.Flash: //TODO 
-                break;
-            case Constants.Steady: //TODO 
-                break;
-            case Constants.NormalHeight:
-                SetNormalHeight(ref chr);
-                break;
-            case Constants.DoubleHeight:
-                SetDoubleHeight(ref chr);
-                break;
-            case Constants.Conceal: //TODO 
-                break;
-            case Constants.Contiguous:
-                SetSeparatedMode(ref chr, false);
-                chr.IsSeparated = false;
-                break;
-            case Constants.Separated:
-                SetSeparatedMode(ref chr, true);
-                break;
-            case Constants.NewBackground:
-                SetBackground(ref chr, chr.Foreground);
-                break;
-            case Constants.BlackBackground:
-                SetBackground(ref chr, Constants.Black);
-                break;
-            case Constants.HoldGraphics:
-                SetGraphicsHold(ref chr, true);
-                break;
-            case Constants.ReleaseGraphics:
-                SetGraphicsHold(ref chr, false);
-                break;
-            default:
-                // this is an invalid code for Prestel but we need attributes to be passed to next char
-                Trace.WriteLine(
-                    $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
-                chr.IsInvalid = true;
-                break;
-        }
-    }
-
+    /// <param name="column"></param>
+    /// <param name="row"></param>
     public void SetCursorPosition(int column, int row) {
 
         _cursor.Row = row;
         _cursor.Col = column;
     }
 
+    #endregion
+
+    #region Private Methods
 
     /// <summary>
     /// This routine simply sets the lower part of double height text or graphic characters.
     /// </summary>
     /// <param name="chr"></param>
     private void ProcessDoubleHeight(ref Char chr) {
+
+        // check to see if we need to do anything
+        if (!_display.RowHasDoubleHeight(_cursor.Row)) {
+            return;
+        }
+
+        // At this point we know the row is double height (i.e. taking up two display rows)
+        // even if there is no double height chars actually displayed.
+        // Under this scenario any New Background (NB) controls on the row need to be updated
+        // as any new background that appears before a DH control will have only updated the
+        // top row, now they need to update top and bottom rows.
+
+        // TODO note that a NH will not have a double height property set
+        //  if KB appears after a NH then it may still need to kill the
+        //  background in the lower row
+
+        // get the whole row (passing -1 for col will retrieve cols 0-39)
+        // and fix any background issues
+        var chrs = _display.GetRemainderOfRow(_cursor.Row, -1);
+        foreach (var c in chrs) {
+            _display.GetCharBelow(c).Background = c.Background;
+        }
+
+        if (!chr.IsDoubleHeight) {
+            return;
+        }
+
+//        if (!(chr.IsDoubleHeight ||
+//            (chr.IsControl && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
+//            (chr.IsControl && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row)))) {
+//            return;
+//        }
 
         // if we are on the last row or the char is not marked as DH then do nothing
         if (_cursor.Row >= Models.Display.ROWS - 1) {
@@ -336,6 +317,66 @@ public partial class DisplayManager {
         return true;
     }
 
+    /// <summary>
+    /// Adds any new attributes to the character that this control character
+    /// might require.
+    /// </summary>
+    /// <param name="chr"></param>
+    /// <returns></returns>
+    private void ApplyNewAttributes(ref Char chr) {
+
+        chr.IsControl = true;
+
+        if (chr.IsForegroundColourChange()) {
+
+            var colour = _colourMapper.Map(chr.Value);
+            SetForeground(ref chr, colour, chr.IsGraphicColourChange());
+            return;
+        }
+
+        switch (chr.Value) {
+
+            case Constants.Flash: //TODO 
+                break;
+            case Constants.Steady: //TODO 
+                break;
+            case Constants.NormalHeight:
+                SetNormalHeight(ref chr);
+                break;
+            case Constants.DoubleHeight:
+                SetDoubleHeight(ref chr);
+                break;
+            case Constants.Conceal: //TODO 
+                break;
+            case Constants.Contiguous:
+                SetSeparatedMode(ref chr, false);
+                chr.IsSeparated = false;
+                break;
+            case Constants.Separated:
+                SetSeparatedMode(ref chr, true);
+                break;
+            case Constants.NewBackground:
+                SetBackground(ref chr, chr.Foreground);
+                break;
+            case Constants.BlackBackground:
+                SetBackground(ref chr, Constants.Black);
+                break;
+            case Constants.HoldGraphics:
+                SetGraphicsHold(ref chr, true);
+                break;
+            case Constants.ReleaseGraphics:
+                SetGraphicsHold(ref chr, false);
+                break;
+            default:
+                // this is an invalid code for Prestel but we need attributes to be passed to next char
+                Trace.WriteLine(
+                    $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
+                chr.IsInvalid = true;
+                break;
+        }
+    }
+
+
     private Models.Display CreateDisplay() {
 
         var display = new Models.Display();
@@ -351,4 +392,7 @@ public partial class DisplayManager {
 
         return display;
     }
+
+    #endregion
+
 }
