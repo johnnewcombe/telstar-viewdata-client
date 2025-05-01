@@ -12,8 +12,9 @@
         Width="800"
         MinHeight="400"
         MinWidth="600"
-        Background="DarkGoldenrod"
-        KeyDown="Window_KeyDown">
+        Background="Black"
+        KeyDown="Window_KeyDown"
+        >
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -25,11 +26,12 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Window.DataContext>
-    <Grid ShowGridLines="False" Margin="0,0,0,0" RowDefinitions="Auto, *, Auto" Background="Goldenrod">
+    <!--<Grid ShowGridLines="False" Margin="0,0,0,0" RowDefinitions="*" Background="Silver">-->
         <!-- Main Area -->
         <!--<Grid ShowGridLines="False" Grid.Row="1" ColumnDefinitions="Auto,*">-->
-        <Grid ShowGridLines="False" Grid.Row="1" ColumnDefinitions="*,Auto">
-            <UniformGrid Grid.Column="0" Margin="20,20,0,10" Name="display" Columns="40" Rows="25" Background="Black"></UniformGrid>
+        <!--<Grid ShowGridLines="False" Grid.Row="1" ColumnDefinitions="*">-->
+            <UniformGrid Grid.Column="0" Margin="10,10,10,10" Name="display" Columns="40" Rows="25" Background="Black"></UniformGrid>
+            <!--
             <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1">
                 <UniformGrid Columns="3" Margin="20">
                     <Button Focusable="False" CornerRadius="10" Tag="1" Classes="keypad" Click="Keypad_OnClick" HorizontalAlignment="Center"
@@ -100,9 +102,10 @@
                     </Button>
                 </StackPanel>
             </StackPanel>
-
-        </Grid>
+            -->
+        <!--</Grid>-->
         <!-- Status Area -->
+        <!--
         <Grid ShowGridLines="False" Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="5">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Grid.Column="1">
@@ -110,5 +113,6 @@
                 <Label>Viewdata Terminal</Label>
             </StackPanel>
         </Grid>
-    </Grid>
+        -->
+    <!--</Grid>-->
 </Window>

@@ -69,19 +69,19 @@ namespace TelstarClient.Comms {
         /// <summary>
         /// Create a TCP asynchronous client. This client is connect to the server and port with passed parameters.
         /// </summary>
-        /// <param name="_ip">Server IP</param>
-        /// <param name="_port">Server Port</param>
-        public TCPClient(string _ip, int _port) {
-            //ipAddress = IPAddress.Parse(_ip);
-            ipAddress = (Dns.Resolve(_ip)).AddressList[0];
-            port = _port;
+        public TCPClient() {
         }
 
         /// <summary>
         /// Connect to the server
         /// </summary>
-        public void Connect() {
+        /// <param name="_ip">Server IP</param>
+        /// <param name="_port">Server Port</param>
+        public void Connect(string ip, int port) {
+            
             try {
+                ipAddress = (Dns.Resolve(ip)).AddressList[0];
+                
                 // Close the socket if open
                 if (socket != null && socket.Connected) {
                     socket.Shutdown(SocketShutdown.Both);

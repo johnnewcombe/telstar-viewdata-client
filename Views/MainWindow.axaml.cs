@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Platform;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
 
@@ -23,14 +24,18 @@ public partial class MainWindow : Window {
         ViewModel = DataContext as MainWindowViewModel;
         ViewModel.PropertyChanged += this.PropertyChangedEventHandler;
 
-        // remove title bar etc.
+        // remove title bar and chrome etc.
+        // if Kiosk mode
         //this.ExtendClientAreaToDecorationsHint = true;
-
+        //this.ExtendClientAreaChromeHints = ExtendClientAreaChromeHints. NoChrome;
+        //this.WindowState = WindowState.FullScreen;
+        //this.Topmost = true;
+        
         //initialise the display
         display.Children.Clear();
-        
+
         // note that we create an extra row of labels for the status line
-        for (int i = 0; i < Models.Display.COLS * (Models.Display.ROWS+1); i++) {
+        for (int i = 0; i < Models.Display.COLS * (Models.Display.ROWS + 1); i++) {
             var g = InitCharacterLabel(Models.Display.SPC);
             display.Children.Add(g);
         }
@@ -51,17 +56,20 @@ public partial class MainWindow : Window {
         }
     }
 
-    private void Window_KeyDown(object sender, KeyEventArgs e)
-    {
+    private void Window_FullScreen(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
+
+    }
+
+    private void Window_KeyDown(object sender, KeyEventArgs e) {
         ViewModel.Send(e.KeySymbol);
     }
-    
+
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
-        ViewModel.Connect();
+        //ViewModel.Connect();
     }
 
     private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e) {
-        ViewModel.Disconnect();
+        //ViewModel.Disconnect();
     }
 
     private void Keypad_OnClick(object? sender, RoutedEventArgs e) {
@@ -86,14 +94,14 @@ public partial class MainWindow : Window {
         foreach (var c in data) {
 
             var label = (Label)((Viewbox)display.Children[c.Index]).Child;
-            
+
             label.Content = c.Value;
             label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
             label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
 
         }
     }
-    
+
     private static Viewbox InitCharacterLabel(int charNumber) {
         var thicknessZero = Thickness.Parse("0");
 

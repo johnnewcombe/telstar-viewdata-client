@@ -27,7 +27,7 @@ public class MainWindowViewModel : ViewModelBase {
     //private List<Models.Char> _displayManagerData = new List<Models.Char>();
     private readonly CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
     private KeyMapper _keyMapper = new KeyMapper();
-    private TCPClient _tcp;
+    private TCPClient _tcp = new TCPClient();
 
     /// <summary>
     /// Constructor
@@ -39,24 +39,22 @@ public class MainWindowViewModel : ViewModelBase {
     public async Task DisplayWelcomeMessage() {
         await Task.Delay(100);
 
-
         _displayManager.Write(Display.MainMenu.GetLogo());
         _displayManager.Display.SetStatusText(disconnectedStatus);
-        //
-        //
+
         OnPropertyChanged(nameof(DisplayData));
     }
 
     #region TCP Client Control and Events
 
-    public void Connect() {
+    public void Connect(string ip, int port) {
         try {
 
             // open the tcp client
-            _tcp = new TCPClient("glasstty.com", 6502);
+
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
-            _tcp.Connect();
+            _tcp.Connect(ip,port);
 
             _displayManager.Display.SetStatusText(connectingStatus);
 
@@ -79,15 +77,35 @@ public class MainWindowViewModel : ViewModelBase {
 
     public void Send(string data) {
 
-        // key mapper
-        if (data == null || _tcp == null) {
-            return;
+        if (_tcp.IsConnected()) {
+            // key mapper
+            if (data == null || _tcp == null) {
+                return;
+            }
+
+            data = _keyMapper.Map(data);
+
+            if (_tcp.Write(data)) {
+                //Debug.Print("Sent=>{0}", data);
+            }
         }
-
-        data = _keyMapper.Map(data);
-
-        if (_tcp.Write(data)) {
-            //Debug.Print("Sent=>{0}", data);
+        else {
+            // TODO Read from config files
+            switch (data) {
+                case "1":
+                    Connect("glasstty.com", 6502);
+                    break;
+                case "2":
+                    Connect("nx.nxtel.org", 23280);
+                    break;
+                case "3":
+                    Connect("192.168.1.64", 6502);
+                    break;
+                case "4":
+                    Connect("fish.ccl4.org", 23);
+                    break;
+                
+            }
         }
     }
 
