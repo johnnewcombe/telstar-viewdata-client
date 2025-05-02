@@ -50,4 +50,15 @@ public static class MainMenu {
 		//var row = new List<byte>(){esc,G,(byte)'T'};
 
 	}
+
+	public static string GetMenu() {
+		var menu = new StringBuilder();
+		//menu.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
+		menu.Append("\r\n");
+		menu.Append(Converters.ConvertFromMarkup("             [C][D]DIRECTORY\r\n\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("    [W]1  Telstar\r\n"));
+		menu.Append(Converters.ConvertFromMarkup("    [W]2  NxTel\r\n"));
+		return menu.ToString();
+		
+	}
 }

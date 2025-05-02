@@ -61,7 +61,7 @@ public partial class MainWindow : Window {
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e) {
-        ViewModel.Send(e.KeySymbol);
+        ViewModel.KeyHandler(e.KeySymbol);
     }
 
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
@@ -74,7 +74,7 @@ public partial class MainWindow : Window {
 
     private void Keypad_OnClick(object? sender, RoutedEventArgs e) {
         var button = (Button)sender;
-        ViewModel.Send((string)button.Tag);
+        ViewModel.KeyHandler((string)button.Tag);
     }
 
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e) {

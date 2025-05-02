@@ -21,6 +21,7 @@ public class MainWindowViewModel : ViewModelBase {
     private const string connectingStatus = "CONNECTING";
 
     private string _status;
+    private bool _menu;
 
     private readonly Display.DisplayManager _displayManager = new Display.DisplayManager();
 
@@ -54,7 +55,7 @@ public class MainWindowViewModel : ViewModelBase {
 
             _tcp.OnConnectEvent += OnConnect;
             _tcp.OnDataReceivedEvent += OnReceived;
-            _tcp.Connect(ip,port);
+            _tcp.Connect(ip, port);
 
             _displayManager.Display.SetStatusText(connectingStatus);
 
@@ -75,7 +76,7 @@ public class MainWindowViewModel : ViewModelBase {
         OnPropertyChanged(nameof(DisplayData));
     }
 
-    public void Send(string data) {
+    public void KeyHandler(string data) {
 
         if (_tcp.IsConnected()) {
             // key mapper
@@ -89,7 +90,15 @@ public class MainWindowViewModel : ViewModelBase {
                 //Debug.Print("Sent=>{0}", data);
             }
         }
+        else if (!_menu) {
+            _menu = true;
+            _displayManager.Display.Clear();
+            _displayManager.SetCursorPosition(0,0);
+            _displayManager.Write(Display.MainMenu.GetMenu());
+            OnPropertyChanged(nameof(DisplayData));
+        }
         else {
+
             // TODO Read from config files
             switch (data) {
                 case "1":
@@ -104,7 +113,7 @@ public class MainWindowViewModel : ViewModelBase {
                 case "4":
                     Connect("fish.ccl4.org", 23);
                     break;
-                
+
             }
         }
     }
