@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -15,11 +16,12 @@ namespace TelstarClient.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase {
 
+    private const string configFile = "config.json";
     private const string connectedStatus = "CONNECTED";
     private const string disconnectedStatus = "DISCONNECTED";
     private const string errorStatus = "UNABLE TO CONNECT";
     private const string connectingStatus = "CONNECTING";
-
+    
     private string _status;
     private bool _menu;
 
@@ -99,10 +101,19 @@ public class MainWindowViewModel : ViewModelBase {
         }
         else {
 
-            // TODO Read from config files
+            var iconfig = new Configuration.JsonConfig();
+            var config = iconfig.Load(configFile);
+            
+            var name = config["name"];
+            var address = config["tcp:address"];
+            
+            if (!int.TryParse(config["tcp:port"], out var port)) {
+                port = 6502;
+            }
+            
             switch (data) {
                 case "1":
-                    Connect("glasstty.com", 6502);
+                    Connect(address, port);
                     break;
                 case "2":
                     Connect("nx.nxtel.org", 23280);
