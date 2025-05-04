@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Threading;
 using TelstarClient.Comms;
+using TelstarClient.Configuration;
 using TelstarClient.Extensions;
 using TelstarClient.Models;
 
@@ -99,19 +100,27 @@ public class MainWindowViewModel : ViewModelBase {
             _displayManager.Write(Display.MainMenu.GetMenu());
             
             // TODO: uupdate the menu
-
+            var settings = new Settings(configFile);
+            
+            //var settings = new Configuration.Settings(configFile);
+            settings.Save(configFile);
+            
 
 
             OnPropertyChanged(nameof(DisplayData));
         }
         else {
 
-            var iconfig = new Configuration.JsonConfig(configFile);
-            var config = iconfig.GetConnection(data);
+            
+            
+            
+            
+            //var iconfig = new Configuration.JsonConfig(configFile);
+            //var config = iconfig.GetConnection(data);
 
-            Trace.WriteLine(config.Address);
-            Trace.WriteLine(config.Port);
-            Connect(config.Address, config.Port);
+            //Trace.WriteLine(config.Address);
+            //Trace.WriteLine(config.Port);
+            //Connect(config.Address, config.Port);
 
         }
     }

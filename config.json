@@ -1,0 +1,39 @@
+{
+  "Connections" : [ {
+    "Name" : "Telstar CURRER",
+    "Address" : "glasstty.com",
+    "Port" : 6502
+  }, {
+    "Name" : "NxTel",
+    "Address" : "nx.nxtel.org",
+    "Port" : 23280
+  }, {
+    "Name" : null,
+    "Address" : null,
+    "Port" : 0
+  }, {
+    "Name" : null,
+    "Address" : null,
+    "Port" : 0
+  }, {
+    "Name" : null,
+    "Address" : null,
+    "Port" : 0
+  }, {
+    "Name" : null,
+    "Address" : null,
+    "Port" : 0
+  }, {
+    "Name" : null,
+    "Address" : null,
+    "Port" : 0
+  }, {
+    "Name" : null,
+    "Address" : null,
+    "Port" : 0
+  }, {
+    "Name" : null,
+    "Address" : null,
+    "Port" : 0
+  } ]
+}
