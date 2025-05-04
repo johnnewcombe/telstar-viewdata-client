@@ -21,7 +21,7 @@ public class MainWindowViewModel : ViewModelBase {
     private const string disconnectedStatus = "DISCONNECTED";
     private const string errorStatus = "UNABLE TO CONNECT";
     private const string connectingStatus = "CONNECTING";
-    
+
     private string _status;
     private bool _menu;
 
@@ -95,37 +95,24 @@ public class MainWindowViewModel : ViewModelBase {
         else if (!_menu) {
             _menu = true;
             _displayManager.Display.Clear();
-            _displayManager.SetCursorPosition(0,0);
+            _displayManager.SetCursorPosition(0, 0);
             _displayManager.Write(Display.MainMenu.GetMenu());
-            OnPropertyChanged(nameof(DisplayData));
+            
+            // TODO: uupdate the menu
+
+
+
+            //OnPropertyChanged(nameof(DisplayData));
         }
         else {
 
-            var iconfig = new Configuration.JsonConfig();
-            var config = iconfig.Load(configFile);
-            
-            var name = config["name"];
-            var address = config["tcp:address"];
-            
-            if (!int.TryParse(config["tcp:port"], out var port)) {
-                port = 6502;
-            }
-            
-            switch (data) {
-                case "1":
-                    Connect(address, port);
-                    break;
-                case "2":
-                    Connect("nx.nxtel.org", 23280);
-                    break;
-                case "3":
-                    Connect("192.168.1.64", 6502);
-                    break;
-                case "4":
-                    Connect("fish.ccl4.org", 23);
-                    break;
+            var iconfig = new Configuration.JsonConfig(configFile);
+            var config = iconfig.GetConnection(data);
 
-            }
+            Trace.WriteLine(config.Address);
+            Trace.WriteLine(config.Port);
+            Connect(config.Address, config.Port);
+
         }
     }
 

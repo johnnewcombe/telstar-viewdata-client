@@ -24,6 +24,7 @@
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
         <PackageReference Include="log4net" Version="3.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
         <PackageReference Include="System.Drawing.Common" Version="9.0.3" />
     </ItemGroup>
 
@@ -11464,5 +11465,8 @@
 
     <ItemGroup>
       <None Remove="log4net.config" />
+      <None Update="config.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>
