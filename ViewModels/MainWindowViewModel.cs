@@ -102,7 +102,7 @@ public class MainWindowViewModel : ViewModelBase {
 
 
 
-            //OnPropertyChanged(nameof(DisplayData));
+            OnPropertyChanged(nameof(DisplayData));
         }
         else {
 
