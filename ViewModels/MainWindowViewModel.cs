@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Threading;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
@@ -17,11 +19,16 @@ namespace TelstarClient.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase {
 
-    private const string configFile = "config.json";
     private const string connectedStatus = "CONNECTED";
     private const string disconnectedStatus = "DISCONNECTED";
     private const string errorStatus = "UNABLE TO CONNECT";
     private const string connectingStatus = "CONNECTING";
+    private const string configFile = "config.json";
+
+    private string appSupportDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
+                                         Path.DirectorySeparatorChar;
+
 
     private string _status;
     private bool _menu;
@@ -90,7 +97,7 @@ public class MainWindowViewModel : ViewModelBase {
             data = _keyMapper.Map(data);
 
             if (_tcp.Write(data)) {
-                //Debug.Print("Sent=>{0}", data);
+                //Trace.Print("Sent=>{0}", data);
             }
         }
         else if (!_menu) {
@@ -98,23 +105,20 @@ public class MainWindowViewModel : ViewModelBase {
             _displayManager.Display.Clear();
             _displayManager.SetCursorPosition(0, 0);
             _displayManager.Write(Display.MainMenu.GetMenu());
-            
-            // TODO: uupdate the menu
-            var settings = new Settings(configFile);
-            
-            //var settings = new Configuration.Settings(configFile);
-            settings.Save(configFile);
-            
 
+            // TODO: update the menu
+            var settings = new Settings(appSupportDirectory, configFile);
+            foreach (var connection in settings.config.Connections) {
+                Trace.WriteLine($"{connection.Name} {connection.Address}:{connection.Port}\r\n");
+            }
+
+            settings.Save(appSupportDirectory, configFile);
 
             OnPropertyChanged(nameof(DisplayData));
         }
         else {
 
-            
-            
-            
-            
+
             //var iconfig = new Configuration.JsonConfig(configFile);
             //var config = iconfig.GetConnection(data);
 
