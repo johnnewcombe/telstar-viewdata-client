@@ -23,13 +23,12 @@ public class MainWindowViewModel : ViewModelBase {
     private const string disconnectedStatus = "DISCONNECTED";
     private const string errorStatus = "UNABLE TO CONNECT";
     private const string connectingStatus = "CONNECTING";
-    private const string configFile = "config.json";
+
 
     private string appSupportDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
                                          Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
                                          Path.DirectorySeparatorChar;
-
-
+    private string configFile;
     private string _status;
     private bool _menu;
 
@@ -45,6 +44,14 @@ public class MainWindowViewModel : ViewModelBase {
     /// </summary>
     public MainWindowViewModel() {
         DisplayWelcomeMessage();
+        
+        configFile = appSupportDirectory + "config.json";
+        
+        // create the app suport directory if it doesn't exist
+        if (!Directory.Exists(appSupportDirectory)) {
+            // create directory
+            Directory.CreateDirectory(appSupportDirectory);
+        }
     }
 
     public async Task DisplayWelcomeMessage() {
@@ -107,12 +114,11 @@ public class MainWindowViewModel : ViewModelBase {
             _displayManager.Write(Display.MainMenu.GetMenu());
 
             // TODO: update the menu
-            var settings = new Settings(appSupportDirectory, configFile);
+            var settings = new Settings(configFile);
             foreach (var connection in settings.config.Connections) {
                 Trace.WriteLine($"{connection.Name} {connection.Address}:{connection.Port}\r\n");
             }
 
-            settings.Save(appSupportDirectory, configFile);
 
             OnPropertyChanged(nameof(DisplayData));
         }

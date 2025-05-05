@@ -9,35 +9,32 @@ using Tmds.DBus.Protocol;
 namespace TelstarClient.Configuration;
 
 public class Settings {
-
+    
     public ConfigSections config;
 
-    public Settings(string path, string jsonFilename) {
+    public Settings(string jsonFilename) {
 
         string jsonString;
-
+        
         // read the config from the application support file if it exists
-        // otherwise load the default config from Assets
-        if (File.Exists(path + Path.DirectorySeparatorChar + jsonFilename)) {
-            jsonString = File.ReadAllText(path + Path.DirectorySeparatorChar + jsonFilename);
+        if (File.Exists(jsonFilename)) {
+            jsonString = File.ReadAllText(jsonFilename);
+            config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
         }
+        // config doesn't exist so load the default from Assets and save
         else {
             var fs = new StreamReader(AssetLoader
                 .Open(new Uri($"avares://{AppDomain.CurrentDomain.FriendlyName}/Assets/defaultConfig.json")));
             jsonString = fs.ReadToEnd();
-        }
 
-        // create the config object
-        config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
+            config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
+            Save(jsonFilename);
+        }
     }
 
-    public void Save(string path, string jsonFilename) {
+    public void Save(string jsonFilename) {
         var jsonString = JsonSerializer.Serialize(config);
-        if (!Directory.Exists(path)) {
-            // create directory
-            Directory.CreateDirectory(path);
-        }
-        File.WriteAllText(path + Path.DirectorySeparatorChar + jsonFilename, jsonString);
+        File.WriteAllText(jsonFilename, jsonString);
     }
 }
 
