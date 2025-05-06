@@ -47,7 +47,6 @@ public static class MainMenu {
 		//logo.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
 		
 		return logo.ToString();
-		
 	}
 
 	public static string GetMenu() {
