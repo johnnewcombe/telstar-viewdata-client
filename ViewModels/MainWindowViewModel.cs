@@ -13,6 +13,7 @@ using Avalonia;
 using Avalonia.Threading;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
+using TelstarClient.Display;
 using TelstarClient.Extensions;
 using TelstarClient.Models;
 
@@ -126,8 +127,8 @@ public class MainWindowViewModel : ViewModelBase {
                     menuSb.Append($"    {item}  {connection.Name}\r\n");
                 }
             }
-            // pop the meunu into the placeholder
-            _displayManager.Write(Display.MainMenu.GetMenu().Replace("[PLACEHOLDER]",menuSb.ToString()));
+            // pop the menu into the placeholder
+            _displayManager.Write(Display.MainMenu.GetMenu().Replace(Constants.PlaceHolder,menuSb.ToString()));
 
             OnPropertyChanged(nameof(DisplayData));
         }

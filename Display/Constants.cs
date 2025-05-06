@@ -76,5 +76,6 @@ public static class Constants {
     public const string DefaultBackground = "Black";
     
     #endregion
-    
+
+    public const string PlaceHolder = "[PLACEHOLDER]";
 }
