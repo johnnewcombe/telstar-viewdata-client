@@ -25,13 +25,14 @@ public class MainWindowViewModel : ViewModelBase {
     private const string connectingStatus = "CONNECTING";
 
 
-    private string appSupportDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+    private string _appSupportDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
                                          Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
                                          Path.DirectorySeparatorChar;
-    private string configFile;
+    private string _configFile;
     private string _status;
     private bool _menu;
-
+    private Settings _settings;
+    
     private readonly Display.DisplayManager _displayManager = new Display.DisplayManager();
 
     //private List<Models.Char> _displayManagerData = new List<Models.Char>();
@@ -45,13 +46,14 @@ public class MainWindowViewModel : ViewModelBase {
     public MainWindowViewModel() {
         DisplayWelcomeMessage();
         
-        configFile = appSupportDirectory + "config.json";
+        _configFile = _appSupportDirectory + "config.json";
         
         // create the app suport directory if it doesn't exist
-        if (!Directory.Exists(appSupportDirectory)) {
+        if (!Directory.Exists(_appSupportDirectory)) {
             // create directory
-            Directory.CreateDirectory(appSupportDirectory);
+            Directory.CreateDirectory(_appSupportDirectory);
         }
+        _settings = new Settings(_configFile);
     }
 
     public async Task DisplayWelcomeMessage() {
@@ -107,23 +109,40 @@ public class MainWindowViewModel : ViewModelBase {
                 //Trace.Print("Sent=>{0}", data);
             }
         }
-        else if (!_menu) {
+        else if (!_menu) { // i.e. any key presses when menu not shown
+            
             _menu = true;
             _displayManager.Display.Clear();
             _displayManager.SetCursorPosition(0, 0);
             _displayManager.Write(Display.MainMenu.GetMenu());
 
-            // TODO: update the menu
-            var settings = new Settings(configFile);
-            foreach (var connection in settings.config.Connections) {
-                Trace.WriteLine($"{connection.Name} {connection.Address}:{connection.Port}\r\n");
+            // update the menu diisplay
+            var item = 0;
+            foreach (var connection in _settings.config.Connections) {
+                if (connection.Name is not null) {
+                    item++;
+                    _displayManager.Write($"    {item}  {connection.Name}\r\n");
+                }
             }
-
 
             OnPropertyChanged(nameof(DisplayData));
         }
         else {
 
+            // key press is a string, so convert to int, get the appropriate
+            // connection details and connect
+            if(int.TryParse(data, out var index)) {
+                
+                if (index >= 0 && index < _settings.config.Connections.Count) {
+                    
+                    // index-1 as menu is '1' based and collection is '0' based
+                    var con = _settings.config.Connections[index-1];
+                    if (con.Name is not null) {
+                        Connect(con.Address, con.Port);
+                    }
+                    
+                }
+            }
 
             //var iconfig = new Configuration.JsonConfig(configFile);
             //var config = iconfig.GetConnection(data);

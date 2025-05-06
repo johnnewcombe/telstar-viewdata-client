@@ -26,10 +26,9 @@ public class Settings {
             var fs = new StreamReader(AssetLoader
                 .Open(new Uri($"avares://{AppDomain.CurrentDomain.FriendlyName}/Assets/defaultConfig.json")));
             jsonString = fs.ReadToEnd();
-
-            config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
-            Save(jsonFilename);
+            File.WriteAllText(jsonFilename, jsonString);
         }
+        config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
     }
 
     public void Save(string jsonFilename) {
