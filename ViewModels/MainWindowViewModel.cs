@@ -124,7 +124,7 @@ public class MainWindowViewModel : ViewModelBase {
             foreach (var connection in _settings.config.Connections) {
                 if (connection.Name is not null) {
                     item++;
-                    menuSb.Append($"    {item}  {connection.Name}\r\n");
+                    menuSb.Append($"    {item}  {connection.Name}\r\n\n");
                 }
             }
             // pop the menu into the placeholder

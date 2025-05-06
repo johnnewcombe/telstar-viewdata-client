@@ -11469,8 +11469,5 @@
 
     <ItemGroup>
       <None Remove="log4net.config" />
-      <None Update="config.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
     </ItemGroup>
 </Project>

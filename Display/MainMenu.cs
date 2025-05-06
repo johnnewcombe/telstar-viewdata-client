@@ -56,7 +56,7 @@ public static class MainMenu {
 		var menu = new StringBuilder();
 		//menu.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
 		menu.Append("\r\n");
-		menu.Append(Converters.ConvertFromMarkup("              [C][D]DIRECTORY\r\n\n\n\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("              [C][D]DIRECTORY\r\n\n\n"));
 		menu.Append("[PLACEHOLDER]");
 		menu.Append(Converters.ConvertFromMarkup("\r\n\n   [C]Press[W]'0'[C]for[W]Manual Dialling..."));
 		return menu.ToString();
