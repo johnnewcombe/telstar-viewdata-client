@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -114,16 +115,19 @@ public class MainWindowViewModel : ViewModelBase {
             _menu = true;
             _displayManager.Display.Clear();
             _displayManager.SetCursorPosition(0, 0);
-            _displayManager.Write(Display.MainMenu.GetMenu());
+            //_displayManager.Write(Display.MainMenu.GetMenu());
 
             // update the menu diisplay
             var item = 0;
+            var menuSb = new StringBuilder();
             foreach (var connection in _settings.config.Connections) {
                 if (connection.Name is not null) {
                     item++;
-                    _displayManager.Write($"    {item}  {connection.Name}\r\n");
+                    menuSb.Append($"    {item}  {connection.Name}\r\n");
                 }
             }
+            // pop the meunu into the placeholder
+            _displayManager.Write(Display.MainMenu.GetMenu().Replace("[PLACEHOLDER]",menuSb.ToString()));
 
             OnPropertyChanged(nameof(DisplayData));
         }

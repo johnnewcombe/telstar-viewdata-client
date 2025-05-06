@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Primitives;
 using TelstarClient.Models;
 
 namespace TelstarClient.Display;
@@ -56,6 +57,8 @@ public static class MainMenu {
 		//menu.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
 		menu.Append("\r\n");
 		menu.Append(Converters.ConvertFromMarkup("              [C][D]DIRECTORY\r\n\n\n\n\n"));
+		menu.Append("[PLACEHOLDER]\r\n\n");
+		menu.Append(Converters.ConvertFromMarkup("   [C]Press[W]'0'[C]for[W]Manual Dialling..."));
 		return menu.ToString();
 	}
 }
