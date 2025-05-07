@@ -61,7 +61,10 @@ public partial class MainWindow : Window {
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e) {
-        ViewModel.KeyHandler(e.KeySymbol);
+        if (e.Key == Key.LeftCtrl) {
+        }
+        
+        ViewModel.KeyHandler(e);
     }
 
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
@@ -70,11 +73,6 @@ public partial class MainWindow : Window {
 
     private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e) {
         //ViewModel.Disconnect();
-    }
-
-    private void Keypad_OnClick(object? sender, RoutedEventArgs e) {
-        var button = (Button)sender;
-        ViewModel.KeyHandler((string)button.Tag);
     }
 
     private void RevealButton_OnClick(object? sender, RoutedEventArgs e) {

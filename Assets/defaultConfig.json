@@ -18,7 +18,7 @@
   }, {
     "Name" : "TeeFax",
     "Address" : "pegasus.matrixnetwork.co.uk",
-    "Port" : 0
+    "Port" : 6502
   }, {
     "Name" : null,
     "Address" : null,

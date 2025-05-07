@@ -1,46 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia;
+using Avalonia.Input;
 using Avalonia.Threading;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
 using TelstarClient.Display;
 using TelstarClient.Extensions;
-using TelstarClient.Models;
 
 namespace TelstarClient.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase {
 
-    private const string connectedStatus = "CONNECTED";
-    private const string disconnectedStatus = "DISCONNECTED";
-    private const string errorStatus = "UNABLE TO CONNECT";
-    private const string connectingStatus = "CONNECTING";
-
-
-    private string _appSupportDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+    private const string ConnectedStatus = "CONNECTED";
+    private const string DisconnectedStatus = "DISCONNECTED";
+    private const string ErrorStatus = "UNABLE TO CONNECT";
+    private const string ConnectingStatus = "CONNECTING";
+    private readonly string _appSupportDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
                                          Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
                                          Path.DirectorySeparatorChar;
-    private string _configFile;
+    private const string ConfigFile = "config.json";
+
     private string _status;
     private bool _menu;
-    private Settings _settings;
-    
-    private readonly Display.DisplayManager _displayManager = new Display.DisplayManager();
-
-    //private List<Models.Char> _displayManagerData = new List<Models.Char>();
-    private readonly CyclicBuffer _cyclicBuffer = new CyclicBuffer(2048);
-    private KeyMapper _keyMapper = new KeyMapper();
-    private TCPClient _tcp = new TCPClient();
+    private bool _keyCtrl;
+    private readonly Settings _settings;
+    private readonly DisplayManager _displayManager;
+    private readonly CyclicBuffer _cyclicBuffer;
+    private readonly KeyMapper _keyMapper;
+    private readonly TCPClient _tcp;
 
     /// <summary>
     /// Constructor
@@ -48,21 +40,30 @@ public class MainWindowViewModel : ViewModelBase {
     public MainWindowViewModel() {
         DisplayWelcomeMessage();
         
-        _configFile = _appSupportDirectory + "config.json";
-        
+        var configFile = _appSupportDirectory + ConfigFile;
+
         // create the app suport directory if it doesn't exist
         if (!Directory.Exists(_appSupportDirectory)) {
             // create directory
             Directory.CreateDirectory(_appSupportDirectory);
         }
-        _settings = new Settings(_configFile);
+
+        _displayManager = new DisplayManager();
+        _settings = new Settings(configFile);
+        _keyMapper = new KeyMapper();
+        _cyclicBuffer = new CyclicBuffer(2048);
+        
+        _tcp = new TCPClient();
+        _tcp.OnConnectEvent += OnConnect;
+        _tcp.OnDataReceivedEvent += OnReceived;
+        
     }
 
     public async Task DisplayWelcomeMessage() {
         await Task.Delay(100);
 
         _displayManager.Write(Display.MainMenu.GetLogo());
-        _displayManager.Display.SetStatusText(disconnectedStatus);
+        _displayManager.Display.SetStatusText(DisconnectedStatus);
 
         OnPropertyChanged(nameof(DisplayData));
     }
@@ -73,12 +74,10 @@ public class MainWindowViewModel : ViewModelBase {
         try {
 
             // open the tcp client
-
-            _tcp.OnConnectEvent += OnConnect;
-            _tcp.OnDataReceivedEvent += OnReceived;
+            _cyclicBuffer.Clear();
             _tcp.Connect(ip, port);
 
-            _displayManager.Display.SetStatusText(connectingStatus);
+            _displayManager.Display.SetStatusText(ConnectingStatus);
 
             OnPropertyChanged(nameof(DisplayData));
         }
@@ -93,50 +92,56 @@ public class MainWindowViewModel : ViewModelBase {
             _tcp.Disconnect();
         }
 
-        _displayManager.Display.SetStatusText(disconnectedStatus);
+        _displayManager.Display.SetStatusText(DisconnectedStatus);
         OnPropertyChanged(nameof(DisplayData));
     }
 
-    public void KeyHandler(string data) {
+    public void KeyHandler(KeyEventArgs e) {
 
+        // if connected then help is available also
         if (_tcp.IsConnected()) {
-            // key mapper
-            if (data == null || _tcp == null) {
+            
+            // control char ?
+            if (e.Key == Key.LeftCtrl) {
+                _keyCtrl = true;
                 return;
             }
 
-            data = _keyMapper.Map(data);
+            if (_keyCtrl) {
+                // previous char was a ctrl            
+                _keyCtrl = false;
+                switch (e.KeySymbol.ToLower()) {
+                    case "c":
+                        _tcp.Disconnect();
+                        DisplayMenu();
+                        break;
+                    case "h":
+                        // TODO save current screen and put it back
+                        // maybe a second cache buffer in the Display object?
+                        DisplayHelp();
+                        break;
+                }
 
-            if (_tcp.Write(data)) {
+            }
+            
+            if (e.KeySymbol == null) {
+                return;
+            }
+            
+            var keySymbol = _keyMapper.Map(e.KeySymbol);
+
+            if (_tcp.Write(keySymbol)) {
                 //Trace.Print("Sent=>{0}", data);
             }
         }
         else if (!_menu) { // i.e. any key presses when menu not shown
-            
-            _menu = true;
-            _displayManager.Display.Clear();
-            _displayManager.SetCursorPosition(0, 0);
-            //_displayManager.Write(Display.MainMenu.GetMenu());
-
-            // update the menu diisplay
-            var item = 0;
-            var menuSb = new StringBuilder();
-            foreach (var connection in _settings.config.Connections) {
-                if (connection.Name is not null) {
-                    item++;
-                    menuSb.Append($"   \e{Constants.AlphaCyan}{item} \e{Constants.AlphaWhite}{connection.Name}\r\n\n");
-                }
-            }
-            // pop the menu into the placeholder
-            _displayManager.Write(Display.MainMenu.GetMenu().Replace(Constants.PlaceHolder,menuSb.ToString()));
-
-            OnPropertyChanged(nameof(DisplayData));
+            DisplayMenu();
         }
         else {
 
             // key press is a string, so convert to int, get the appropriate
             // connection details and connect
-            if(int.TryParse(data, out var index)) {
+            if(int.TryParse(e.KeySymbol, out var index)) {
                 
                 if (index >= 0 && index < _settings.config.Connections.Count) {
                     
@@ -163,13 +168,13 @@ public class MainWindowViewModel : ViewModelBase {
     private void OnConnect(bool status) {
 
         if (status) {
-            _displayManager.Display.SetStatusText(connectedStatus);
+            _displayManager.Display.SetStatusText(ConnectedStatus);
         }
         else {
-            _displayManager.Display.SetStatusText(errorStatus);
+            _displayManager.Display.SetStatusText(ErrorStatus);
             // delay
             Thread.Sleep(750);
-            _displayManager.Display.SetStatusText(disconnectedStatus);
+            _displayManager.Display.SetStatusText(DisconnectedStatus);
         }
     }
 
@@ -228,6 +233,39 @@ public class MainWindowViewModel : ViewModelBase {
             _displayManager.Display.Chars = value;
             OnPropertyChanged();
         }
+    }
+
+    private void DisplayHelp() {
+
+        MainMenu.GetHelp();
+        _displayManager.Display.Clear();
+        _displayManager.SetCursorPosition(0, 0);
+        _displayManager.Write(Display.MainMenu.GetHelp());
+
+        OnPropertyChanged(nameof(DisplayData)); 
+    }
+
+    private void DisplayMenu() {
+        
+        _menu = true;
+        _displayManager.Display.Clear();
+        _displayManager.SetCursorPosition(0, 0);
+        //_displayManager.Write(Display.MainMenu.GetMenu());
+
+        // update the menu diisplay
+        var item = 0;
+        var menuSb = new StringBuilder();
+        foreach (var connection in _settings.config.Connections) {
+            if (connection.Name is not null) {
+                item++;
+                menuSb.Append($"   \e{Constants.AlphaCyan}{item} \e{Constants.AlphaWhite}{connection.Name}\r\n\n");
+            }
+        }
+        // pop the menu into the placeholder
+        _displayManager.Write(Display.MainMenu.GetMenu().Replace(Constants.PlaceHolder,menuSb.ToString()));
+
+        OnPropertyChanged(nameof(DisplayData));
+
     }
 
     #endregion

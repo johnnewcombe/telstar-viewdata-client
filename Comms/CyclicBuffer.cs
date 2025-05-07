@@ -40,7 +40,8 @@ public class CyclicBuffer {
     /// </summary>
     public char[] InternalBuffer {
         get {
-            lock (iLock) { // not really needed
+            lock (iLock) {
+                // not really needed
                 return _buffer;
             }
         }
@@ -75,7 +76,7 @@ public class CyclicBuffer {
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     public char Remove() {
-        
+
         lock (iLock) {
 
             if (this.Count == 0) {
@@ -87,6 +88,7 @@ public class CyclicBuffer {
             if (outtPtr >= _bufferSize) {
                 outtPtr = 0;
             }
+
             return c;
         }
     }
@@ -105,5 +107,10 @@ public class CyclicBuffer {
                 return _bufferSize - outtPtr + inPtr;
             }
         }
+    }
+
+    public void Clear() {
+        inPtr = 0;
+        outtPtr = 0;
     }
 }
