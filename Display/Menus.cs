@@ -5,7 +5,7 @@ using TelstarClient.Models;
 
 namespace TelstarClient.Display;
 
-public static class MainMenu {
+public static class Menus {
 
 	/// <summary>
 	/// Returns the welcome logo in viewdata byte format.

@@ -65,7 +65,7 @@ public class MainWindowViewModel : ViewModelBase {
     public async Task DisplayWelcomeMessage() {
         await Task.Delay(100);
 
-        _displayManager.Write(Display.MainMenu.GetLogo());
+        _displayManager.Write(Display.Menus.GetLogo());
         _displayManager.Display.SetStatusText(DisconnectedStatus);
 
         OnPropertyChanged(nameof(DisplayData));
@@ -245,10 +245,10 @@ public class MainWindowViewModel : ViewModelBase {
 
     private void DisplayHelp() {
 
-        MainMenu.GetHelp();
+        Menus.GetHelp();
         _displayManager.Display.Clear();
         _displayManager.SetCursorPosition(0, 0);
-        _displayManager.Write(Display.MainMenu.GetHelp());
+        _displayManager.Write(Display.Menus.GetHelp());
 
         OnPropertyChanged(nameof(DisplayData));
     }
@@ -270,7 +270,7 @@ public class MainWindowViewModel : ViewModelBase {
         }
 
         // pop the menu into the placeholder
-        _displayManager.Write(Display.MainMenu.GetMenu().Replace(Constants.PlaceHolder, menuSb.ToString()));
+        _displayManager.Write(Display.Menus.GetMenu().Replace(Constants.PlaceHolder, menuSb.ToString()));
 
         OnPropertyChanged(nameof(DisplayData));
 
