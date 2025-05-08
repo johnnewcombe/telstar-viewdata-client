@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TelstarClient.Display;
 using Char = TelstarClient.Models.Char;
 
@@ -8,43 +9,7 @@ namespace TelstarClient.Extensions;
 public static class Extensions {
     
     #region Char Extensions
-
-    /// <summary>
-    /// All the properties of this object, except the Value, are copied to the
-    /// destination object
-    /// </summary>
-    /// <param name="chr"></param>
-    /// <param name="dest"></param>
-    public static void CloneAttributes(this Char chr, ref Char dest) {
-
-        ArgumentNullException.ThrowIfNull(dest);
-
-        dest.Foreground = chr.Foreground;
-        dest.Background = chr.Background;
-        dest.IsGraphic = chr.IsGraphic;
-        dest.IsControl = chr.IsControl;
-        dest.IsSeparated = chr.IsSeparated;
-        dest.IsConcealed = chr.IsConcealed;
-        dest.IsGraphicsHold = chr.IsGraphicsHold;
-        dest.IsDoubleHeight = chr.IsDoubleHeight;
-
-    }
-
-    /// <summary>
-    /// Sets the object properties, except the Value, to default values.
-    /// </summary>
-    /// <param name="chr"></param>
-    public static void SetDefaultAttributes(this Char chr) {
-        chr.Background = "White";
-        chr.Background = "Black";
-        chr.IsGraphic = false;
-        chr.IsControl = false;
-        chr.IsSeparated = false;
-        chr.IsConcealed = false;
-        chr.IsGraphicsHold = false;
-        chr.IsDoubleHeight = false;
-    }
-
+    
     /// <summary>
     /// Returns true if the character is 'blast through', i.e. should be displayed
     /// as an alpha character when in graphic mode.
@@ -126,7 +91,7 @@ public static class Extensions {
             display.RowReferences[i] = 0;
         }
     }
-
+    
     /// <summary>
     /// Determines if the specified row is read only. This is typically used to protect the lower row
     /// of a double height row from being overwritten.

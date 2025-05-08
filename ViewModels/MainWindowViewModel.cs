@@ -117,11 +117,13 @@ public class MainWindowViewModel : ViewModelBase {
                     case "z":
                         Disconnect();
                         DisplayMenu();
+                        _menu = true;
                         break;
                     case "h":
                         // TODO save current screen and put it back
                         // maybe a second cache buffer in the Display object?
                         DisplayHelp();
+                        _menu = true;
                         break;
                     case "r":
                     case "c":
