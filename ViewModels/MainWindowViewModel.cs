@@ -20,9 +20,12 @@ public class MainWindowViewModel : ViewModelBase {
     private const string DisconnectedStatus = "DISCONNECTED";
     private const string ErrorStatus = "UNABLE TO CONNECT";
     private const string ConnectingStatus = "CONNECTING";
-    private readonly string _appSupportDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
-                                         Path.DirectorySeparatorChar;
+
+    private readonly string _appSupportDirectory =
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+        Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
+        Path.DirectorySeparatorChar;
+
     private const string ConfigFile = "config.json";
 
     private string _status;
@@ -39,7 +42,7 @@ public class MainWindowViewModel : ViewModelBase {
     /// </summary>
     public MainWindowViewModel() {
         DisplayWelcomeMessage();
-        
+
         var configFile = _appSupportDirectory + ConfigFile;
 
         // create the app suport directory if it doesn't exist
@@ -52,11 +55,11 @@ public class MainWindowViewModel : ViewModelBase {
         _settings = new Settings(configFile);
         _keyMapper = new KeyMapper();
         _cyclicBuffer = new CyclicBuffer(2048);
-        
+
         _tcp = new TCPClient();
         _tcp.OnConnectEvent += OnConnect;
         _tcp.OnDataReceivedEvent += OnReceived;
-        
+
     }
 
     public async Task DisplayWelcomeMessage() {
@@ -88,31 +91,31 @@ public class MainWindowViewModel : ViewModelBase {
     }
 
     public void Disconnect() {
+        
         if (_tcp is not null) {
             _tcp.Disconnect();
         }
-
-        _displayManager.Display.SetStatusText(DisconnectedStatus);
-        OnPropertyChanged(nameof(DisplayData));
     }
 
     public void KeyHandler(KeyEventArgs e) {
 
         // if connected then help is available also
         if (_tcp.IsConnected()) {
-            
+
             // control char ?
             if (e.Key == Key.LeftCtrl) {
                 _keyCtrl = true;
                 return;
             }
-
+            
             if (_keyCtrl) {
                 // previous char was a ctrl            
                 _keyCtrl = false;
                 switch (e.KeySymbol.ToLower()) {
-                    case "c":
-                        _tcp.Disconnect();
+                    case "q":
+                    case "x":
+                    case "z":
+                        Disconnect();
                         DisplayMenu();
                         break;
                     case "h":
@@ -120,37 +123,40 @@ public class MainWindowViewModel : ViewModelBase {
                         // maybe a second cache buffer in the Display object?
                         DisplayHelp();
                         break;
+                    case "r":
+                    case "c":
+                        break;
                 }
-
             }
             
-            if (e.KeySymbol == null) {
-                return;
-            }
-            
-            var keySymbol = _keyMapper.Map(e.KeySymbol);
+            if (e.KeySymbol != null) {
+                var keySymbol = _keyMapper.Map(e.KeySymbol);
 
-            if (_tcp.Write(keySymbol)) {
-                //Trace.Print("Sent=>{0}", data);
+                if (_tcp.Write(keySymbol)) {
+                    //Trace.Print("Sent=>{0}", data);
+                }
             }
         }
-        else if (!_menu) { // i.e. any key presses when menu not shown
+        else if (!_menu) {
+            // menu is second screen, so any key press on first screen shows menu
             DisplayMenu();
+            _menu = true;
         }
         else {
+            // Connect
 
             // key press is a string, so convert to int, get the appropriate
             // connection details and connect
-            if(int.TryParse(e.KeySymbol, out var index)) {
-                
+            if (int.TryParse(e.KeySymbol, out var index)) {
+
                 if (index >= 0 && index < _settings.config.Connections.Count) {
-                    
+
                     // index-1 as menu is '1' based and collection is '0' based
-                    var con = _settings.config.Connections[index-1];
+                    var con = _settings.config.Connections[index - 1];
                     if (con.Name is not null) {
                         Connect(con.Address, con.Port);
                     }
-                    
+
                 }
             }
 
@@ -206,7 +212,7 @@ public class MainWindowViewModel : ViewModelBase {
         //Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
 
         // get data from buffer and process for viewdata 
-        while (_cyclicBuffer.Count > 0) {
+        while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
 
             if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
 
@@ -242,12 +248,11 @@ public class MainWindowViewModel : ViewModelBase {
         _displayManager.SetCursorPosition(0, 0);
         _displayManager.Write(Display.MainMenu.GetHelp());
 
-        OnPropertyChanged(nameof(DisplayData)); 
+        OnPropertyChanged(nameof(DisplayData));
     }
 
     private void DisplayMenu() {
-        
-        _menu = true;
+
         _displayManager.Display.Clear();
         _displayManager.SetCursorPosition(0, 0);
         //_displayManager.Write(Display.MainMenu.GetMenu());
@@ -261,8 +266,9 @@ public class MainWindowViewModel : ViewModelBase {
                 menuSb.Append($"   \e{Constants.AlphaCyan}{item} \e{Constants.AlphaWhite}{connection.Name}\r\n\n");
             }
         }
+
         // pop the menu into the placeholder
-        _displayManager.Write(Display.MainMenu.GetMenu().Replace(Constants.PlaceHolder,menuSb.ToString()));
+        _displayManager.Write(Display.MainMenu.GetMenu().Replace(Constants.PlaceHolder, menuSb.ToString()));
 
         OnPropertyChanged(nameof(DisplayData));
 
