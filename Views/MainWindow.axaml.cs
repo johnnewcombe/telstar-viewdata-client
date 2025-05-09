@@ -49,7 +49,7 @@ public partial class MainWindow : Window {
                     UpdateDisplay();
                 }
                 catch (Exception ex) {
-                    Debug.WriteLine(ex.Message);
+                    Trace.WriteLine(ex.Message);
                 }
 
                 break;

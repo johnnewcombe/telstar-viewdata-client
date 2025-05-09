@@ -41,7 +41,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
-        
+
         DisplayWelcomeMessage();
 
         var configFile = _appSupportDirectory + ConfigFile;
@@ -51,7 +51,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             // create directory
             Directory.CreateDirectory(_appSupportDirectory);
         }
-        
+
         _displayManager = new DisplayManager();
         _settings = new Settings(configFile);
         _keyMapper = new KeyMapper();
@@ -62,8 +62,37 @@ public partial class MainWindowViewModel : ViewModelBase {
         _tcp.OnDataReceivedEvent += OnReceived;
 
     }
-    
+
     #region Data Processing and Notification
+
+    private async void UpdateConnectStatus() {
+
+        try {
+            var status = ConnectStatus;
+            if (status) {
+                _displayManager.Display.SetStatusText(ConnectedStatus);
+            }
+            else {
+
+                _displayManager.Display.SetStatusText(ErrorStatus);
+                DisplayData = _displayManager.Display.Chars;
+
+                // delay, can't just use Thread.Sleep(2000) as this causes UI thread
+                // to stop and prevents display of above message
+                await Task.Delay(2000);
+                _displayManager.Display.SetStatusText(DisconnectedStatus);
+            }
+        }
+        catch (Exception e) {
+            // ensures that all exceptions are handled within the async body
+            // not handling them with void async methods can cause the process
+            // to crash
+            Trace.WriteLine(e);
+        }
+        finally {
+            DisplayData = _displayManager.Display.Chars;
+        }
+    }
 
     /// <summary>
     /// Method to process the receive buffer. This is called from
@@ -94,7 +123,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     #endregion
 
     #region Public Properties and methods
-    
+
     /// <summary>
     /// Diplay data to be displayed by the View.
     /// </summary>

@@ -51,7 +51,7 @@ public partial class DisplayManager {
 
     public bool WriteChar(char character) {
 
-        Trace.WriteLine($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
+        //Trace.WriteLine($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {

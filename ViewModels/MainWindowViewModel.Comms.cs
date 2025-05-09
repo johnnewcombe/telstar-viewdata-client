@@ -9,7 +9,24 @@ namespace TelstarClient.ViewModels;
 public partial class MainWindowViewModel {
     
     #region TCP Client Control and Events
+    
+    private Lock locker = new ();
+    private bool _connectStatus;
 
+    public bool ConnectStatus
+    {
+        get
+        {
+            lock (locker)
+                return _connectStatus;
+        }
+        set
+        {
+            lock (locker)
+                _connectStatus = value;
+        }
+    }
+    
     public void Connect(string ip, int port) {
         try {
 
@@ -18,8 +35,7 @@ public partial class MainWindowViewModel {
             _tcp.Connect(ip, port);
 
             _displayManager.Display.SetStatusText(ConnectingStatus);
-
-            OnPropertyChanged(nameof(DisplayData));
+            DisplayData = _displayManager.Display.Chars;
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
@@ -36,22 +52,11 @@ public partial class MainWindowViewModel {
 
     // Connection Status Listener
     private void OnConnect(bool status) {
-
-        if (status) {
-            _displayManager.Display.SetStatusText(ConnectedStatus);
-        }
-        else {
-            _displayManager.Display.SetStatusText(ErrorStatus);
-            DisplayData = _displayManager.Display.Chars;
-
-            // delay
-            Thread.Sleep(750);
-            _displayManager.Display.SetStatusText(DisconnectedStatus);
-        }
-
-        DisplayData = _displayManager.Display.Chars;
+            ConnectStatus = status;
+            Dispatcher.UIThread.Post(UpdateConnectStatus);
     }
 
+    
     // Data Received Listener
     private void OnReceived(string data) {
 
