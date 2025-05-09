@@ -7,26 +7,23 @@ using TelstarClient.Extensions;
 namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel {
-    
+
     #region TCP Client Control and Events
-    
-    private Lock locker = new ();
+
+    private Lock locker = new();
     private bool _connectStatus;
 
-    public bool ConnectStatus
-    {
-        get
-        {
+    public bool ConnectStatus {
+        get {
             lock (locker)
                 return _connectStatus;
         }
-        set
-        {
+        set {
             lock (locker)
                 _connectStatus = value;
         }
     }
-    
+
     public void Connect(string ip, int port) {
         try {
 
@@ -52,11 +49,15 @@ public partial class MainWindowViewModel {
 
     // Connection Status Listener
     private void OnConnect(bool status) {
-            ConnectStatus = status;
-            Dispatcher.UIThread.Post(UpdateConnectStatus);
+
+        // set thread safe property
+        ConnectStatus = status;
+
+        // switch to UI thread
+        Dispatcher.UIThread.Post(UpdateConnectStatus);
     }
 
-    
+
     // Data Received Listener
     private void OnReceived(string data) {
 
@@ -72,4 +73,5 @@ public partial class MainWindowViewModel {
     }
 
     #endregion
+
 }

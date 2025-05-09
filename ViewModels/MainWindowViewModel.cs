@@ -107,7 +107,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
 
             if (_menu) {
-
+                //continue;
             }
 
             if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
