@@ -30,6 +30,7 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     private string _status;
     private bool _menu;
+    private bool _help;
     private bool _keyCtrl;
     private readonly Settings _settings;
     private readonly DisplayManager _displayManager;
@@ -106,15 +107,13 @@ public partial class MainWindowViewModel : ViewModelBase {
         // get data from buffer and process for viewdata 
         while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
 
-            if (_menu) {
-                //continue;
-            }
-
             if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
 
                 // updating this property will invoke the OnPropertyChanged event
                 // to update the view
-                DisplayData = _displayManager.Display.Chars;
+                if (!_menu) {
+                    DisplayData = _displayManager.Display.Chars;
+                }
             }
         }
 
@@ -146,7 +145,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         _displayManager.Write(Display.Menus.GetLogo());
         _displayManager.Display.SetStatusText(DisconnectedStatus);
 
-        OnPropertyChanged(nameof(DisplayData));
+        DisplayData = _displayManager.Display.Chars;
     }
 
     private void DisplayHelp() {
@@ -155,8 +154,9 @@ public partial class MainWindowViewModel : ViewModelBase {
         _displayManager.Display.Clear();
         _displayManager.SetCursorPosition(0, 0);
         _displayManager.Write(Display.Menus.GetHelp());
+        _help = true;
 
-        OnPropertyChanged(nameof(DisplayData));
+        DisplayData = _displayManager.Display.Chars;
     }
 
     private void DisplayMenu() {
@@ -177,8 +177,7 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         // pop the menu into the placeholder
         _displayManager.Write(Display.Menus.GetMenu().Replace(Constants.PlaceHolder, menuSb.ToString()));
-
-        OnPropertyChanged(nameof(DisplayData));
+        DisplayData = _displayManager.Display.Chars;
 
     }
 

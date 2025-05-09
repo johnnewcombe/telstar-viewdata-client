@@ -29,6 +29,8 @@ public partial class MainWindowViewModel {
 
             // open the tcp client
             _cyclicBuffer.Clear();
+            _menu = false;
+
             _tcp.Connect(ip, port);
 
             _displayManager.Display.SetStatusText(ConnectingStatus);

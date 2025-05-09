@@ -19,6 +19,16 @@ public partial class MainWindowViewModel {
                 return;
             }
 
+            if (e.Key == Key.Escape) {
+                // if we press the escape whilst connected it cancels
+                // any help screens or dialogs etc.
+                if (_help) {
+                    // switch back to main display
+                    DisplayData = _displayManager.Display.Chars;
+                }
+            }
+
+            
             if (_keyCtrl) {
                 // previous char was a ctrl            
                 _keyCtrl = false;
@@ -31,10 +41,15 @@ public partial class MainWindowViewModel {
                         _menu = true;
                         break;
                     case "h":
-                        // TODO save current screen and put it back
-                        // maybe a second cache buffer in the Display object?
-                        DisplayHelp();
-                        _menu = true;
+                        if (_help) {
+                            // hang-up or something
+                        }
+                        else {
+                            // TODO save current screen and put it back
+                            // maybe a second cache buffer in the Display object?
+                            DisplayHelp();
+
+                        }
                         break;
                     case "r":
                     case "c":
@@ -50,14 +65,14 @@ public partial class MainWindowViewModel {
                 }
             }
         }
+        // if not connected and not the menu/help then display the menu
         else if (!_menu) {
-            // menu is second screen, so any key press on first screen shows menu
             DisplayMenu();
             _menu = true;
         }
         else {
-            // Connect
-
+            
+            // not Connected so connect
             // key press is a string, so convert to int, get the appropriate
             // connection details and connect
             if (int.TryParse(e.KeySymbol, out var index)) {
@@ -72,14 +87,6 @@ public partial class MainWindowViewModel {
 
                 }
             }
-
-            //var iconfig = new Configuration.JsonConfig(configFile);
-            //var config = iconfig.GetConnection(data);
-
-            //Trace.WriteLine(config.Address);
-            //Trace.WriteLine(config.Port);
-            //Connect(config.Address, config.Port);
-
         }
     }
 }
