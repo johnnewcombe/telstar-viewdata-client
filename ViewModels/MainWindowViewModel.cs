@@ -62,15 +62,6 @@ public class MainWindowViewModel : ViewModelBase {
 
     }
 
-    public async Task DisplayWelcomeMessage() {
-        await Task.Delay(100);
-
-        _displayManager.Write(Display.Menus.GetLogo());
-        _displayManager.Display.SetStatusText(DisconnectedStatus);
-
-        OnPropertyChanged(nameof(DisplayData));
-    }
-
     #region TCP Client Control and Events
 
     public void Connect(string ip, int port) {
@@ -86,17 +77,98 @@ public class MainWindowViewModel : ViewModelBase {
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
-            Debug.WriteLine($"Error : {ex}");
+            Trace.WriteLine($"Error : {ex}");
         }
     }
 
     public void Disconnect() {
-        
+
         if (_tcp is not null) {
             _tcp.Disconnect();
         }
     }
 
+    // Connection Status Listener
+    private void OnConnect(bool status) {
+
+        if (status) {
+            _displayManager.Display.SetStatusText(ConnectedStatus);
+        }
+        else {
+            _displayManager.Display.SetStatusText(ErrorStatus);
+            DisplayData = _displayManager.Display.Chars;
+
+            // delay
+            Thread.Sleep(750);
+            _displayManager.Display.SetStatusText(DisconnectedStatus);
+        }
+
+        DisplayData = _displayManager.Display.Chars;
+    }
+
+    // Data Received Listener
+    private void OnReceived(string data) {
+
+        // add data to the cyclic buffer, this is thread safe
+        foreach (var c in data) {
+            _cyclicBuffer.Add(c);
+        }
+
+        // at this point we are not on the UI thread but one created by the TCPClient
+        // this is a fire and forget call, the TCP Client will not wait for a result
+        // Dispatcher.UIThread.Post(ProcessReceiveBuffer);
+        Dispatcher.UIThread.Post(ProcessReceiveBuffer);
+    }
+
+    #endregion
+
+    #region Data Processing and Notification
+
+    /// <summary>
+    /// Method to process the receive buffer. This is called from
+    /// the OnDataReceived event but on the UI Thread as a separate
+    /// Task.
+    /// </summary>
+    private void ProcessReceiveBuffer() {
+
+        //Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
+
+        // get data from buffer and process for viewdata 
+        while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
+
+            if (_menu) {
+
+            }
+
+            if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
+
+                // updating this property will invoke the OnPropertyChanged event
+                // to update the view
+                DisplayData = _displayManager.Display.Chars;
+            }
+        }
+
+    }
+
+    #endregion
+
+    #region Public Properties and methods
+    
+    /// <summary>
+    /// Diplay data to be displayed by the View.
+    /// </summary>
+    public List<Models.Char> DisplayData {
+        get { return _displayManager.Display.Chars; }
+        set {
+            _displayManager.Display.Chars = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Handles keyboard activity passsed from the View.
+    /// </summary>
+    /// <param name="e"></param>
     public void KeyHandler(KeyEventArgs e) {
 
         // if connected then help is available also
@@ -107,7 +179,7 @@ public class MainWindowViewModel : ViewModelBase {
                 _keyCtrl = true;
                 return;
             }
-            
+
             if (_keyCtrl) {
                 // previous char was a ctrl            
                 _keyCtrl = false;
@@ -130,7 +202,7 @@ public class MainWindowViewModel : ViewModelBase {
                         break;
                 }
             }
-            
+
             if (e.KeySymbol != null) {
                 var keySymbol = _keyMapper.Map(e.KeySymbol);
 
@@ -172,75 +244,18 @@ public class MainWindowViewModel : ViewModelBase {
         }
     }
 
-    // Connection Status Listener
-    private void OnConnect(bool status) {
-
-        if (status) {
-            _displayManager.Display.SetStatusText(ConnectedStatus);
-        }
-        else {
-            _displayManager.Display.SetStatusText(ErrorStatus);
-            // delay
-            Thread.Sleep(750);
-            _displayManager.Display.SetStatusText(DisconnectedStatus);
-        }
-    }
-
-    // Data Received Listener
-    private void OnReceived(string data) {
-
-        // add data to the cyclic buffer
-        foreach (var c in data) {
-            _cyclicBuffer.Add(c);
-        }
-
-        // at this point we are not on the UI thread but one created by the TCPClient
-        // this is a fire and forget call, the TCP Client will not wait for a result
-        // Dispatcher.UIThread.Post(ProcessReceiveBuffer);
-        Dispatcher.UIThread.Post(ProcessReceiveBuffer);
-    }
-
     #endregion
 
-    #region Data Processing and Notification
+    #region Private Methods
 
-    /// <summary>
-    /// Method to process the receive buffer. This is called from
-    /// the OnDataReceived event but on the UI Thread as a separate
-    /// Task.
-    /// </summary>
-    private void ProcessReceiveBuffer() {
+    private async Task DisplayWelcomeMessage() {
 
-        //Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
+        await Task.Delay(100);
 
-        // get data from buffer and process for viewdata 
-        while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
+        _displayManager.Write(Display.Menus.GetLogo());
+        _displayManager.Display.SetStatusText(DisconnectedStatus);
 
-            if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
-
-                // updating this property will invoke the OnPropertyChanged event
-                // to update the view
-                DisplayData = _displayManager.Display.Chars;
-            }
-        }
-
-        //Debug.Print("ProcessReceiveBuffer Exit");
-    }
-
-    public string Status {
-        get { return _status; }
-        set {
-            _status = value;
-            OnPropertyChanged(nameof(Status));
-        }
-    }
-
-    public List<Models.Char> DisplayData {
-        get { return _displayManager.Display.Chars; }
-        set {
-            _displayManager.Display.Chars = value;
-            OnPropertyChanged();
-        }
+        OnPropertyChanged(nameof(DisplayData));
     }
 
     private void DisplayHelp() {

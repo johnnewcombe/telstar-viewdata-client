@@ -177,13 +177,16 @@ public static class Extensions {
     public static void SetStatusText(this Models.Display display, string status,
         string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
 
+        // clear the row
         for (var i = 0; i < Models.Display.COLS; i++) {
             var cell = display.Chars[24 * Models.Display.COLS + i];
             cell.Value = Models.Display.SPC;
         }
-
+        
+        // work out the starting column so that the text is centred
         var col = (Models.Display.COLS / 2) - (status.Length / 2);
 
+        // add the text and attributes to the status row
         foreach (var c in status) {
 
             var cell = display.Chars[24 * Models.Display.COLS + col];
@@ -192,6 +195,7 @@ public static class Extensions {
             cell.Background = Constants.DefaultBackground;
             col++;
 
+            // belts and braces
             if (col >= Models.Display.COLS) {
                 break;
             }
