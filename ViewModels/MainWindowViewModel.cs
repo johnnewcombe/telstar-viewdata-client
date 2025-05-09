@@ -14,7 +14,7 @@ using TelstarClient.Extensions;
 
 namespace TelstarClient.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase {
+public partial class MainWindowViewModel : ViewModelBase {
 
     private const string ConnectedStatus = "CONNECTED";
     private const string DisconnectedStatus = "DISCONNECTED";
@@ -41,6 +41,7 @@ public class MainWindowViewModel : ViewModelBase {
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
+        
         DisplayWelcomeMessage();
 
         var configFile = _appSupportDirectory + ConfigFile;
@@ -50,7 +51,7 @@ public class MainWindowViewModel : ViewModelBase {
             // create directory
             Directory.CreateDirectory(_appSupportDirectory);
         }
-
+        
         _displayManager = new DisplayManager();
         _settings = new Settings(configFile);
         _keyMapper = new KeyMapper();
@@ -61,67 +62,7 @@ public class MainWindowViewModel : ViewModelBase {
         _tcp.OnDataReceivedEvent += OnReceived;
 
     }
-
-    #region TCP Client Control and Events
-
-    public void Connect(string ip, int port) {
-        try {
-
-            // open the tcp client
-            _cyclicBuffer.Clear();
-            _tcp.Connect(ip, port);
-
-            _displayManager.Display.SetStatusText(ConnectingStatus);
-
-            OnPropertyChanged(nameof(DisplayData));
-        }
-        catch (Exception ex) {
-            // Catch errors in Connection and receive Callbacks
-            Trace.WriteLine($"Error : {ex}");
-        }
-    }
-
-    public void Disconnect() {
-
-        if (_tcp is not null) {
-            _tcp.Disconnect();
-        }
-    }
-
-    // Connection Status Listener
-    private void OnConnect(bool status) {
-
-        if (status) {
-            _displayManager.Display.SetStatusText(ConnectedStatus);
-        }
-        else {
-            _displayManager.Display.SetStatusText(ErrorStatus);
-            DisplayData = _displayManager.Display.Chars;
-
-            // delay
-            Thread.Sleep(750);
-            _displayManager.Display.SetStatusText(DisconnectedStatus);
-        }
-
-        DisplayData = _displayManager.Display.Chars;
-    }
-
-    // Data Received Listener
-    private void OnReceived(string data) {
-
-        // add data to the cyclic buffer, this is thread safe
-        foreach (var c in data) {
-            _cyclicBuffer.Add(c);
-        }
-
-        // at this point we are not on the UI thread but one created by the TCPClient
-        // this is a fire and forget call, the TCP Client will not wait for a result
-        // Dispatcher.UIThread.Post(ProcessReceiveBuffer);
-        Dispatcher.UIThread.Post(ProcessReceiveBuffer);
-    }
-
-    #endregion
-
+    
     #region Data Processing and Notification
 
     /// <summary>
@@ -162,85 +103,6 @@ public class MainWindowViewModel : ViewModelBase {
         set {
             _displayManager.Display.Chars = value;
             OnPropertyChanged();
-        }
-    }
-
-    /// <summary>
-    /// Handles keyboard activity passsed from the View.
-    /// </summary>
-    /// <param name="e"></param>
-    public void KeyHandler(KeyEventArgs e) {
-
-        // if connected then help is available also
-        if (_tcp.IsConnected()) {
-
-            // control char ?
-            if (e.Key == Key.LeftCtrl) {
-                _keyCtrl = true;
-                return;
-            }
-
-            if (_keyCtrl) {
-                // previous char was a ctrl            
-                _keyCtrl = false;
-                switch (e.KeySymbol.ToLower()) {
-                    case "q":
-                    case "x":
-                    case "z":
-                        Disconnect();
-                        DisplayMenu();
-                        _menu = true;
-                        break;
-                    case "h":
-                        // TODO save current screen and put it back
-                        // maybe a second cache buffer in the Display object?
-                        DisplayHelp();
-                        _menu = true;
-                        break;
-                    case "r":
-                    case "c":
-                        break;
-                }
-            }
-
-            if (e.KeySymbol != null) {
-                var keySymbol = _keyMapper.Map(e.KeySymbol);
-
-                if (_tcp.Write(keySymbol)) {
-                    //Trace.Print("Sent=>{0}", data);
-                }
-            }
-        }
-        else if (!_menu) {
-            // menu is second screen, so any key press on first screen shows menu
-            DisplayMenu();
-            _menu = true;
-        }
-        else {
-            // Connect
-
-            // key press is a string, so convert to int, get the appropriate
-            // connection details and connect
-            if (int.TryParse(e.KeySymbol, out var index)) {
-
-                if (index >= 0 && index < _settings.config.Connections.Count) {
-
-                    // index-1 as menu is '1' based and collection is '0' based
-                    var con = _settings.config.Connections[index - 1];
-                    if (con.Name is not null) {
-                        Connect(con.Address, con.Port);
-                    }
-
-                }
-            }
-
-            //var iconfig = new Configuration.JsonConfig(configFile);
-            //var config = iconfig.GetConnection(data);
-
-            //Trace.WriteLine(config.Address);
-            //Trace.WriteLine(config.Port);
-            //Connect(config.Address, config.Port);
-
         }
     }
 
