@@ -46,9 +46,17 @@ public static class Menus {
 	public static string GetHelp() {
 		
 		var menu = new StringBuilder();
-		//menu.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
 		menu.Append("\r\n");
-		menu.Append(Converters.ConvertFromMarkup("                [C][D]HELP\r\n\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("                 [D]HELP\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
+		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl C[C]Conceal\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl R[C]Reveal\r\n\n"));
+		//menu.Append(Converters.ConvertFromMarkup(""));
+		//menu.Append(Converters.ConvertFromMarkup(""));
+		//menu.Append(Converters.ConvertFromMarkup(""));
+		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl X[C]Disconnect\r\n\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("  [Y]Press Escape to Return to Terminal"));
+		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}
 }

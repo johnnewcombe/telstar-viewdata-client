@@ -130,7 +130,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// <summary>
     /// Diplay data to be displayed by the View.
     /// </summary>
-    public List<Models.Char> DisplayData {
+    public List<Char> DisplayData {
         get { return _displayData; }
         set {
             _displayData = value;
