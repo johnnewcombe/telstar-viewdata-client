@@ -22,10 +22,11 @@ public partial class MainWindowViewModel {
             if (e.Key == Key.Escape) {
                 // if we press the escape whilst connected it cancels
                 // any help screens or dialogs etc.
-                if (_help) {
+                //if (_help) {
+                    _help = false;
                     // switch back to main display
                     DisplayData = _displayManager.Display.Chars;
-                }
+                //}
             }
 
             

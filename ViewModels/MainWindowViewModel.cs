@@ -11,6 +11,7 @@ using TelstarClient.Comms;
 using TelstarClient.Configuration;
 using TelstarClient.Display;
 using TelstarClient.Extensions;
+using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.ViewModels;
 
@@ -32,8 +33,10 @@ public partial class MainWindowViewModel : ViewModelBase {
     private bool _menu;
     private bool _help;
     private bool _keyCtrl;
+    private List<Char> _displayData;
     private readonly Settings _settings;
     private readonly DisplayManager _displayManager;
+    private readonly DisplayManager _displayManagerAlt;
     private readonly CyclicBuffer _cyclicBuffer;
     private readonly KeyMapper _keyMapper;
     private readonly TCPClient _tcp;
@@ -54,6 +57,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         }
 
         _displayManager = new DisplayManager();
+        _displayManagerAlt = new DisplayManager();
         _settings = new Settings(configFile);
         _keyMapper = new KeyMapper();
         _cyclicBuffer = new CyclicBuffer(2048);
@@ -109,9 +113,9 @@ public partial class MainWindowViewModel : ViewModelBase {
 
             if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
 
-                // updating this property will invoke the OnPropertyChanged event
-                // to update the view
-                if (!_menu) {
+                // if we have displayed the help page, don't update the view
+                // just yet
+                if (!_help) {
                     DisplayData = _displayManager.Display.Chars;
                 }
             }
@@ -127,9 +131,9 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// Diplay data to be displayed by the View.
     /// </summary>
     public List<Models.Char> DisplayData {
-        get { return _displayManager.Display.Chars; }
+        get { return _displayData; }
         set {
-            _displayManager.Display.Chars = value;
+            _displayData = value;
             OnPropertyChanged();
         }
     }
@@ -150,13 +154,15 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     private void DisplayHelp() {
 
+        // for the help we use an alternative display so that any
+        // incoming data can be handled as normal
         Menus.GetHelp();
-        _displayManager.Display.Clear();
-        _displayManager.SetCursorPosition(0, 0);
-        _displayManager.Write(Display.Menus.GetHelp());
+        _displayManagerAlt.Display.Clear();
+        _displayManagerAlt.SetCursorPosition(0, 0);
+        _displayManagerAlt.Write(Display.Menus.GetHelp());
         _help = true;
 
-        DisplayData = _displayManager.Display.Chars;
+        DisplayData = _displayManagerAlt.Display.Chars;
     }
 
     private void DisplayMenu() {
