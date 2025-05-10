@@ -151,12 +151,24 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         DisplayData = _displayManager.Display.Chars;
     }
+    
+    private void DisplayAbout() {
+
+        // for the help we use an alternative display so that any
+        // incoming data can be handled as normal
+        Menus.GetAbout();
+        _displayManagerAlt.Display.Clear();
+        _displayManagerAlt.SetCursorPosition(0, 0);
+        _displayManagerAlt.Write(Display.Menus.GetAbout());
+        _help = true;
+
+        DisplayData = _displayManagerAlt.Display.Chars;
+    }
 
     private void DisplayHelp() {
 
         // for the help we use an alternative display so that any
         // incoming data can be handled as normal
-        Menus.GetHelp();
         _displayManagerAlt.Display.Clear();
         _displayManagerAlt.SetCursorPosition(0, 0);
         _displayManagerAlt.Write(Display.Menus.GetHelp());
@@ -184,7 +196,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         // pop the menu into the placeholder
         _displayManager.Write(Display.Menus.GetMenu().Replace(Constants.PlaceHolder, menuSb.ToString()));
         DisplayData = _displayManager.Display.Chars;
-
+        _menu = true;
     }
 
     #endregion

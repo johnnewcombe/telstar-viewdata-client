@@ -59,4 +59,12 @@ public static class Menus {
 		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}
+
+	public static string GetAbout() {
+		var menu = new StringBuilder();
+		menu.Append("\r\n");
+		menu.Append(Converters.ConvertFromMarkup("                 [D]ABOUT\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
+		return menu.ToString();
+	}
 }

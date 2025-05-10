@@ -34,12 +34,14 @@ public partial class MainWindowViewModel {
                 // previous char was a ctrl            
                 _keyCtrl = false;
                 switch (e.KeySymbol.ToLower()) {
+                    case "a":
+                        DisplayAbout();
+                        break;
                     case "q":
                     case "x":
                     case "z":
                         Disconnect();
                         DisplayMenu();
-                        _menu = true;
                         break;
                     case "h":
                         if (_help) {
