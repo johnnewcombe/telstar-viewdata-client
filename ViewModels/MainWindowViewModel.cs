@@ -1,4 +1,23 @@
-﻿using System;
+﻿/*
+    Copyright (c) 2025 John Newcombe
+
+    This file is part of the Software known as GlassTTY Viewdata Client.
+
+    GlassTTY Viewdata Client is free software: you can redistribute
+    it and/or modify it under the terms of the GNU General Public
+    License as published by the Free Software Foundation, either
+    version 3 of the License, or (at your option) any later version.
+    GlassTTY Viewdata Client is distributed in the hope that it will
+    be useful, but WITHOUT ANY WARRANTY; without even the implied
+    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -31,7 +50,7 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     private string _status;
     private bool _menu;
-    private bool _help;
+    private bool _altFrameDisplayed;
     private bool _keyCtrl;
     private List<Char> _displayData;
     private readonly Settings _settings;
@@ -115,7 +134,7 @@ public partial class MainWindowViewModel : ViewModelBase {
 
                 // if we have displayed the help page, don't update the view
                 // just yet
-                if (!_help) {
+                if (!_altFrameDisplayed) {
                     DisplayData = _displayManager.Display.Chars;
                 }
             }
@@ -151,32 +170,28 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         DisplayData = _displayManager.Display.Chars;
     }
-    
-    private void DisplayAbout() {
 
-        // for the help we use an alternative display so that any
-        // incoming data can be handled as normal
-        Menus.GetAbout();
-        _displayManagerAlt.Display.Clear();
-        _displayManagerAlt.SetCursorPosition(0, 0);
-        _displayManagerAlt.Write(Display.Menus.GetAbout());
-        _help = true;
-
-        DisplayData = _displayManagerAlt.Display.Chars;
-    }
-
-    private void DisplayHelp() {
-
+    /// <summary>
+    /// Displays the specified text (e.g. a Viewdata Frame) on the alternate
+    /// display. The main display is no longer shown but can still be written
+    /// to e.g. from a tcp stream.
+    /// </summary>
+    private void DisplayAltFrame(string frame) {
+        
         // for the help we use an alternative display so that any
         // incoming data can be handled as normal
         _displayManagerAlt.Display.Clear();
         _displayManagerAlt.SetCursorPosition(0, 0);
-        _displayManagerAlt.Write(Display.Menus.GetHelp());
-        _help = true;
+        _displayManagerAlt.Write(frame);
+        _altFrameDisplayed = true;
 
         DisplayData = _displayManagerAlt.Display.Chars;
+
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void DisplayMenu() {
 
         _displayManager.Display.Clear();

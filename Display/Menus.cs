@@ -1,7 +1,23 @@
-using System.Collections.Generic;
+/*
+    Copyright (c) 2025 John Newcombe
+   
+    This file is part of the Software known as GlassTTY Viewdata Client.
+
+    GlassTTY Viewdata Client is free software: you can redistribute
+    it and/or modify it under the terms of the GNU General Public
+    License as published by the Free Software Foundation, either
+    version 3 of the License, or (at your option) any later version.
+    GlassTTY Viewdata Client is distributed in the hope that it will
+    be useful, but WITHOUT ANY WARRANTY; without even the implied
+    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+
+*/
+
 using System.Text;
-using Microsoft.Extensions.Primitives;
-using TelstarClient.Models;
 
 namespace TelstarClient.Display;
 
@@ -55,7 +71,7 @@ public static class Menus {
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl X[C]Disconnect\r\n\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("  [Y]Press Escape to Return to Terminal"));
+		menu.Append(Converters.ConvertFromMarkup("   Press Escape to Return to Terminal"));
 		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}
@@ -64,7 +80,13 @@ public static class Menus {
 		var menu = new StringBuilder();
 		menu.Append("\r\n");
 		menu.Append(Converters.ConvertFromMarkup("                 [D]ABOUT\r\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
+		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("   Version 0.1 (c) John Newcombe 2025\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("  [C]GlassTTY Viewdata Client is free\r\n"));
+		menu.Append(Converters.ConvertFromMarkup("  [C]software provided under the GPL 3\r\n"));
+		menu.Append(Converters.ConvertFromMarkup("  [C]CopyLeft licence.\r\n\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("   Press Escape to Return to Terminal"));
+		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}
 }
