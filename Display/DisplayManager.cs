@@ -1,6 +1,6 @@
 /*
     Copyright (c) 2025 John Newcombe
-   
+
     This file is part of the Software known as GlassTTY Viewdata Client.
 
     GlassTTY Viewdata Client is free software: you can redistribute
@@ -17,11 +17,14 @@
 
 */
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using Avalonia.Controls.Converters;
 using Avalonia.Logging;
-using TelstarClient.Models;
 using TelstarClient.Extensions;
+using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.Display;
 
@@ -38,18 +41,40 @@ public partial class DisplayManager {
     private readonly FontMapper _fontMapper;
     private readonly ColourMapper _colourMapper;
 
+    public delegate void OnDisplayDataChangedEventHandler();
+
+    public event OnDisplayDataChangedEventHandler OnDisplayDataChangedEvent;
+
+    private Timer _stateTimer; // TODO use _stateTimer.Dispose() when exiting the display manager.
+
     #endregion
 
     #region Constructor
 
-    public DisplayManager() {
+    public DisplayManager(bool enableFlash = false) {
         _display = CreateDisplay();
         _cursor = new Cursor();
         _fontMapper = new FontMapper();
         _colourMapper = new ColourMapper();
+
+        Debug.Print("DisplayManager initialized");
+
+        if (enableFlash) {
+            _stateTimer = new Timer(Flash, null, 1000, 1000);
+        }
+
     }
 
     #endregion
+
+    private void Flash(Object state) {
+
+        // Update the display
+        Display.Flash();
+
+        // Raise an event to the mainViewModel to indicate that the display property has changed.
+        OnDisplayDataChangedEvent();
+    }
 
     #region Public Properties
 
@@ -126,14 +151,14 @@ public partial class DisplayManager {
         }
         else {
             // not a control code
-            chr.IsControl = false;
+            chr.Control = false;
 
             // update the value
             chr.Value = character;
 
-            if (chr.IsGraphic) {
+            if (chr.Graphic) {
 
-                var graphicsBase = chr.IsSeparated ? 0xe2c0 : 0xe200;
+                var graphicsBase = chr.Separated ? 0xe2c0 : 0xe200;
 
                 // sort out graphics by selecting the appropriate character in the font
                 if (chr.Value >= 0x20 && chr.Value <= 0x3f) {
@@ -154,9 +179,9 @@ public partial class DisplayManager {
 
         ProcessDoubleHeight(ref chr);
 
-        if (chr.IsControl) {
+        if (chr.Control) {
 
-            if (chr.IsGraphicsHold && chr.IsGraphic) {
+            if (chr.GraphicsHold && chr.Graphic) {
                 chr.Value = _holdGraphicsCharacter;
             }
             else {
@@ -199,7 +224,7 @@ public partial class DisplayManager {
         if (!_display.RowHasDoubleHeight(_cursor.Row)) {
             return;
         }
-        
+
         // TODO what if it was DH but isn't now? do we need to blank the lower row?
 
         // At this point we know the row is double height (i.e. taking up two display rows)
@@ -220,13 +245,13 @@ public partial class DisplayManager {
             // TODO refactor as this is duplicated below for NB etc. and in SetDoubleHeight()
         }
 
-        if (!chr.IsDoubleHeight) {
+        if (!chr.DoubleHeight) {
             return;
         }
 
-//        if (!(chr.IsDoubleHeight ||
-//            (chr.IsControl && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
-//            (chr.IsControl && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row)))) {
+//        if (!(chr.DoubleHeight ||
+//            (chr.Control && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
+//            (chr.Control && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row)))) {
 //            return;
 //        }
 
@@ -240,7 +265,7 @@ public partial class DisplayManager {
         var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + _cursor.Col];
 
         // DH graphic char
-        if (!chr.IsControl && chr.IsGraphic && !chr.IsBlastThrough()) {
+        if (!chr.Control && chr.Graphic && !chr.IsBlastThrough()) {
             // convert to upper and lower font values
             var val = chr.Value;
             chr.Value = (char)(val + 0x40); // graphics font char already set, DH (upper) is 0x40 above
@@ -249,7 +274,7 @@ public partial class DisplayManager {
         }
 
         // DH alpha char
-        else if (!chr.IsControl && (!chr.IsGraphic || chr.IsBlastThrough())) {
+        else if (!chr.Control && (!chr.Graphic || chr.IsBlastThrough())) {
             // convert to upper and lower font values
             var val = chr.Value;
             chr.Value = (char)(val + 0xe020 - 0x20); // chars start from 0x20
@@ -257,8 +282,8 @@ public partial class DisplayManager {
         }
 
         // NB or KB control
-        else if (chr.IsControl && (chr.Value == Constants.NewBackground ||
-                                   chr.Value == Constants.BlackBackground)) {
+        else if (chr.Control && (chr.Value == Constants.NewBackground ||
+                                 chr.Value == Constants.BlackBackground)) {
             // set background to end of lower row or until KB or another NB.
             // upper row will already have been done so copy to lower row including this char
 
@@ -269,8 +294,8 @@ public partial class DisplayManager {
             var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
             foreach (var c in row) {
 
-                if (c.IsControl && (c.Value == Constants.NewBackground ||
-                                    c.Value == Constants.BlackBackground)) {
+                if (c.Control && (c.Value == Constants.NewBackground ||
+                                  c.Value == Constants.BlackBackground)) {
                     break;
                 }
 
@@ -280,7 +305,7 @@ public partial class DisplayManager {
             }
         }
         // FG control
-        else if (chr.IsControl && chr.IsForegroundColourChange()) {
+        else if (chr.Control && chr.IsForegroundColourChange()) {
             var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
             foreach (var c in row) {
                 if (c.IsForegroundColourChange()) {
@@ -348,7 +373,7 @@ public partial class DisplayManager {
     /// <returns></returns>
     private void ApplyNewAttributes(ref Char chr) {
 
-        chr.IsControl = true;
+        chr.Control = true;
 
         if (chr.IsForegroundColourChange()) {
 
@@ -359,9 +384,11 @@ public partial class DisplayManager {
 
         switch (chr.Value) {
 
-            case Constants.Flash: //TODO 
+            case Constants.Flash:
+                SetFlash(ref chr, true);
                 break;
-            case Constants.Steady: //TODO 
+            case Constants.Steady:
+                SetFlash(ref chr, false);
                 break;
             case Constants.NormalHeight:
                 SetNormalHeight(ref chr);
@@ -373,7 +400,7 @@ public partial class DisplayManager {
                 break;
             case Constants.Contiguous:
                 SetSeparatedMode(ref chr, false);
-                chr.IsSeparated = false;
+                chr.Separated = false;
                 break;
             case Constants.Separated:
                 SetSeparatedMode(ref chr, true);
@@ -394,7 +421,7 @@ public partial class DisplayManager {
                 // this is an invalid code for Prestel but we need attributes to be passed to next char
                 Trace.WriteLine(
                     $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
-                chr.IsInvalid = true;
+                chr.Invalid = true;
                 break;
         }
     }

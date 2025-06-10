@@ -56,6 +56,7 @@ public static class Menus {
 		menu.Append(Converters.ConvertFromMarkup("  [C]DIR NAME\r\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[PLACEHOLDER]"));
 		menu.Append(Converters.ConvertFromMarkup("\r\n\n[C]Select item or '0' for Manual Dialling"));
+		menu.Append(Converters.ConvertFromMarkup("\r\n       [C]Ctrl H for to view Help"));
 		return menu.ToString();
 	}
 
@@ -67,11 +68,11 @@ public static class Menus {
 		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl C[C]Conceal\r\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl R[C]Reveal\r\n\n"));
-		//menu.Append(Converters.ConvertFromMarkup(""));
+		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl H[C]Help\r\n\n"));
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl X[C]Disconnect\r\n\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("   Press Escape to Return to Terminal"));
+		menu.Append(Converters.ConvertFromMarkup("         Press any key to Return"));
 		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}

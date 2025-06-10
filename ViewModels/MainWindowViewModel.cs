@@ -75,7 +75,9 @@ public partial class MainWindowViewModel : ViewModelBase {
             Directory.CreateDirectory(_appSupportDirectory);
         }
 
-        _displayManager = new DisplayManager();
+        _displayManager = new DisplayManager(true);
+        _displayManager.OnDisplayDataChangedEvent += DisplayDataChanged;
+        
         _displayManagerAlt = new DisplayManager();
         _settings = new Settings(configFile);
         _keyMapper = new KeyMapper();
@@ -86,9 +88,21 @@ public partial class MainWindowViewModel : ViewModelBase {
         _tcp.OnDataReceivedEvent += OnReceived;
 
     }
-
+    
     #region Data Processing and Notification
+    
+    private void DisplayDataChanged() {
+        // this method is called if the DiplayManager has updated the display internally
+        // e.g. when flashing text (this is handled within the display manager itself)
+        // this allows us to update the Display property of this view model
+        Dispatcher.UIThread.Post(UpdateDisplay);
+        DisplayData = _displayManager.Display.Chars;
+    }
 
+    private void UpdateDisplay() {
+        DisplayData = _displayManager.Display.Chars;
+    }
+    
     private async void UpdateConnectStatus() {
 
         try {

@@ -55,17 +55,17 @@ public partial class DisplayManager {
 
         // the graphics hold control itself is set to display the held char if it exists
         if (chr.Value == Constants.HoldGraphics) {
-            chr.IsGraphicsHold = held;
+            chr.GraphicsHold = held;
         }
         
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
  
         foreach (var c in row) {
  
-            c.IsGraphicsHold = held;
+            c.GraphicsHold = held;
 
             // stop?
-            if (c.IsControl && (c.Value == Constants.ReleaseGraphics)|| 
+            if (c.Control && (c.Value == Constants.ReleaseGraphics)|| 
                 c.Value == Constants.HoldGraphics) {
                 break;
             }
@@ -83,16 +83,27 @@ public partial class DisplayManager {
 
         foreach (var c in row) {
 
-            c.IsSeparated = separated;
+            c.Separated = separated;
 
             // stop?
-            if (c.IsControl && (c.Value == Constants.Separated ||
+            if (c.Control && (c.Value == Constants.Separated ||
                                 c.Value == Constants.Contiguous)) {
                 break;
             }
         }
     }
 
+    private void SetFlash(ref Char chr, bool flash) {
+        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+
+        foreach (var c in row) {
+            c.Flash = flash;
+            // stop?
+            if (c.Control && (c.Value == Constants.Steady)) {
+                break;
+            }
+        }
+    }
 
 // TODO combine with SetBackground??
     /// <summary>
@@ -112,10 +123,10 @@ public partial class DisplayManager {
         foreach (var c in row) {
 
             c.Foreground = colour;
-            c.IsGraphic = isGraphic;
+            c.Graphic = isGraphic;
 
             // stop?
-            if (c.IsControl && c.IsForegroundColourChange()) {
+            if (c.Control && c.IsForegroundColourChange()) {
                 break;
             }
         }
@@ -137,7 +148,7 @@ public partial class DisplayManager {
         foreach (var c in row) {
 
             // stop?
-            if (c.IsControl && c.IsBackgroundColourChange()) {
+            if (c.Control && c.IsBackgroundColourChange()) {
                 break;
             }
 
@@ -152,20 +163,20 @@ public partial class DisplayManager {
     /// <param name="chr"></param>
     private void SetDoubleHeight(ref Char chr) {
 
-        chr.IsDoubleHeight = true;
+        chr.DoubleHeight = true;
 
         // set DH to all chars until EOL or another DH or NH
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
         foreach (var c in row) {
             
             // stop?
-            if (c.IsControl && (c.Value == Constants.DoubleHeight ||
+            if (c.Control && (c.Value == Constants.DoubleHeight ||
                                 c.Value == Constants.NormalHeight)) {
                 break;
             }
 
             // set DH to all chars until EOL or another DH or NH
-            c.IsDoubleHeight = true;
+            c.DoubleHeight = true;
 
         }
 
@@ -188,19 +199,19 @@ public partial class DisplayManager {
     /// <param name="chr"></param>
     private void SetNormalHeight(ref Char chr) {
 
-        chr.IsDoubleHeight = false;
+        chr.DoubleHeight = false;
 
         // reset DH to all chars until EOL or another DH or NH
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
         foreach (var c in row) {
 
             // stop?
-            if (c.IsControl && (c.Value == Constants.DoubleHeight ||
+            if (c.Control && (c.Value == Constants.DoubleHeight ||
                                 c.Value == Constants.NormalHeight)) {
                 break;
             }
 
-            c.IsDoubleHeight = false;
+            c.DoubleHeight = false;
         }
     }
 }

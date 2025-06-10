@@ -26,6 +26,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using Avalonia.Platform;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
@@ -82,8 +83,13 @@ public partial class MainWindow : Window {
     private void Window_KeyDown(object sender, KeyEventArgs e) {
         if (e.Key == Key.LeftCtrl) {
         }
-        
-        ViewModel.KeyHandler(e);
+
+        try {
+            ViewModel.KeyHandler(e);
+        }
+        catch (Exception ex) {
+            Trace.WriteLine(ex.Message);
+        }
     }
 
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
@@ -112,10 +118,15 @@ public partial class MainWindow : Window {
 
             var label = (Label)((Viewbox)display.Children[c.Index]).Child;
 
-            label.Content = c.Value;
-            label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
-            label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
-
+            if (!c.InVisible) {
+                label.Content = c.Value;
+                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
+                label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+            }
+            else {
+                label.Content = "";
+                label.Background = (IImmutableSolidColorBrush)new ImmutableSolidColorBrush(Colors.Black);
+            }
         }
     }
 

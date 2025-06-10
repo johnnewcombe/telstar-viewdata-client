@@ -33,13 +33,15 @@ public class Char {
 
     // NOTE, changing anything here MUST be reflected in the Extensions Class also.
     public char Value { get; set; }
-    public bool IsInvalid { get; set; }
-    public bool IsControl { get; set; }
-    public bool IsConcealed { get; set; }
-    public bool IsSeparated { get; set; }
-    public bool IsGraphic { get; set; }
-    public bool IsGraphicsHold { get; set; }
-    public bool IsDoubleHeight { get; set; }
+    public bool InVisible { get; set; }
+    public bool Invalid { get; set; }
+    public bool Control { get; set; }
+    public bool Concealed { get; set; }
+    public bool Flash { get; set; }
+    public bool Separated { get; set; }
+    public bool Graphic { get; set; }
+    public bool GraphicsHold { get; set; }
+    public bool DoubleHeight { get; set; }
     public int Index { get; set; }
     public string Foreground { get; set; }
     public string Background { get; set; }

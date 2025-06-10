@@ -37,7 +37,7 @@ public static class Extensions {
     /// <returns></returns>
     public static bool IsBlastThrough(this Char chr) {
 
-        if (chr.IsGraphic && chr.Value >= 0x40 && chr.Value <= 0x5A) {
+        if (chr.Graphic && chr.Value >= 0x40 && chr.Value <= 0x5A) {
             return true;
         }
 
@@ -50,7 +50,7 @@ public static class Extensions {
     /// <param name="chr"></param>
     /// <returns></returns>
     public static bool IsAlphaColourChange(this Char chr) {
-        return chr.IsControl && (chr.Value >= Constants.AlphaRed && chr.Value <= Constants.AlphaWhite);
+        return chr.Control && (chr.Value >= Constants.AlphaRed && chr.Value <= Constants.AlphaWhite);
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public static class Extensions {
     /// <param name="chr"></param>
     /// <returns></returns>
     public static bool IsGraphicColourChange(this Char chr) {
-        return chr.IsControl && (chr.Value >= Constants.GraphicRed && chr.Value <= Constants.GraphicWhite);
+        return chr.Control && (chr.Value >= Constants.GraphicRed && chr.Value <= Constants.GraphicWhite);
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public static class Extensions {
     /// <param name="chr"></param>
     /// <returns></returns>
     public static bool IsBackgroundColourChange(this Char chr) {
-        return chr.IsControl && (chr.Value == Constants.NewBackground || chr.Value == Constants.BlackBackground);
+        return chr.Control && (chr.Value == Constants.NewBackground || chr.Value == Constants.BlackBackground);
     }
 
     #endregion
@@ -97,12 +97,14 @@ public static class Extensions {
             c.Foreground = Constants.DefaultForeground;
             c.Background = Constants.DefaultBackground;
             c.Value = Models.Display.SPC;
-            c.IsControl = false;
-            c.IsConcealed = false;
-            c.IsSeparated = false;
-            c.IsGraphic = false;
-            c.IsGraphicsHold = false;
-            c.IsDoubleHeight = false;
+            c.InVisible = false;
+            c.Control = false;
+            c.Flash = false;
+            c.Concealed = false;
+            c.Separated = false;
+            c.Graphic = false;
+            c.GraphicsHold = false;
+            c.DoubleHeight = false;
         }
 
         // clear the row references
@@ -110,7 +112,21 @@ public static class Extensions {
             display.RowReferences[i] = 0;
         }
     }
-    
+
+    public static void Flash(this Models.Display display) {
+
+        // TODO access c.Flash in a threadsafe way as this method is called from
+        //   a thread pool thread
+        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+            var c = display.Chars[i];
+            if (c.Flash) {
+                // TODO lock
+                c.InVisible = !c.InVisible;
+            }
+        }
+        
+    }
+
     /// <summary>
     /// Determines if the specified row is read only. This is typically used to protect the lower row
     /// of a double height row from being overwritten.
@@ -195,7 +211,7 @@ public static class Extensions {
     /// <param name="backgroundColour"></param>
     public static void SetStatusText(this Models.Display display, string status,
         string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
-
+        
         // clear the row
         for (var i = 0; i < Models.Display.COLS; i++) {
             var cell = display.Chars[24 * Models.Display.COLS + i];
