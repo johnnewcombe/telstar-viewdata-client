@@ -33,25 +33,14 @@ public partial class MainWindowViewModel {
     /// <param name="e"></param>
     public async Task KeyHandler(KeyEventArgs e) {
 
-        Trace.WriteLine($"Key:{e.Key.ToString()}, Symbol:{e.KeySymbol}, Physical Key:{e.PhysicalKey.ToString()}");
-
+        Trace.TraceInformation($"Key:{e.Key.ToString()}, Symbol:{e.KeySymbol}, Physical Key:{e.PhysicalKey.ToString()} Modifiers: {e.KeyModifiers}");
+        
         // if connected then help is available also
         if (_tcp.IsConnected()) {
+            
+            if (e.KeyModifiers == KeyModifiers.Control) {
 
-            // control char ?
-            if (e.Key == Key.LeftCtrl) {
-                _keyCtrl = true;
-
-                // control key only valid for 500ms
-                await Task.Delay(500);
-                _keyCtrl = false;
-
-                return;
-            }
-
-            if (_keyCtrl) {
                 // previous char was a ctrl            
-                _keyCtrl = false;
                 switch (e.KeySymbol.ToLower()) {
                     case "a":
                         DisplayAltFrame(Menus.GetAbout());
