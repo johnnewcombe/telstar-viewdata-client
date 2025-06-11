@@ -55,8 +55,8 @@ public static class Menus {
 		menu.Append(Converters.ConvertFromMarkup("              [C][D]DIRECTORY\r\n\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("  [C]DIR NAME\r\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[PLACEHOLDER]"));
-		menu.Append(Converters.ConvertFromMarkup("\r\n\n[C]Select item or '0' for Manual Dialling"));
-		menu.Append(Converters.ConvertFromMarkup("\r\n       [C]Ctrl H for to view Help"));
+		menu.Append(Converters.ConvertFromMarkup("\r\n\n    [C]Select '0' for Manual Dialling"));
+		menu.Append(Converters.ConvertFromMarkup("\r\n\n       [W]Ctrl-H for to view Help"));
 		return menu.ToString();
 	}
 

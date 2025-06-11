@@ -99,7 +99,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         // however we must only do this if we are NOT displaying the altDisplay e.g.Menu/Help etc
         Trace.TraceInformation($"Menu {_menu}");
         
-        if (!_menu) {
+        if (!_altFrameDisplayed) {
             Dispatcher.UIThread.Post(UpdateDisplay);
         }
     }

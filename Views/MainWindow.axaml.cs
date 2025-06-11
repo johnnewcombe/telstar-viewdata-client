@@ -41,16 +41,14 @@ public partial class MainWindow : Window {
         InitializeComponent();
 
         Trace.Listeners.Add(new ConsoleTraceListener());
-        
+
         ViewModel = new MainWindowViewModel();
-        //ViewModel = DataContext as MainWindowViewModel;
         ViewModel.PropertyChanged += this.PropertyChangedEventHandler;
 
-        // remove title bar and chrome etc.
-        // if Kiosk mode
-        //this.ExtendClientAreaToDecorationsHint = true;
-        //this.ExtendClientAreaChromeHints = ExtendClientAreaChromeHints. NoChrome;
-        //this.WindowState = WindowState.FullScreen;
+        // remove title bar and chrome etc. e.g. if Kiosk mode
+        //ExtendClientAreaToDecorationsHint = true;
+        //ExtendClientAreaChromeHints = ExtendClientAreaChromeHints. NoChrome;
+        //WindowState = WindowState.FullScreen;
         //this.Topmost = true;
         
         //initialise the display
