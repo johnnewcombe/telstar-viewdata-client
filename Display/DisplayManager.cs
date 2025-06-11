@@ -40,7 +40,8 @@ public partial class DisplayManager {
     private char _holdGraphicsCharacter;
     private readonly FontMapper _fontMapper;
     private readonly ColourMapper _colourMapper;
-
+    private string _name;
+    
     public delegate void OnDisplayDataChangedEventHandler();
 
     public event OnDisplayDataChangedEventHandler OnDisplayDataChangedEvent;
@@ -51,24 +52,25 @@ public partial class DisplayManager {
 
     #region Constructor
 
-    public DisplayManager(bool enableFlash = false) {
+    public DisplayManager( bool enableFlash = false) {
+        
         _display = CreateDisplay();
         _cursor = new Cursor();
         _fontMapper = new FontMapper();
         _colourMapper = new ColourMapper();
-
-        //Debug.Print("DisplayManager initialized");
-
+        
         if (enableFlash) {
             _stateTimer = new Timer(Flash, null, 1000, 1000);
         }
-
     }
 
     #endregion
 
     private void Flash(Object state) {
 
+        
+        Trace.TraceInformation($"DisplayManager Flash {DateTime.Now}");
+        
         // Update the display
         Display.Flash();
 
@@ -95,7 +97,7 @@ public partial class DisplayManager {
 
     public bool WriteChar(char character) {
 
-        //Trace.WriteLine($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
+        //Trace.TraceInformation($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
@@ -419,14 +421,13 @@ public partial class DisplayManager {
                 break;
             default:
                 // this is an invalid code for Prestel but we need attributes to be passed to next char
-                Trace.WriteLine(
-                    $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
+                //Trace.TraceWarning(
+                //    $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
                 chr.Invalid = true;
                 break;
         }
     }
-
-
+    
     private Models.Display CreateDisplay() {
 
         var display = new Models.Display();

@@ -42,8 +42,8 @@ public partial class MainWindow : Window {
 
         Trace.Listeners.Add(new ConsoleTraceListener());
         
-        //ViewModel = new MainWindowViewModel();
-        ViewModel = DataContext as MainWindowViewModel;
+        ViewModel = new MainWindowViewModel();
+        //ViewModel = DataContext as MainWindowViewModel;
         ViewModel.PropertyChanged += this.PropertyChangedEventHandler;
 
         // remove title bar and chrome etc.
@@ -55,6 +55,7 @@ public partial class MainWindow : Window {
         
         //initialise the display
         display.Children.Clear();
+
 
         // note that we create an extra row of labels for the status line
         for (int i = 0; i < Models.Display.COLS * (Models.Display.ROWS + 1); i++) {
@@ -71,7 +72,7 @@ public partial class MainWindow : Window {
                     UpdateDisplay();
                 }
                 catch (Exception ex) {
-                    Trace.WriteLine(ex.Message);
+                    Trace.TraceError(ex.Message);
                 }
 
                 break;
@@ -90,7 +91,7 @@ public partial class MainWindow : Window {
             ViewModel.KeyHandler(e);
         }
         catch (Exception ex) {
-            Trace.WriteLine(ex.Message);
+            Trace.TraceError(ex.Message);
         }
     }
 

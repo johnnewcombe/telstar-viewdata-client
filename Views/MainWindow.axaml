@@ -16,16 +16,12 @@
         KeyDown="Window_KeyDown"
         >
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <!--<Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
     <Window.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
-    </Window.DataContext>
+    </Window.DataContext>-->
     <!--<Grid ShowGridLines="False" Margin="0,0,0,0" RowDefinitions="*" Background="Silver">-->
         <!-- Main Area -->
         <!--<Grid ShowGridLines="False" Grid.Row="1" ColumnDefinitions="Auto,*">-->
