@@ -57,7 +57,7 @@ public partial class DisplayManager {
         _fontMapper = new FontMapper();
         _colourMapper = new ColourMapper();
 
-        Debug.Print("DisplayManager initialized");
+        //Debug.Print("DisplayManager initialized");
 
         if (enableFlash) {
             _stateTimer = new Timer(Flash, null, 1000, 1000);

@@ -1,6 +1,6 @@
 /*
     Copyright (c) 2025 John Newcombe
-   
+
     This file is part of the Software known as GlassTTY Viewdata Client.
 
     GlassTTY Viewdata Client is free software: you can redistribute
@@ -17,6 +17,8 @@
 
 */
 
+using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using TelstarClient.Display;
@@ -25,11 +27,13 @@ namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel {
 
-        /// <summary>
-    /// Handles keyboard activity passsed from the View.
+    /// <summary>
+    /// Handles keyboard activity passed from the View.
     /// </summary>
     /// <param name="e"></param>
     public async Task KeyHandler(KeyEventArgs e) {
+
+        Trace.WriteLine($"Key:{e.Key.ToString()}, Symbol:{e.KeySymbol}, Physical Key:{e.PhysicalKey.ToString()}");
 
         // if connected then help is available also
         if (_tcp.IsConnected()) {
@@ -37,20 +41,20 @@ public partial class MainWindowViewModel {
             // control char ?
             if (e.Key == Key.LeftCtrl) {
                 _keyCtrl = true;
-                
+
                 // control key only valid for 500ms
                 await Task.Delay(500);
                 _keyCtrl = false;
 
                 return;
             }
-            
+
             if (_keyCtrl) {
                 // previous char was a ctrl            
                 _keyCtrl = false;
                 switch (e.KeySymbol.ToLower()) {
                     case "a":
-                            DisplayAltFrame(Menus.GetAbout());
+                        DisplayAltFrame(Menus.GetAbout());
                         break;
                     case "q":
                     case "x":
@@ -59,7 +63,7 @@ public partial class MainWindowViewModel {
                         DisplayMenu();
                         break;
                     case "h":
-                            DisplayAltFrame(Menus.GetHelp());
+                        DisplayAltFrame(Menus.GetHelp());
                         break;
                     case "r":
                     case "c":
@@ -72,7 +76,7 @@ public partial class MainWindowViewModel {
                     // any help screens or dialogs etc.
                     if (_altFrameDisplayed) {
                         _altFrameDisplayed = false;
-                        // switch back to main display
+                        // switch back to main display*
                         DisplayData = _displayManager.Display.Chars;
                     }
                     else {
@@ -94,19 +98,20 @@ public partial class MainWindowViewModel {
             // TODO Help available in disconnected state
             //
             //
-            
+
             // not Connected so connect
             // key press is a string, so convert to int, get the appropriate
             // connection details and connect
             if (int.TryParse(e.KeySymbol, out var index)) {
 
                 if (index == 0) {
-                    
+
                     // Manual dialing
                     //
                     // TODO Implement Manual connections
-                    
-                } else if (index > 0 && index < _settings.config.Connections.Count) {
+
+                }
+                else if (index > 0 && index < _settings.config.Connections.Count) {
 
                     // index-1 as menu is '1' based and collection is '0' based
                     var con = _settings.config.Connections[index - 1];

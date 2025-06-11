@@ -96,7 +96,6 @@ public partial class MainWindowViewModel : ViewModelBase {
         // e.g. when flashing text (this is handled within the display manager itself)
         // this allows us to update the Display property of this view model
         Dispatcher.UIThread.Post(UpdateDisplay);
-        DisplayData = _displayManager.Display.Chars;
     }
 
     private void UpdateDisplay() {
