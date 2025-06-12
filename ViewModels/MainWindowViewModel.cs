@@ -107,8 +107,6 @@ public partial class MainWindowViewModel : ViewModelBase {
         // this allows us to update the Display property of this view model
         
         // however we must only do this if we are NOT displaying the altDisplay e.g.Menu/Help etc
-        Log.Debug($"Menu {_menu}");
-        
         if (!_altFrameDisplayed) {
             Dispatcher.UIThread.Post(UpdateDisplay);
         }

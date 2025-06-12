@@ -40,7 +40,7 @@ public static class Menus {
 		logo.Append(Converters.ConvertFromMarkup("[c][sg]j5*o5\x7f   \x7f//\x7f\"//o4+//}  j5   \x7f  \"//\x7f\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("[c][sg]*}|~%\x7f||4\x7f  \x7f*||~%m||?  j5   \x7f  m||?\r\n"));
 		logo.Append(Converters.ConvertFromMarkup("\r\n\n\n"));
-		logo.Append(Converters.ConvertFromMarkup("[D][n][B]         Viewdata Terminal\r\n"));
+		logo.Append(Converters.ConvertFromMarkup("[D][n][B][9]Viewdata Terminal\r\n"));
 
 		// alignment guide
 		//logo.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
@@ -52,11 +52,11 @@ public static class Menus {
 		var menu = new StringBuilder();
 		//menu.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
 		menu.Append("\r\n");
-		menu.Append(Converters.ConvertFromMarkup("              [C][D]DIRECTORY\r\n\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("  [C]DIR NAME\r\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("[PLACEHOLDER]"));
-		menu.Append(Converters.ConvertFromMarkup("\r\n\n    [C]Select '0' for Manual Dialling"));
-		menu.Append(Converters.ConvertFromMarkup("\r\n\n       [W]Ctrl-H for to view Help"));
+		menu.Append(Converters.ConvertFromMarkup("[7][7][C][D]DIRECTORY\r\n\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[2][C]DIR NAME\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[0][PLACEHOLDER]"));
+		menu.Append(Converters.ConvertFromMarkup("\r\n\n[4][C]Select '0' for Manual Dialling"));
+		menu.Append(Converters.ConvertFromMarkup("\r\n\n[7][W]Ctrl-H for to view Help"));
 		return menu.ToString();
 	}
 
@@ -64,7 +64,7 @@ public static class Menus {
 		
 		var menu = new StringBuilder();
 		menu.Append("\r\n");
-		menu.Append(Converters.ConvertFromMarkup("                 [D]HELP\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[9][8][D]HELP\r\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl C[C]Conceal\r\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl R[C]Reveal\r\n\n"));
@@ -72,7 +72,7 @@ public static class Menus {
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl X[C]Disconnect\r\n\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("         Press any key to Return"));
+		menu.Append(Converters.ConvertFromMarkup("[9]Press any key to Return"));
 		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}
@@ -80,13 +80,13 @@ public static class Menus {
 	public static string GetAbout() {
 		var menu = new StringBuilder();
 		menu.Append("\r\n");
-		menu.Append(Converters.ConvertFromMarkup("                 [D]ABOUT\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[9][8][D]ABOUT\r\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("   Version 0.1 (c) John Newcombe 2025\r\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("  [C]GlassTTY Viewdata Client is free\r\n"));
-		menu.Append(Converters.ConvertFromMarkup("  [C]software provided under the GPL 3\r\n"));
-		menu.Append(Converters.ConvertFromMarkup("  [C]CopyLeft licence.\r\n\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("   Press Escape to Return to Terminal"));
+		menu.Append(Converters.ConvertFromMarkup("[3]Version 0.1 (c) John Newcombe 2025\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[2][C]GlassTTY Viewdata Client is free\r\n"));
+		menu.Append(Converters.ConvertFromMarkup("[2][C]software provided under the GPL 3\r\n"));
+		menu.Append(Converters.ConvertFromMarkup("[2][C]CopyLeft licence.\r\n\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[3]Press Escape to Return to Terminal"));
 		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}

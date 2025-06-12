@@ -67,9 +67,6 @@ public partial class DisplayManager {
     #endregion
 
     private void Flash(Object state) {
-
-        
-        Logging.Log.Debug($"DisplayManager Flash {DateTime.Now}");
         
         // Update the display
         Display.Flash();

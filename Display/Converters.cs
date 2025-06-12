@@ -19,6 +19,8 @@
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices.Marshalling;
+using System.Text.RegularExpressions;
+using TelstarClient.Logging;
 
 namespace TelstarClient.Display;
 
@@ -82,6 +84,23 @@ public static class Converters {
     /// <returns></returns>
     public static string ConvertFromMarkup(string markup) {
 
+        // this is the markup pattern for inserting spaces e.g. [7]
+        // TODO make this support more than 0-9 i.e.0-99
+        var pattern = "[[0-9]\\]";
+        
+        Regex rg = new Regex(pattern);
+        var matches = rg.Matches(markup);
+        if (matches.Count > 0) {
+
+            foreach (var match in matches) {
+                // get number of spaces and pop them in the message
+                int iSpaces = 0;
+                if (int.TryParse(match.ToString().TrimEnd([']']), out iSpaces)) {
+                    markup = markup.Replace($"[{match}", string.Empty.PadLeft(iSpaces));
+                }
+            }
+        }
+        
         markup = markup.Replace("[R]", ALPHA_RED);
         markup = markup.Replace("[R]", ALPHA_RED);
         markup = markup.Replace("[G]", ALPHA_GREEN);
