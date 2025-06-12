@@ -84,19 +84,22 @@ public static class Converters {
     /// <returns></returns>
     public static string ConvertFromMarkup(string markup) {
 
-        // this is the markup pattern for inserting spaces e.g. [7]
-        // TODO make this support more than 0-9 i.e.0-99
-        var pattern = "[[0-9]\\]";
+        // this is the markup pattern for inserting spaces e.g. [7] or [17]
+        var pattern = "[[0-9]{1,2}\\]";
         
         Regex rg = new Regex(pattern);
         var matches = rg.Matches(markup);
         if (matches.Count > 0) {
 
             foreach (var match in matches) {
+
+                // get the match without the brackets
+                var ms = match.ToString().TrimEnd(']').TrimStart('[');
+
                 // get number of spaces and pop them in the message
                 int iSpaces = 0;
-                if (int.TryParse(match.ToString().TrimEnd([']']), out iSpaces)) {
-                    markup = markup.Replace($"[{match}", string.Empty.PadLeft(iSpaces));
+                if (int.TryParse(ms, out iSpaces)) {
+                    markup = markup.Replace($"[{ms}]", string.Empty.PadLeft(iSpaces));
                 }
             }
         }
