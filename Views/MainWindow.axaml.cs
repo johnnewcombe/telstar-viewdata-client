@@ -40,7 +40,7 @@ public partial class MainWindow : Window {
     public MainWindow() {
         InitializeComponent();
 
-        Trace.Listeners.Add(new ConsoleTraceListener());
+
 
         ViewModel = new MainWindowViewModel();
         ViewModel.PropertyChanged += this.PropertyChangedEventHandler;

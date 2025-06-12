@@ -152,8 +152,6 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// </summary>
     private void ProcessReceiveBuffer() {
 
-        //Debug.Print($"Buffer Size: {_cyclicBuffer.Count}");
-
         // get data from buffer and process for viewdata 
         while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
 

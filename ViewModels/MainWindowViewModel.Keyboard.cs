@@ -21,6 +21,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia.Input;
+using Avalonia.Logging;
 using TelstarClient.Display;
 
 namespace TelstarClient.ViewModels;
@@ -33,7 +34,7 @@ public partial class MainWindowViewModel {
     /// <param name="e"></param>
     public async Task KeyHandler(KeyEventArgs e) {
 
-        Logging.Log.Information($"Key:{e.Key.ToString()}, Symbol:{e.KeySymbol}, Physical Key:{e.PhysicalKey.ToString()} Modifiers: {e.KeyModifiers}");
+        Logging.Log.Debug($"Key:{e.Key.ToString()}, Symbol:{e.KeySymbol}, Physical Key:{e.PhysicalKey.ToString()} Modifiers: {e.KeyModifiers}");
         
         // if connected then help is available also
         if (_tcp.IsConnected()) {
@@ -71,8 +72,8 @@ public partial class MainWindowViewModel {
                     else {
                         var keySymbol = _keyMapper.Map(e.KeySymbol);
 
-                        if (_tcp.Write(keySymbol)) {
-                            //Trace.Print("Sent=>{0}", data);
+                        if (!_tcp.Write(keySymbol)) {
+                            Logging.Log.Error($"Keyboard entry no sent:{keySymbol}");
                         }
                     }
                 }
