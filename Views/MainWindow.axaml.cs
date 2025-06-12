@@ -70,7 +70,7 @@ public partial class MainWindow : Window {
                     UpdateDisplay();
                 }
                 catch (Exception ex) {
-                    Trace.TraceError(ex.Message);
+                    Logging.Log.Error(ex.Message);
                 }
 
                 break;
@@ -89,7 +89,7 @@ public partial class MainWindow : Window {
             ViewModel.KeyHandler(e);
         }
         catch (Exception ex) {
-            Trace.TraceError(ex.Message);
+            Logging.Log.Error(ex.Message);
         }
     }
 

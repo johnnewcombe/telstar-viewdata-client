@@ -69,7 +69,7 @@ public partial class DisplayManager {
     private void Flash(Object state) {
 
         
-        Trace.TraceInformation($"DisplayManager Flash {DateTime.Now}");
+        Logging.Log.Debug($"DisplayManager Flash {DateTime.Now}");
         
         // Update the display
         Display.Flash();
@@ -97,7 +97,7 @@ public partial class DisplayManager {
 
     public bool WriteChar(char character) {
 
-        //Trace.TraceInformation($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
+        //Logging.Log.Information($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
@@ -421,7 +421,7 @@ public partial class DisplayManager {
                 break;
             default:
                 // this is an invalid code for Prestel but we need attributes to be passed to next char
-                //Trace.TraceWarning(
+                //Logging.Log.Warning(
                 //    $"ApplyNewAttributes -  Row: {_cursor.Row}, Col:{_cursor.Col}, Value: {(int)chr.Value:X2}");
                 chr.Invalid = true;
                 break;

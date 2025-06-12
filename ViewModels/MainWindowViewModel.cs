@@ -26,21 +26,24 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Microsoft.Extensions.Configuration;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
 using TelstarClient.Display;
 using TelstarClient.Extensions;
+using TelstarClient.Logging;
 using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase {
-
+    
     private const string ConnectedStatus = "CONNECTED";
     private const string DisconnectedStatus = "DISCONNECTED";
     private const string ErrorStatus = "UNABLE TO CONNECT";
     private const string ConnectingStatus = "CONNECTING";
 
+    private IConfiguration _config;
     private readonly string _appSupportDirectory =
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
@@ -64,6 +67,13 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// Constructor
     /// </summary>
     public MainWindowViewModel() {
+
+        _config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        // set the log level
+        Log.LogLevel(_config.GetSection("Logging:LogLevel:System").Value);
         
         DisplayWelcomeMessage();
         
@@ -97,7 +107,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         // this allows us to update the Display property of this view model
         
         // however we must only do this if we are NOT displaying the altDisplay e.g.Menu/Help etc
-        Trace.TraceInformation($"Menu {_menu}");
+        Log.Debug($"Menu {_menu}");
         
         if (!_altFrameDisplayed) {
             Dispatcher.UIThread.Post(UpdateDisplay);
@@ -130,7 +140,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             // ensures that all exceptions are handled within the async body
             // not handling them with void async methods can cause the process
             // to crash
-            Trace.TraceError(e.Message);
+            Logging.Log.Error(e.Message);
         }
         finally {
             DisplayData = _displayManager.Display.Chars;

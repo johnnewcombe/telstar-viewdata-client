@@ -20,6 +20,9 @@
         <AvaloniaResource Include="Assets\defaultConfig.json">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </AvaloniaResource>
+        <None Update="appsettings.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>

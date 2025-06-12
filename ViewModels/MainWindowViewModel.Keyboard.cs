@@ -33,7 +33,7 @@ public partial class MainWindowViewModel {
     /// <param name="e"></param>
     public async Task KeyHandler(KeyEventArgs e) {
 
-        Trace.TraceInformation($"Key:{e.Key.ToString()}, Symbol:{e.KeySymbol}, Physical Key:{e.PhysicalKey.ToString()} Modifiers: {e.KeyModifiers}");
+        Logging.Log.Information($"Key:{e.Key.ToString()}, Symbol:{e.KeySymbol}, Physical Key:{e.PhysicalKey.ToString()} Modifiers: {e.KeyModifiers}");
         
         // if connected then help is available also
         if (_tcp.IsConnected()) {
