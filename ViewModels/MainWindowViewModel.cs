@@ -43,7 +43,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private const string ErrorStatus = "UNABLE TO CONNECT";
     private const string ConnectingStatus = "CONNECTING";
 
-    private IConfiguration _config;
+    private IConfiguration _appSettings;
     private readonly string _appSupportDirectory =
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
@@ -68,12 +68,12 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// </summary>
     public MainWindowViewModel() {
 
-        _config = new ConfigurationBuilder()
+        _appSettings = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();
 
         // set the log level
-        Log.LogLevel(_config.GetSection("Logging:LogLevel:System").Value);
+        Log.LogLevel(_appSettings.GetSection("Logging:LogLevel:System").Value);
         
         DisplayWelcomeMessage();
         
