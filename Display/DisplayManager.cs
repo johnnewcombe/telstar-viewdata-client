@@ -209,6 +209,34 @@ public partial class DisplayManager {
         _cursor.Col = column;
     }
 
+    public void SetStatusText(string status,
+        string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
+        
+        // clear the row
+        for (var i = 0; i < Models.Display.COLS; i++) {
+            var cell = _display.Chars[24 * Models.Display.COLS + i];
+            cell.Value = Models.Display.SPC;
+        }
+        
+        // work out the starting column so that the text is centred
+        var col = (Models.Display.COLS / 2) - (status.Length / 2);
+
+        // add the text and attributes to the status row
+        foreach (var c in status) {
+
+            var cell = _display.Chars[24 * Models.Display.COLS + col];
+            cell.Value = c;
+            cell.Foreground = foregroundColour;
+            cell.Background = backgroundColour;
+            col++;
+
+            // belts and braces
+            if (col >= Models.Display.COLS) {
+                break;
+            }
+        }
+    }
+    
     #endregion
 
     #region Private Methods
@@ -395,7 +423,13 @@ public partial class DisplayManager {
             case Constants.DoubleHeight:
                 SetDoubleHeight(ref chr);
                 break;
-            case Constants.Conceal: //TODO 
+            case Constants.Conceal:
+                // there is no reveal code, reveal is executed by the user
+                // normally a control code affects the following cells, however conceal
+                // is unusual in that the position where the control code is, is also affected.
+                // This wouldn't normally matter as control codes are blank. However if Hold 
+                // Graphics is set, it would matter.
+                SetConceal(ref chr, true);
                 break;
             case Constants.Contiguous:
                 SetSeparatedMode(ref chr, false);

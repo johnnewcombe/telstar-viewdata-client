@@ -18,7 +18,6 @@
 */
 
 using System;
-using System.Diagnostics;
 using System.Threading;
 using Avalonia.Threading;
 using TelstarClient.Extensions;
@@ -29,16 +28,16 @@ public partial class MainWindowViewModel {
 
     #region TCP Client Control and Events
 
-    private Lock locker = new();
+    private Lock _lock = new();
     private bool _connectStatus;
 
     public bool ConnectStatus {
         get {
-            lock (locker)
+            lock (_lock)
                 return _connectStatus;
         }
         set {
-            lock (locker)
+            lock (_lock)
                 _connectStatus = value;
         }
     }
@@ -48,12 +47,11 @@ public partial class MainWindowViewModel {
 
             // open the tcp client
             _cyclicBuffer.Clear();
-            _menu = false;
 
             _tcp.Connect(ip, port);
 
-            _displayManager.Display.SetStatusText(ConnectingStatus);
-            DisplayData = _displayManager.Display.Chars;
+            _status = ConnectingStatus;
+            DisplayData = _displayManagerMain.Display.Chars;
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks

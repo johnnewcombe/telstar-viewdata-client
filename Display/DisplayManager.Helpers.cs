@@ -93,6 +93,18 @@ public partial class DisplayManager {
         }
     }
 
+    private void SetConceal(ref Char chr, bool conceal) {
+        var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+        
+        foreach (var c in row) {
+            c.Concealed = conceal;
+            // stop?
+            if (c.Control && (c.Value == Constants.Steady)) {
+                break;
+            }
+        }
+    }
+    
     private void SetFlash(ref Char chr, bool flash) {
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
 

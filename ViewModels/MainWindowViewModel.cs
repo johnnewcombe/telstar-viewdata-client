@@ -37,27 +37,41 @@ using Char = TelstarClient.Models.Char;
 namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase {
-    
+
     private const string ConnectedStatus = "CONNECTED";
     private const string DisconnectedStatus = "DISCONNECTED";
     private const string ErrorStatus = "UNABLE TO CONNECT";
     private const string ConnectingStatus = "CONNECTING";
+    private const string ConfigFile = "config.json";
 
+    // used to keep track of what is being displayed to the user
+    // the order is unimportant EXCEPT that 'Welcome' must be the
+    // first entry.
+    private enum DisplayType {
+        Welcome,
+        Menu,
+        Terminal,
+        Help,
+        About,
+        Config
+    }
+
+    // this is used to access the appSettings.json file
+    // this is separate from the user config.json
     private IConfiguration _appSettings;
+
     private readonly string _appSupportDirectory =
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
         Path.DirectorySeparatorChar;
 
-    private const string ConfigFile = "config.json";
-
+    private string _statusText;
     private string _status;
-    private bool _menu;
-    private bool _altFrameDisplayed;
+    private DisplayType _displayType;
     private bool _keyCtrl;
     private List<Char> _displayData;
     private readonly Settings _settings;
-    private readonly DisplayManager _displayManager;
+    private readonly DisplayManager _displayManagerMain;
     private readonly DisplayManager _displayManagerAlt;
     private readonly CyclicBuffer _cyclicBuffer;
     private readonly KeyMapper _keyMapper;
@@ -75,8 +89,6 @@ public partial class MainWindowViewModel : ViewModelBase {
         // set the log level
         Log.LogLevel(_appSettings.GetSection("Logging:LogLevel:System").Value);
         
-        DisplayWelcomeMessage();
-        
         var configFile = _appSupportDirectory + ConfigFile;
 
         // create the app suport directory if it doesn't exist
@@ -85,10 +97,17 @@ public partial class MainWindowViewModel : ViewModelBase {
             Directory.CreateDirectory(_appSupportDirectory);
         }
 
-        _displayManager = new DisplayManager(true);
-        _displayManager.OnDisplayDataChangedEvent += DisplayDataChanged;
-        
+        // set up the alt display and show the welcome message
+        // this will set the 'displayType' to 'Welcome'
         _displayManagerAlt = new DisplayManager();
+        
+        // note that this method is asynchronous and includes a delay such
+        // that it completes AFTER the constructor has completed
+        DisplayWelcomeMessage();
+        
+        _displayManagerMain = new DisplayManager(true);
+        _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChanged;
+
         _settings = new Settings(configFile);
         _keyMapper = new KeyMapper();
         _cyclicBuffer = new CyclicBuffer(2048);
@@ -98,40 +117,38 @@ public partial class MainWindowViewModel : ViewModelBase {
         _tcp.OnDataReceivedEvent += OnReceived;
 
     }
-    
+
     #region Data Processing and Notification
-    
+
     private void DisplayDataChanged() {
         // this method is called if the DiplayManager has updated the display internally
         // e.g. when flashing text (this is handled within the display manager itself)
         // this allows us to update the Display property of this view model
-        
-        // however we must only do this if we are NOT displaying the altDisplay e.g.Menu/Help etc
-        if (!_altFrameDisplayed) {
+
+        // however we must only do this if we are displaying Viewdata screen
+        if (_displayType == DisplayType.Terminal) { 
             Dispatcher.UIThread.Post(UpdateDisplay);
         }
     }
 
     private void UpdateDisplay() {
-        DisplayData = _displayManager.Display.Chars;
+        DisplayData = _displayManagerMain.Display.Chars;
     }
-    
+
     private async void UpdateConnectStatus() {
 
         try {
             var status = ConnectStatus;
             if (status) {
-                _displayManager.Display.SetStatusText(ConnectedStatus);
+                _status = ConnectedStatus;
             }
             else {
-
-                _displayManager.Display.SetStatusText(ErrorStatus);
-                DisplayData = _displayManager.Display.Chars;
+                _status = ErrorStatus;
 
                 // delay, can't just use Thread.Sleep(2000) as this causes UI thread
                 // to stop and prevents display of above message
                 await Task.Delay(2000);
-                _displayManager.Display.SetStatusText(DisconnectedStatus);
+                _status = DisconnectedStatus;
             }
         }
         catch (Exception e) {
@@ -141,7 +158,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             Logging.Log.Error(e.Message);
         }
         finally {
-            DisplayData = _displayManager.Display.Chars;
+            //DisplayData = _displayManagerMain.Display.Chars;
         }
     }
 
@@ -155,12 +172,12 @@ public partial class MainWindowViewModel : ViewModelBase {
         // get data from buffer and process for viewdata 
         while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
 
-            if (_displayManager.WriteChar(_cyclicBuffer.Remove())) {
+            if (_displayManagerMain.WriteChar(_cyclicBuffer.Remove())) {
 
                 // if we have displayed the help page, don't update the view
                 // just yet
-                if (!_altFrameDisplayed) {
-                    DisplayData = _displayManager.Display.Chars;
+                if (_displayType == DisplayType.Terminal) {
+                    DisplayData = _displayManagerMain.Display.Chars;
                 }
             }
         }
@@ -186,44 +203,57 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     #region Private Methods
 
+    private void SetDisplay(DisplayType displayType) {
+
+        // if we are using the alt display then clear it etc
+        if (displayType > 0) {
+            _displayManagerAlt.Display.Clear();
+            _displayManagerAlt.SetCursorPosition(0, 0);
+        }
+
+        // The screen can be in any one of these states. The client could
+        // be online or offline when in any of these states.
+        switch (displayType) {
+
+            case DisplayType.Terminal:
+                DisplayData = _displayManagerMain.Display.Chars;
+                break;
+            case DisplayType.Welcome:
+                _displayManagerAlt.Write(Display.Menus.GetLogo());
+                //_displayManagerAlt.Display.SetStatusText(_statusText);
+                DisplayData = _displayManagerAlt.Display.Chars;
+                break;
+            case DisplayType.Menu:
+                // pop the menu into the placeholder
+                _displayManagerAlt.Write(Display.Menus.GetMenu().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
+               // _displayManagerAlt.Display.SetStatusText(_statusText);
+                DisplayData = _displayManagerAlt.Display.Chars;
+                break;
+            case DisplayType.About:
+                _displayManagerAlt.Write(Display.Menus.GetAbout());
+               // _displayManagerAlt.Display.SetStatusText(_statusText);
+                DisplayData = _displayManagerAlt.Display.Chars;
+                break;
+            case DisplayType.Help:
+                _displayManagerAlt.Write(Display.Menus.GetHelp());
+                //_displayManagerAlt.Display.SetStatusText(_statusText);
+                DisplayData = _displayManagerAlt.Display.Chars;
+                break;
+            case DisplayType.Config:
+                break;
+        }
+
+        _displayType = displayType;
+    }
+
     private async Task DisplayWelcomeMessage() {
-
         await Task.Delay(100);
-
-        _displayManager.Write(Display.Menus.GetLogo());
-        _displayManager.Display.SetStatusText(DisconnectedStatus);
-
-        DisplayData = _displayManager.Display.Chars;
+        SetDisplay(DisplayType.Welcome);
     }
 
-    /// <summary>
-    /// Displays the specified text (e.g. a Viewdata Frame) on the alternate
-    /// display. The main display is no longer shown but can still be written
-    /// to e.g. from a tcp stream.
-    /// </summary>
-    private void DisplayAltFrame(string frame) {
-        
-        // for the help we use an alternative display so that any
-        // incoming data can be handled as normal
-        _displayManagerAlt.Display.Clear();
-        _displayManagerAlt.SetCursorPosition(0, 0);
-        _displayManagerAlt.Write(frame);
-        _altFrameDisplayed = true;
+    private string GetMenuFromConfig() {
 
-        DisplayData = _displayManagerAlt.Display.Chars;
-
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private void DisplayMenu() {
-
-        _displayManager.Display.Clear();
-        _displayManager.SetCursorPosition(0, 0);
-        //_displayManager.Write(Display.MainMenu.GetMenu());
-
-        // update the menu diisplay
+        // get the menu details from the config file
         var item = 0;
         var menuSb = new StringBuilder();
         foreach (var connection in _settings.config.Connections) {
@@ -233,10 +263,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             }
         }
 
-        // pop the menu into the placeholder
-        _displayManager.Write(Display.Menus.GetMenu().Replace(Constants.PlaceHolder, menuSb.ToString()));
-        DisplayData = _displayManager.Display.Chars;
-        _menu = true;
+        return menuSb.ToString();
     }
 
     #endregion

@@ -120,11 +120,20 @@ public static class Extensions {
         for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
             var c = display.Chars[i];
             if (c.Flash) {
-                // TODO lock
+                // TODO lock ??
                 c.InVisible = !c.InVisible;
             }
         }
-        
+    }
+
+    public static void ToggleConceal(this Models.Display display) {
+        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+            var c = display.Chars[i];
+            if (c.Concealed) {
+                // TODO lock ??
+                c.InVisible = !c.InVisible;
+            }
+        }
     }
 
     /// <summary>
@@ -227,7 +236,7 @@ public static class Extensions {
             var cell = display.Chars[24 * Models.Display.COLS + col];
             cell.Value = c;
             cell.Foreground = foregroundColour;
-            cell.Background = Constants.DefaultBackground;
+            cell.Background = backgroundColour;
             col++;
 
             // belts and braces
