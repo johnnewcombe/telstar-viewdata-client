@@ -72,20 +72,18 @@ public static class Menus {
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		//menu.Append(Converters.ConvertFromMarkup(""));
 		menu.Append(Converters.ConvertFromMarkup("[M]Ctrl X[C]Disconnect\r\n\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("[9]Press any key to Return"));
+		menu.Append(Converters.ConvertFromMarkup("[9]Press any key to Return\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[3]Version 0.1 (c) John Newcombe 2025\r\n\n"));
 		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();
 	}
 
-	public static string GetAbout() {
+	public static string GetEdit() {
 		var menu = new StringBuilder();
 		menu.Append("\r\n");
-		menu.Append(Converters.ConvertFromMarkup("[17][D]ABOUT\r\n\n"));
+		menu.Append(Converters.ConvertFromMarkup("[17][D]EDIT\r\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("[3]Version 0.1 (c) John Newcombe 2025\r\n\n"));
-		menu.Append(Converters.ConvertFromMarkup("[2][C]GlassTTY Viewdata Client is free\r\n"));
-		menu.Append(Converters.ConvertFromMarkup("[2][C]software provided under the GPL 3\r\n"));
-		menu.Append(Converters.ConvertFromMarkup("[2][C]CopyLeft licence.\r\n\n\n"));
 		menu.Append(Converters.ConvertFromMarkup("[3]Press Escape to Return to Terminal"));
 		//menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
 		return menu.ToString();

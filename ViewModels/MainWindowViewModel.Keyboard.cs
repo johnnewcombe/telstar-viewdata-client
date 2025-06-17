@@ -19,6 +19,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using Avalonia.Logging;
@@ -39,7 +40,7 @@ public partial class MainWindowViewModel {
 
         // The screen can be in any one of 'DisplayType' states. Also,
         // the client could be online or offline when in any of these states.
-        
+
         switch (_displayType) {
 
             case DisplayType.Terminal:
@@ -72,14 +73,13 @@ public partial class MainWindowViewModel {
 
             case DisplayType.Menu:
 
-                if (int.TryParse(key.Ascii, out var index)) {
+                if (key.KeyModifiers == KeyModifiers.Control && key.Ascii.ToLower() == "h") {
+                    SetDisplay(DisplayType.Help);
+                }
+                else if (int.TryParse(key.Ascii, out var index)) {
 
                     if (index == 0) {
-
-                        // Manual dialing
-                        //
-                        // TODO Implement Manual connections
-
+                        SetDisplay(DisplayType.Edit);
                     }
                     else if (index > 0 && index < _settings.config.Connections.Count) {
 
@@ -88,29 +88,28 @@ public partial class MainWindowViewModel {
                         if (con.Name is not null) {
                             Connect(con.Address, con.Port);
                         }
+
                         SetDisplay(DisplayType.Terminal);
                     }
                 }
 
                 break;
-            case DisplayType.About:
+            case DisplayType.Edit:
+                SetDisplay(_previousDisplayType);
                 break;
             case DisplayType.Help:
-                switch (key.Ascii.ToLower()) {
-                    case "a":
-                        SetDisplay(DisplayType.About);
-                        break;
-                }
-                break;
-            case DisplayType.Config:
+                SetDisplay(_previousDisplayType);
                 break;
         }
     }
-    
+
     public async Task KeyHandler(KeyEventArgs key) {
 
+        if (key.KeySymbol == "\r") {
+        }
+
         Logging.Log.Debug(
-            $"Key:{key.Key.ToString()}, Symbol:{key.KeySymbol}, Physical Key:{key.PhysicalKey.ToString()} Modifiers: {key.KeyModifiers}");
+            $"Key:{key.Key.ToString()}, Symbol:\"{(key.KeySymbol == "\r" ? "\\r" : key.KeySymbol)}\", Physical Key:{key.PhysicalKey.ToString()} Modifiers: {key.KeyModifiers}");
 
         // TODO KeySymbol below needs to be tested with various keyboards 
         // and OSs based on the table below

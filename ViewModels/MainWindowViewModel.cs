@@ -52,8 +52,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         Menu,
         Terminal,
         Help,
-        About,
-        Config
+        Edit,
     }
 
     // this is used to access the appSettings.json file
@@ -68,6 +67,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private string _statusText;
     private string _status;
     private DisplayType _displayType;
+    private DisplayType _previousDisplayType;
     private bool _keyCtrl;
     private List<Char> _displayData;
     private readonly Settings _settings;
@@ -229,8 +229,8 @@ public partial class MainWindowViewModel : ViewModelBase {
                // _displayManagerAlt.Display.SetStatusText(_statusText);
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
-            case DisplayType.About:
-                _displayManagerAlt.Write(Display.Menus.GetAbout());
+            case DisplayType.Edit:
+                _displayManagerAlt.Write(Display.Menus.GetEdit());
                // _displayManagerAlt.Display.SetStatusText(_statusText);
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
@@ -239,10 +239,11 @@ public partial class MainWindowViewModel : ViewModelBase {
                 //_displayManagerAlt.Display.SetStatusText(_statusText);
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
-            case DisplayType.Config:
-                break;
+            default:
+                return; // important
         }
-
+        //this oly happens if we have changed the display
+        _previousDisplayType = _displayType;
         _displayType = displayType;
     }
 
