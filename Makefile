@@ -1,12 +1,12 @@
 version := 0.0.1
 
 build:
-	#dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os linux --arch x64
-	#dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os linux --arch arm64
-	#dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os osx --arch x64
-	#dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os osx --arch arm64
-	#dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os win --arch x64
-	#dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os win --arch arm64
+	dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os linux --arch x64
+	dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os linux --arch arm64
+	dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os osx --arch x64
+	dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os osx --arch arm64
+	dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os win --arch x64
+	dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os win --arch arm64
 
 	# This will fail if the version already exists, this is by design
 	mkdir ../Releases/$(version)
