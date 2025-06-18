@@ -108,7 +108,7 @@ public static class Extensions {
         }
 
         // clear the row references
-        for (var i = 0; i < Models.Display.ROWS; i++) {
+        for (var i = 0; i < Models.Display.ROWS-1; i++) {
             display.RowReferences[i] = 0;
         }
     }

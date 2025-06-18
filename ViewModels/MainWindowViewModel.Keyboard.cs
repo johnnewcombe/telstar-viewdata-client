@@ -49,6 +49,10 @@ public partial class MainWindowViewModel {
                 if (key.KeyModifiers == KeyModifiers.Control) {
 
                     switch (key.Ascii.ToLower()) {
+                        case "x": // show help manus
+                            Disconnect();
+                            SetDisplay(DisplayType.Menu);
+                            break;
                         case "h": // show help manus
                             SetDisplay(DisplayType.Help);
                             break;
@@ -98,7 +102,21 @@ public partial class MainWindowViewModel {
                 SetDisplay(_previousDisplayType);
                 break;
             case DisplayType.Help:
-                SetDisplay(_previousDisplayType);
+                
+                if (key.KeyModifiers == KeyModifiers.Control) {
+                    switch (key.Ascii.ToLower()) {
+                        case "x":
+                            Disconnect();
+                            SetDisplay(DisplayType.Menu);
+                            break;
+                        default:
+                            SetDisplay(_previousDisplayType);
+                            break;
+                    }
+                }
+                else {
+                    SetDisplay(_previousDisplayType);
+                }
                 break;
         }
     }

@@ -64,8 +64,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
         Path.DirectorySeparatorChar;
 
-    private string _statusText;
-    private string _status;
+    //private string _statusText;
     private DisplayType _displayType;
     private DisplayType _previousDisplayType;
     private bool _keyCtrl;
@@ -107,6 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         
         _displayManagerMain = new DisplayManager(true);
         _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChanged;
+        _displayManagerMain.Display.SetStatusText(DisconnectedStatus);
 
         _settings = new Settings(configFile);
         _keyMapper = new KeyMapper();
@@ -118,6 +118,12 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     }
 
+    private async Task DisplayWelcomeMessage() {
+        await Task.Delay(100);
+        UpdateConnectStatus();
+        SetDisplay(DisplayType.Welcome);
+    }
+    
     #region Data Processing and Notification
 
     private void DisplayDataChanged() {
@@ -127,28 +133,42 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         // however we must only do this if we are displaying Viewdata screen
         if (_displayType == DisplayType.Terminal) { 
-            Dispatcher.UIThread.Post(UpdateDisplay);
+            Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
     }
 
-    private void UpdateDisplay() {
+    private void UpdateMainDisplay() {
         DisplayData = _displayManagerMain.Display.Chars;
     }
+    private void UpdateAltDisplay() {
+        DisplayData = _displayManagerAlt.Display.Chars;
+    }
 
-    private async void UpdateConnectStatus() {
+    /// <summary>
+    /// This called on the UI Tread via the dispatcher (see OnConnect event).
+    /// </summary>
+    private void UpdateConnectStatus() {
 
+        string statusText;
+        
         try {
-            var status = ConnectStatus;
-            if (status) {
-                _status = ConnectedStatus;
+            // this function cannot have parameters so read from thread safe property
+            // to get the current status.
+            if (ConnectStatus) {
+                 statusText = ConnectedStatus;
             }
             else {
-                _status = ErrorStatus;
-
-                // delay, can't just use Thread.Sleep(2000) as this causes UI thread
-                // to stop and prevents display of above message
-                await Task.Delay(2000);
-                _status = DisconnectedStatus;
+                statusText = DisconnectedStatus;
+            }
+            // update both displays
+            _displayManagerMain.Display.SetStatusText(statusText);
+            _displayManagerAlt.Display.SetStatusText(statusText);
+            
+            if (_displayType == DisplayType.Terminal) {
+                DisplayData = _displayManagerMain.Display.Chars;
+            }
+            else {
+                DisplayData = _displayManagerAlt.Display.Chars;
             }
         }
         catch (Exception e) {
@@ -156,9 +176,6 @@ public partial class MainWindowViewModel : ViewModelBase {
             // not handling them with void async methods can cause the process
             // to crash
             Logging.Log.Error(e.Message);
-        }
-        finally {
-            //DisplayData = _displayManagerMain.Display.Chars;
         }
     }
 
@@ -216,41 +233,37 @@ public partial class MainWindowViewModel : ViewModelBase {
         switch (displayType) {
 
             case DisplayType.Terminal:
-                DisplayData = _displayManagerMain.Display.Chars;
+                // nothing to do
                 break;
             case DisplayType.Welcome:
-                _displayManagerAlt.Write(Display.Menus.GetLogo());
-                //_displayManagerAlt.Display.SetStatusText(_statusText);
-                DisplayData = _displayManagerAlt.Display.Chars;
+                _displayManagerAlt.Write(Display.Menus.GetWelcome());
                 break;
             case DisplayType.Menu:
                 // pop the menu into the placeholder
                 _displayManagerAlt.Write(Display.Menus.GetMenu().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
-               // _displayManagerAlt.Display.SetStatusText(_statusText);
-                DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.Edit:
                 _displayManagerAlt.Write(Display.Menus.GetEdit());
-               // _displayManagerAlt.Display.SetStatusText(_statusText);
-                DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.Help:
                 _displayManagerAlt.Write(Display.Menus.GetHelp());
-                //_displayManagerAlt.Display.SetStatusText(_statusText);
-                DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             default:
                 return; // important
         }
-        //this oly happens if we have changed the display
+        //this only happens if we have changed the display
         _previousDisplayType = _displayType;
         _displayType = displayType;
+        
+        
+        if (_displayType == DisplayType.Terminal) {
+            Dispatcher.UIThread.Post(UpdateMainDisplay);
+        }
+        else {
+            Dispatcher.UIThread.Post(UpdateAltDisplay);
+        }
     }
 
-    private async Task DisplayWelcomeMessage() {
-        await Task.Delay(100);
-        SetDisplay(DisplayType.Welcome);
-    }
 
     private string GetMenuFromConfig() {
 

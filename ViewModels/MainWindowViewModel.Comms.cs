@@ -31,6 +31,10 @@ public partial class MainWindowViewModel {
     private Lock _lock = new();
     private bool _connectStatus;
 
+    /// <summary>
+    /// Thread safe property to allow the connected status to be read
+    /// from multiple threads
+    /// </summary>
     public bool ConnectStatus {
         get {
             lock (_lock)
@@ -49,9 +53,8 @@ public partial class MainWindowViewModel {
             _cyclicBuffer.Clear();
 
             _tcp.Connect(ip, port);
-
-            _status = ConnectingStatus;
-            DisplayData = _displayManagerMain.Display.Chars;
+            Dispatcher.UIThread.Post(UpdateMainDisplay);
+            
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
@@ -63,15 +66,22 @@ public partial class MainWindowViewModel {
 
         if (_tcp is not null) {
             _tcp.Disconnect();
+            
+            // set the thread safe property
+            ConnectStatus = false;
+
+            // switch to UI thread
+            _displayManagerMain.Display.Clear();
+            Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
     }
 
     // Connection Status Listener
     private void OnConnect(bool status) {
 
-        // set thread safe property
+        // set the thread safe property
         ConnectStatus = status;
-
+        
         // switch to UI thread
         Dispatcher.UIThread.Post(UpdateConnectStatus);
     }
