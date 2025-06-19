@@ -31,6 +31,7 @@ namespace TelstarClient;
 public partial class App : Application
 {
     private static readonly ILog log = LogManager.GetLogger(typeof(App));
+    private MainWindowViewModel ViewModel;
     
     public override void Initialize()
     {
@@ -42,6 +43,9 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            
+            //var args = desktop.Args;
+            
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
@@ -49,6 +53,7 @@ public partial class App : Application
             {
                 //DataContext = new MainWindowViewModel(),
             };
+            
         }
         
         base.OnFrameworkInitializationCompleted();

@@ -1,6 +1,6 @@
 /*
     Copyright (c) 2025 John Newcombe
-   
+
     This file is part of the Software known as GlassTTY Viewdata Client.
 
     GlassTTY Viewdata Client is free software: you can redistribute
@@ -24,7 +24,7 @@ using TelstarClient.Models;
 namespace TelstarClient.Display;
 
 public partial class DisplayManager {
-    
+
     /// Sets the Graphics Hold status, specify true to hold graphics, false to release.
     /// Adds any new attributes to the character that this control character
     /// might require.
@@ -57,21 +57,21 @@ public partial class DisplayManager {
         if (chr.Value == Constants.HoldGraphics) {
             chr.GraphicsHold = held;
         }
-        
+
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
- 
+
         foreach (var c in row) {
- 
+
             c.GraphicsHold = held;
 
             // stop?
-            if (c.Control && (c.Value == Constants.ReleaseGraphics)|| 
+            if (c.Control && (c.Value == Constants.ReleaseGraphics) ||
                 c.Value == Constants.HoldGraphics) {
                 break;
             }
         }
     }
-    
+
     /// <summary>
     /// Adds any new attributes to the character that this control character
     /// might require.
@@ -87,7 +87,7 @@ public partial class DisplayManager {
 
             // stop?
             if (c.Control && (c.Value == Constants.Separated ||
-                                c.Value == Constants.Contiguous)) {
+                              c.Value == Constants.Contiguous)) {
                 break;
             }
         }
@@ -95,19 +95,25 @@ public partial class DisplayManager {
 
     private void SetConceal(ref Char chr, bool conceal) {
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
+
+        chr.Concealed = conceal;
         
         foreach (var c in row) {
             c.Concealed = conceal;
+
             // stop?
-            if (c.Control && (c.Value == Constants.Steady)) {
+            // Conceal stops at next colour change!
+            if (c.Control && c.IsForegroundColourChange()) {
                 break;
             }
         }
     }
-    
+
     private void SetFlash(ref Char chr, bool flash) {
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-
+        
+        chr.Flash = flash;
+        
         foreach (var c in row) {
             c.Flash = flash;
             // stop?
@@ -124,14 +130,14 @@ public partial class DisplayManager {
     /// <param name="chr"></param>
     /// <param name="colour"></param>
     private void SetForeground(ref Char chr, string colour, bool isGraphic) {
-        
-        // the colour change control only affects the chars following
-        // the control itself holds the previous colour. This matters
-        // where the graphic hold character is used instead of a blank
 
+        // The colour change control only affects the chars following,
+        // the control itself holds the previous colour. This matters
+        // where the graphic hold character is used instead of a blank.
+        
         // set the colour of the rest of the row
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
-        
+
         foreach (var c in row) {
 
             c.Foreground = colour;
@@ -142,8 +148,22 @@ public partial class DisplayManager {
                 break;
             }
         }
+
+        // TODO: 
+        // The conceal code is cancelled on receipt of a foreground colour control
+        // which means all concealed attributes need to be cancelled up to any new
+        // concealed code.
+        foreach (var c in row) {
+
+            c.Concealed = false;
+
+            // stop at new concealed
+            if (c.Control && c.Concealed) {
+                break;
+            }
+        }
     }
-    
+
     /// <summary>
     /// Helper function to set a colour change.
     /// </summary>
@@ -180,10 +200,10 @@ public partial class DisplayManager {
         // set DH to all chars until EOL or another DH or NH
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
         foreach (var c in row) {
-            
+
             // stop?
             if (c.Control && (c.Value == Constants.DoubleHeight ||
-                                c.Value == Constants.NormalHeight)) {
+                              c.Value == Constants.NormalHeight)) {
                 break;
             }
 
@@ -195,7 +215,7 @@ public partial class DisplayManager {
         //get whole row
         row = _display.GetRemainderOfRow(_cursor.Row, -1);
         foreach (var c in row) {
-            
+
             // TODO do we need this as this is done during the
             //  ProcessDoubleHeight() function.
             // copy the colours to all chars in the row below
@@ -219,7 +239,7 @@ public partial class DisplayManager {
 
             // stop?
             if (c.Control && (c.Value == Constants.DoubleHeight ||
-                                c.Value == Constants.NormalHeight)) {
+                              c.Value == Constants.NormalHeight)) {
                 break;
             }
 

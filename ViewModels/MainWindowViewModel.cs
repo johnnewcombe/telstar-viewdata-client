@@ -87,7 +87,7 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         // set the log level
         Log.LogLevel(_appSettings.GetSection("Logging:LogLevel:System").Value);
-        
+
         var configFile = _appSupportDirectory + ConfigFile;
 
         // create the app suport directory if it doesn't exist
@@ -99,11 +99,11 @@ public partial class MainWindowViewModel : ViewModelBase {
         // set up the alt display and show the welcome message
         // this will set the 'displayType' to 'Welcome'
         _displayManagerAlt = new DisplayManager();
-        
+
         // note that this method is asynchronous and includes a delay such
         // that it completes AFTER the constructor has completed
         DisplayWelcomeMessage();
-        
+
         _displayManagerMain = new DisplayManager(true);
         _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChanged;
         _displayManagerMain.Display.SetStatusText(DisconnectedStatus);
@@ -123,7 +123,9 @@ public partial class MainWindowViewModel : ViewModelBase {
         UpdateConnectStatus();
         SetDisplay(DisplayType.Welcome);
     }
-    
+
+    public string[]? Args { set; get; }
+
     #region Data Processing and Notification
 
     private void DisplayDataChanged() {
@@ -132,7 +134,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         // this allows us to update the Display property of this view model
 
         // however we must only do this if we are displaying Viewdata screen
-        if (_displayType == DisplayType.Terminal) { 
+        if (_displayType == DisplayType.Terminal) {
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
     }
@@ -140,6 +142,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private void UpdateMainDisplay() {
         DisplayData = _displayManagerMain.Display.Chars;
     }
+
     private void UpdateAltDisplay() {
         DisplayData = _displayManagerAlt.Display.Chars;
     }
@@ -150,20 +153,21 @@ public partial class MainWindowViewModel : ViewModelBase {
     private void UpdateConnectStatus() {
 
         string statusText;
-        
+
         try {
             // this function cannot have parameters so read from thread safe property
             // to get the current status.
             if (ConnectStatus) {
-                 statusText = ConnectedStatus;
+                statusText = ConnectedStatus;
             }
             else {
                 statusText = DisconnectedStatus;
             }
+
             // update both displays
             _displayManagerMain.Display.SetStatusText(statusText);
             _displayManagerAlt.Display.SetStatusText(statusText);
-            
+
             if (_displayType == DisplayType.Terminal) {
                 DisplayData = _displayManagerMain.Display.Chars;
             }
@@ -251,11 +255,12 @@ public partial class MainWindowViewModel : ViewModelBase {
             default:
                 return; // important
         }
+
         //this only happens if we have changed the display
         _previousDisplayType = _displayType;
         _displayType = displayType;
-        
-        
+
+
         if (_displayType == DisplayType.Terminal) {
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }

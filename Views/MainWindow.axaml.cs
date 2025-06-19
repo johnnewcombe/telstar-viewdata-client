@@ -22,12 +22,14 @@ using System.ComponentModel;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
 
@@ -38,9 +40,8 @@ public partial class MainWindow : Window {
     public MainWindowViewModel ViewModel { get; set; }
 
     public MainWindow() {
+        
         InitializeComponent();
-
-
 
         ViewModel = new MainWindowViewModel();
         ViewModel.PropertyChanged += this.PropertyChangedEventHandler;
@@ -53,7 +54,6 @@ public partial class MainWindow : Window {
         
         //initialise the display
         display.Children.Clear();
-
 
         // note that we create an extra row of labels for the status line
         for (int i = 0; i < Models.Display.COLS * (Models.Display.ROWS + 1); i++) {

@@ -117,9 +117,15 @@ public static class Extensions {
 
         // TODO access c.Flash in a threadsafe way as this method is called from
         //   a thread pool thread
+        
         for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
             var c = display.Chars[i];
-            if (c.Flash) {
+            if (c.Flash && !c.Concealed) {
+                
+                // TODO: By toggling the character it causes odd results if the toggle
+                // is invoked by the user whilst the frame is rendering as yet unrendered
+                // characters could unset attributes and end up being toggled the wrong way.
+                
                 // TODO lock ??
                 c.InVisible = !c.InVisible;
             }
@@ -130,6 +136,11 @@ public static class Extensions {
         for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
             var c = display.Chars[i];
             if (c.Concealed) {
+                
+                // TODO: By toggling the character it causes odd results if the toggle
+                // is invoked by the user whilst the frame is rendering as yet unrendered
+                // characters could unset attributes and end up being toggled the wrong way.
+
                 // TODO lock ??
                 c.InVisible = !c.InVisible;
             }
