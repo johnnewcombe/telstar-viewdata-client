@@ -193,7 +193,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         // get data from buffer and process for viewdata 
         while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
 
-            if (_displayManagerMain.WriteChar(_cyclicBuffer.Remove())) {
+            if (_displayManagerMain.Write(_cyclicBuffer.Remove())) {
 
                 // if we have displayed the help page, don't update the view
                 // just yet
@@ -248,6 +248,7 @@ public partial class MainWindowViewModel : ViewModelBase {
                 break;
             case DisplayType.Edit:
                 _displayManagerAlt.Write(Display.Menus.GetEdit());
+                _displayManagerAlt.SetCursorToField();
                 break;
             case DisplayType.Help:
                 _displayManagerAlt.Write(Display.Menus.GetHelp());

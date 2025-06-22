@@ -1,4 +1,4 @@
-version := 0.0.3
+version := 0.0.4
 
 build:
 	dotnet publish --verbosity detailed --self-contained --use-current-runtime --configuration Release --os linux --arch x64

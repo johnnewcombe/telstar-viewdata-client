@@ -41,7 +41,7 @@ public partial class DisplayManager {
     private readonly FontMapper _fontMapper;
     private readonly ColourMapper _colourMapper;
     private string _name;
-    
+
     public delegate void OnDisplayDataChangedEventHandler();
 
     public event OnDisplayDataChangedEventHandler OnDisplayDataChangedEvent;
@@ -52,13 +52,13 @@ public partial class DisplayManager {
 
     #region Constructor
 
-    public DisplayManager( bool enableFlash = false) {
-        
+    public DisplayManager(bool enableFlash = false) {
+
         _display = CreateDisplay();
         _cursor = new Cursor();
         _fontMapper = new FontMapper();
         _colourMapper = new ColourMapper();
-        
+
         if (enableFlash) {
             _stateTimer = new Timer(Flash, null, 1000, 1000);
         }
@@ -67,7 +67,7 @@ public partial class DisplayManager {
     #endregion
 
     private void Flash(Object state) {
-        
+
         // Update the display
         Display.Flash();
 
@@ -88,13 +88,13 @@ public partial class DisplayManager {
 
     public void Write(string text) {
         foreach (var c in text) {
-            WriteChar(c);
+            Write(c);
         }
     }
 
-    public bool WriteChar(char character) {
+    public bool Write(char character) {
 
-        //Logging.Log.Information($"WriteChar - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
+        //Logging.Log.Information($"Write - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
 
         // process control codes and any attributes changed
         if (ProcessC0Controls(character)) {
@@ -209,15 +209,36 @@ public partial class DisplayManager {
         _cursor.Col = column;
     }
 
+    /// <summary>
+    /// Sets cursor to one space after a colon searched from the current cursor position.
+    /// This allows the Colon character to identify a field. The search stops at the end
+    /// of the display.
+    /// This is typically used to emulate the behavior of a form in menu screens etc.
+    /// </summary>
+    /// <returns>True if a field was found or false if not.</returns>
+    public bool SetCursorToField() {
+        for (var row = 0; row < Models.Display.COLS; row++) {
+            for (var col = 0; col < Models.Display.ROWS; col++) {
+                if (Display.Chars[row * Models.Display.COLS + col].Value == ':') {
+                    // set cursor and exit
+                    SetCursorPosition(col, row);
+                    _cursor.HorizontalTab(2);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void SetStatusText(string status,
         string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
-        
+
         // clear the row
         for (var i = 0; i < Models.Display.COLS; i++) {
             var cell = _display.Chars[24 * Models.Display.COLS + i];
             cell.Value = Models.Display.SPC;
         }
-        
+
         // work out the starting column so that the text is centred
         var col = (Models.Display.COLS / 2) - (status.Length / 2);
 
@@ -236,7 +257,7 @@ public partial class DisplayManager {
             }
         }
     }
-    
+
     #endregion
 
     #region Private Methods
@@ -458,7 +479,7 @@ public partial class DisplayManager {
                 break;
         }
     }
-    
+
     private Models.Display CreateDisplay() {
 
         var display = new Models.Display();

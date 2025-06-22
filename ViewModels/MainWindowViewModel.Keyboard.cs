@@ -17,13 +17,7 @@
 
 */
 
-using System;
-using System.Diagnostics;
-using System.Security.Policy;
-using System.Threading.Tasks;
 using Avalonia.Input;
-using Avalonia.Logging;
-using TelstarClient.Display;
 using TelstarClient.Extensions;
 
 namespace TelstarClient.ViewModels;
@@ -48,22 +42,25 @@ public partial class MainWindowViewModel {
                 // looking for control keys only
                 if (key.KeyModifiers == KeyModifiers.Control) {
 
-                    switch (key.Ascii.ToLower()) {
-                        case "x": // show help manus
+                    switch (key.Ascii) {
+                        case 'X':
+                        case 'x': // show help manus
                             Disconnect();
                             SetDisplay(DisplayType.Menu);
                             break;
-                        case "h": // show help manus
+                        case 'H':
+                        case 'h': // show help manus
                             SetDisplay(DisplayType.Help);
                             break;
-                        case "c": // conceal
+                        case 'C':
+                        case 'c': // conceal
                             _displayManagerMain.Display.ToggleConceal();
                             break;
                     }
                 }
                 else {
                     var keySymbol = _keyMapper.Map(key.Ascii);
-                    if (!_tcp.Write(keySymbol)) {
+                    if (!_tcp.Write(keySymbol.ToString())) {
                         Logging.Log.Error($"Keyboard entry no sent:{keySymbol}");
                     }
                 }
@@ -77,11 +74,11 @@ public partial class MainWindowViewModel {
 
             case DisplayType.Menu:
 
-                if (key.KeyModifiers == KeyModifiers.Control && key.Ascii.ToLower() == "h") {
+                if (key.KeyModifiers == KeyModifiers.Control && key.Ascii is 'h' or 'H') {
                     SetDisplay(DisplayType.Help);
                 }
-                else if (int.TryParse(key.Ascii, out var index)) {
-
+                else if (key.Ascii >= 0x30 && key.Ascii <= 0x39) {
+                    var index = key.Ascii - 0x30;
                     if (index == 0) {
                         SetDisplay(DisplayType.Edit);
                     }
@@ -99,13 +96,17 @@ public partial class MainWindowViewModel {
 
                 break;
             case DisplayType.Edit:
-                SetDisplay(_previousDisplayType);
+                if (MenuEditor(key)) {
+                    //MenuEditor returns true when complete or cancelled
+                    SetDisplay(_previousDisplayType);
+                }
+
                 break;
             case DisplayType.Help:
-                
+
                 if (key.KeyModifiers == KeyModifiers.Control) {
-                    switch (key.Ascii.ToLower()) {
-                        case "x":
+                    switch (key.Ascii) {
+                        case 'X' or 'x':
                             Disconnect();
                             SetDisplay(DisplayType.Menu);
                             break;
@@ -117,23 +118,26 @@ public partial class MainWindowViewModel {
                 else {
                     SetDisplay(_previousDisplayType);
                 }
+
                 break;
         }
     }
 
-    public async Task KeyHandler(KeyEventArgs key) {
+    public void KeyHandler(KeyEventArgs key) {
 
-        if (key.KeySymbol == "\r") {
+        //if (key.KeySymbol == "\r") {
+        //
+        //}
+
+        if (!char.TryParse(key.KeySymbol, out var keyChar)) {
+            return;
         }
-
-        Logging.Log.Debug(
-            $"Key:{key.Key.ToString()}, Symbol:\"{(key.KeySymbol == "\r" ? "\\r" : key.KeySymbol)}\", Physical Key:{key.PhysicalKey.ToString()} Modifiers: {key.KeyModifiers}");
 
         // TODO KeySymbol below needs to be tested with various keyboards 
         // and OSs based on the table below
         var asciiResult = new Models.Key() {
             KeyModifiers = key.KeyModifiers,
-            Ascii = key.KeySymbol
+            Ascii = keyChar
         };
 
         ProcessKey(asciiResult);
@@ -238,7 +242,7 @@ public partial class MainWindowViewModel {
         NumPadAdd 95 Numeric keypad +.
         NumPadClear 96 Numeric keypad C or AC (All Clear). Also for use with numpads that have a Clear key that is separate from the NumLock key. On the Mac, the numpad Clear key is NumLock.
         NumPadComma 97 Numeric keypad , (thousands separator). For locales where the thousands separator is a "." (e.g., Brazil), this key may generate a ..
-        NumPadDecimal 98 Numeric keypad . Del. For locales where the decimal separator is "," (e.g., Brazil), this key may generate a ,.
+        NumPadDecimal 98 Numeric keypad . Del. For locales where the decimal separator is "," (e.g., Brazil), this key may generate a,
         NumPadDivide 99 Numeric keypad /.
         NumPadEnter 100 Numeric keypad Enter.
         NumPadEqual 101 Numeric keypad =.
@@ -307,6 +311,19 @@ public partial class MainWindowViewModel {
         Undo 164 Undo. Legacy. Found on Sun’s USB keyboard.
 
         */
+
+    }
+
+    private bool MenuEditor(Models.Key key) {
+
+        // name
+        // TODO: navigate to first colon
+        //  TAB and Return navigate to next colon
+        //  Shift TAB navigates to previous colon
+        
+        _displayManagerAlt.Write(key.Ascii);
+        DisplayData = _displayManagerAlt.Display.Chars;
+        return false;
 
     }
 

@@ -26,12 +26,15 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using TelstarClient.Logging;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
+using Logger = log4net.Repository.Hierarchy.Logger;
 
 namespace TelstarClient.Views;
 
@@ -82,8 +85,8 @@ public partial class MainWindow : Window {
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e) {
-        if (e.Key == Key.LeftCtrl) {
-        }
+        Log.Debug(
+            $"Key:{e.Key.ToString()}, Symbol:\"{(e.KeySymbol == "\r" ? "\\r" : e.KeySymbol)}\", Physical Key:{e.PhysicalKey.ToString()} Modifiers: {e.KeyModifiers}");
 
         try {
             ViewModel.KeyHandler(e);
@@ -93,6 +96,10 @@ public partial class MainWindow : Window {
         }
     }
 
+    private void Window_TextInput(object sender, TextInputEventArgs e) { 
+        Log.Debug($"TextInput:{e.Text}");
+    }
+    
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
         //ViewModel.Connect();
     }

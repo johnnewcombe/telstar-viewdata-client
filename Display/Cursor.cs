@@ -57,6 +57,13 @@ public class Cursor {
     /// Increments the cursor. The cursor wraps at the end of the row, and
     /// wraps from the bottom back to the top.
     /// </summary>
+    public void HorizontalTab(int count) {
+        do {
+            HorizontalTab();
+            count--;
+        }while (count > 0);
+    }
+
     public void HorizontalTab() {
         _col++;
         if (_col < Models.Display.COLS) return;
