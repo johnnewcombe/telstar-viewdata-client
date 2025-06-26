@@ -42,14 +42,18 @@ public partial class DisplayManager {
     private readonly ColourMapper _colourMapper;
     private string _name;
 
-    public delegate void OnDisplayDataChangedEventHandler();
-
-    public event OnDisplayDataChangedEventHandler OnDisplayDataChangedEvent;
-
     private Timer _stateTimer; // TODO use _stateTimer.Dispose() when exiting the display manager.
 
     #endregion
 
+    #region Public Variabled
+
+    public delegate void OnDisplayDataChangedEventHandler();
+
+    public event OnDisplayDataChangedEventHandler OnDisplayDataChangedEvent;
+    
+    #endregion
+    
     #region Constructor
 
     public DisplayManager(bool enableFlash = false) {
@@ -81,7 +85,7 @@ public partial class DisplayManager {
         set { _display = value; }
         get { return _display; }
     }
-
+    
     #endregion
 
     #region Public Methods
@@ -204,9 +208,20 @@ public partial class DisplayManager {
     /// <param name="column"></param>
     /// <param name="row"></param>
     public void SetCursorPosition(int column, int row) {
-
         _cursor.Row = row;
         _cursor.Col = column;
+    }
+
+    public void SetCursorPosition(int index) {
+        
+        if (index < Models.Display.COLS) {
+            _cursor.Row = 0;
+            _cursor.Col = index;
+        }
+        else {
+            _cursor.Row = index / Models.Display.COLS;
+            _cursor.Col = index % Models.Display.COLS;
+        }
     }
 
     /// <summary>
@@ -216,20 +231,25 @@ public partial class DisplayManager {
     /// This is typically used to emulate the behavior of a form in menu screens etc.
     /// </summary>
     /// <returns>True if a field was found or false if not.</returns>
-    public bool SetCursorToField() {
-        for (var row = 0; row < Models.Display.COLS; row++) {
-            for (var col = 0; col < Models.Display.ROWS; col++) {
-                if (Display.Chars[row * Models.Display.COLS + col].Value == ':') {
-                    // set cursor and exit
-                    SetCursorPosition(col, row);
-                    _cursor.HorizontalTab(2);
-                    return true;
-                }
+    /*
+    public bool GetFields_old() {
+
+        // last possible position for a field is 2 characters before the last
+        var end = Models.Display.ROWS * Models.Display.COLS - 2;
+        var start = _cursor.Row * Models.Display.COLS + _cursor.Col;
+
+        for (var index = start; index < end; index++) {
+            if (Display.Chars[index].Value == ':') {
+                // set cursor and exit
+                index += 2;
+                return true;
             }
         }
+
         return false;
     }
-
+*/
+    /*
     public void SetStatusText(string status,
         string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
 
@@ -257,6 +277,7 @@ public partial class DisplayManager {
             }
         }
     }
+*/
 
     #endregion
 

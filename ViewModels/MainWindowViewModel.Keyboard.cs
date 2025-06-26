@@ -17,12 +17,17 @@
 
 */
 
+using System.Collections.Generic;
 using Avalonia.Input;
+using Avalonia.Logging;
+using TelstarClient.Display;
 using TelstarClient.Extensions;
+using TelstarClient.Logging;
 
 namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel {
+
 
     /// <summary>
     /// Handles keyboard activity passed from the View.
@@ -96,8 +101,8 @@ public partial class MainWindowViewModel {
 
                 break;
             case DisplayType.Edit:
-                if (MenuEditor(key)) {
-                    //MenuEditor returns true when complete or cancelled
+                if (!MenuEditor(key)) {
+                    //MenuEditor returns false when complete or cancelled
                     SetDisplay(_previousDisplayType);
                 }
 
@@ -122,7 +127,50 @@ public partial class MainWindowViewModel {
                 break;
         }
     }
+    
+    /// <summary>
+    /// MenuEditor returns false when complete or cancelled
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    private bool MenuEditor(Models.Key key) {
 
+        // TODO There has to be a better way than this
+        if (_fields is null) {
+            _fields = GetFieldsFromDisplay(_displayManagerAlt);
+            _displayManagerAlt.SetCursorPosition(_fields[_currentField] + 2);
+        }
+        
+        // name
+        // TODO: navigate to first colon
+        //  TAB and Return navigate to next colon
+        //  Shift TAB navigates to previous colon
+
+        if (key.Ascii is '\r' or '\t') {
+            _currentField++;
+            if (_currentField < _fields.Count) {
+                // move to next field
+                _displayManagerAlt.SetCursorPosition(_fields[_currentField] + 2);
+                return true;
+            }
+
+            // no fields, so we are finished
+            // reset fields
+            _fields = null;
+            _currentField = 0;
+            return false;
+
+
+        }
+
+        // not a CR or tab
+        // TODO: filter out control chars etc except delete
+        _displayManagerAlt.Write(key.Ascii);
+        DisplayData = _displayManagerAlt.Display.Chars;
+
+        return true;
+
+    }
     public void KeyHandler(KeyEventArgs key) {
 
         //if (key.KeySymbol == "\r") {
@@ -314,17 +362,6 @@ public partial class MainWindowViewModel {
 
     }
 
-    private bool MenuEditor(Models.Key key) {
-
-        // name
-        // TODO: navigate to first colon
-        //  TAB and Return navigate to next colon
-        //  Shift TAB navigates to previous colon
-        
-        _displayManagerAlt.Write(key.Ascii);
-        DisplayData = _displayManagerAlt.Display.Chars;
-        return false;
-
-    }
+ 
 
 }

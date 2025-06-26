@@ -44,6 +44,20 @@ public partial class MainWindowViewModel : ViewModelBase {
     private const string ConnectingStatus = "CONNECTING";
     private const string ConfigFile = "config.json";
 
+
+    // TODO consider simplifying this field stuff or moving into a FormObject with the edit screen text?
+    private class Field() {
+        public int Col;
+        public int Row;
+    }
+
+    // Used to store the index (screen pos) of any fields within the display.
+    // Fields are marked with a colon.
+    private List<int> _fields;
+
+    // this is the item in the list not the index of the display
+    private int _currentField;
+
     // used to keep track of what is being displayed to the user
     // the order is unimportant EXCEPT that 'Welcome' must be the
     // first entry.
@@ -248,7 +262,6 @@ public partial class MainWindowViewModel : ViewModelBase {
                 break;
             case DisplayType.Edit:
                 _displayManagerAlt.Write(Display.Menus.GetEdit());
-                _displayManagerAlt.SetCursorToField();
                 break;
             case DisplayType.Help:
                 _displayManagerAlt.Write(Display.Menus.GetHelp());
@@ -260,7 +273,6 @@ public partial class MainWindowViewModel : ViewModelBase {
         //this only happens if we have changed the display
         _previousDisplayType = _displayType;
         _displayType = displayType;
-
 
         if (_displayType == DisplayType.Terminal) {
             Dispatcher.UIThread.Post(UpdateMainDisplay);
@@ -284,6 +296,25 @@ public partial class MainWindowViewModel : ViewModelBase {
         }
 
         return menuSb.ToString();
+    }
+
+    /// <summary>
+    /// Returns a list of index values representing where fields are within the display.
+    /// Fields are identified by a colon ':'.
+    /// </summary>
+    /// <param name="dispayManager"></param>
+    /// <returns></returns>
+    private List<int> GetFieldsFromDisplay(Display.DisplayManager dispayManager) {
+
+        var result = new List<int>();
+
+        for (int index = 0; index < Models.Display.COLS * Models.Display.ROWS - 2; index++) {
+            if (_displayManagerAlt.Display.Chars[index].Value == ':') {
+                result.Add(index);
+            }
+        }
+
+        return result;
     }
 
     #endregion
