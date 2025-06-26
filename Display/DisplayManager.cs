@@ -223,62 +223,25 @@ public partial class DisplayManager {
             _cursor.Col = index % Models.Display.COLS;
         }
     }
-
+    
     /// <summary>
-    /// Sets cursor to one space after a colon searched from the current cursor position.
-    /// This allows the Colon character to identify a field. The search stops at the end
-    /// of the display.
-    /// This is typically used to emulate the behavior of a form in menu screens etc.
+    /// Returns a list of index values representing where fields are within the display.
+    /// Fields are identified by a delimter, typically a colon ':'.
     /// </summary>
-    /// <returns>True if a field was found or false if not.</returns>
-    /*
-    public bool GetFields_old() {
+    /// <param name="dispayManager"></param>
+    /// <returns></returns>
+    public List<int> GetFields(char delimeter) {
 
-        // last possible position for a field is 2 characters before the last
-        var end = Models.Display.ROWS * Models.Display.COLS - 2;
-        var start = _cursor.Row * Models.Display.COLS + _cursor.Col;
+        var result = new List<int>();
 
-        for (var index = start; index < end; index++) {
-            if (Display.Chars[index].Value == ':') {
-                // set cursor and exit
-                index += 2;
-                return true;
+        for (int index = 0; index < Models.Display.COLS * Models.Display.ROWS - 2; index++) {
+            if (Display.Chars[index].Value == delimeter) {
+                result.Add(index);
             }
         }
 
-        return false;
+        return result;
     }
-*/
-    /*
-    public void SetStatusText(string status,
-        string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
-
-        // clear the row
-        for (var i = 0; i < Models.Display.COLS; i++) {
-            var cell = _display.Chars[24 * Models.Display.COLS + i];
-            cell.Value = Models.Display.SPC;
-        }
-
-        // work out the starting column so that the text is centred
-        var col = (Models.Display.COLS / 2) - (status.Length / 2);
-
-        // add the text and attributes to the status row
-        foreach (var c in status) {
-
-            var cell = _display.Chars[24 * Models.Display.COLS + col];
-            cell.Value = c;
-            cell.Foreground = foregroundColour;
-            cell.Background = backgroundColour;
-            col++;
-
-            // belts and braces
-            if (col >= Models.Display.COLS) {
-                break;
-            }
-        }
-    }
-*/
-
     #endregion
 
     #region Private Methods
@@ -317,12 +280,6 @@ public partial class DisplayManager {
         if (!chr.DoubleHeight) {
             return;
         }
-
-//        if (!(chr.DoubleHeight ||
-//            (chr.Control && chr.Value == Constants.BlackBackground && _display.RowHasDoubleHeight(_cursor.Row)) ||
-//            (chr.Control && chr.IsForegroundColourChange() && _display.RowHasDoubleHeight(_cursor.Row)))) {
-//            return;
-//        }
 
         // if we are on the last row or the char is not marked as DH then do nothing
         if (_cursor.Row >= Models.Display.ROWS - 1) {

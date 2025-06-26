@@ -137,7 +137,7 @@ public partial class MainWindowViewModel {
 
         // TODO There has to be a better way than this
         if (_fields is null) {
-            _fields = GetFieldsFromDisplay(_displayManagerAlt);
+            _fields = _displayManagerAlt.GetFields(':');
             _displayManagerAlt.SetCursorPosition(_fields[_currentField] + 2);
         }
         
@@ -361,7 +361,4 @@ public partial class MainWindowViewModel {
         */
 
     }
-
- 
-
 }
