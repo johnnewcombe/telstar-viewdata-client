@@ -22,6 +22,7 @@ using Avalonia.Input;
 using Avalonia.Logging;
 using TelstarClient.Display;
 using TelstarClient.Extensions;
+using TelstarClient.Forms;
 using TelstarClient.Logging;
 
 namespace TelstarClient.ViewModels;
@@ -76,7 +77,6 @@ public partial class MainWindowViewModel {
                 // then load the menu
                 SetDisplay(DisplayType.Menu);
                 break;
-
             case DisplayType.Menu:
 
                 if (key.KeyModifiers == KeyModifiers.Control && key.Ascii is 'h' or 'H') {
@@ -101,7 +101,7 @@ public partial class MainWindowViewModel {
 
                 break;
             case DisplayType.Edit:
-                if (!MenuEditor(key)) {
+                if (!ProcessMenuEditKey(key)) {
                     //MenuEditor returns false when complete or cancelled
                     SetDisplay(_previousDisplayType);
                 }
@@ -127,50 +127,41 @@ public partial class MainWindowViewModel {
                 break;
         }
     }
-    
+
     /// <summary>
     /// MenuEditor returns false when complete or cancelled
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    private bool MenuEditor(Models.Key key) {
-
-        // TODO There has to be a better way than this
-        if (_fields is null) {
-            _fields = _displayManagerAlt.GetFields(':');
-            _displayManagerAlt.SetCursorPosition(_fields[_currentField] + 2);
-        }
+    private bool ProcessMenuEditKey(Models.Key key) {
         
-        // name
-        // TODO: navigate to first colon
-        //  TAB and Return navigate to next colon
-        //  Shift TAB navigates to previous colon
-
-        if (key.Ascii is '\r' or '\t') {
-            _currentField++;
-            if (_currentField < _fields.Count) {
-                // move to next field
-                _displayManagerAlt.SetCursorPosition(_fields[_currentField] + 2);
-                return true;
+        // TODO:
+        //  TAB and Return navigate to next field
+        //  Shift TAB navigates to previous field
+        var currentField = _currentForm.GetCurrentField();
+        
+        // are we terminating the field?
+        if (key.Ascii is '\r' or '\t' || currentField.Value.Length >=currentField.Length) {
+            if (_currentForm.Next()) {
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
             }
-
-            // no fields, so we are finished
-            // reset fields
-            _fields = null;
-            _currentField = 0;
+            // all done
+            _currentForm = null;
             return false;
-
-
         }
 
-        // not a CR or tab
-        // TODO: filter out control chars etc except delete
-        _displayManagerAlt.Write(key.Ascii);
-        DisplayData = _displayManagerAlt.Display.Chars;
+        _displayManagerAlt.SetCursorPosition(currentField.StartIndex);
+
+        // not a CR or tab, so filter out control chars etc except backspace
+        if (key.Ascii >= 0x20 || key.Ascii == 0x08) {
+            _displayManagerAlt.Write(key.Ascii);
+            DisplayData = _displayManagerAlt.Display.Chars;
+        }
 
         return true;
 
     }
+
     public void KeyHandler(KeyEventArgs key) {
 
         //if (key.KeySymbol == "\r") {

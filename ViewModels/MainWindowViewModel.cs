@@ -31,6 +31,7 @@ using TelstarClient.Comms;
 using TelstarClient.Configuration;
 using TelstarClient.Display;
 using TelstarClient.Extensions;
+using TelstarClient.Forms;
 using TelstarClient.Logging;
 using Char = TelstarClient.Models.Char;
 
@@ -53,10 +54,10 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     // Used to store the index (screen pos) of any fields within the display.
     // Fields are marked with a colon.
-    private List<int> _fields;
+    //private List<int> _fields;
 
     // this is the item in the list not the index of the display
-    private int _currentField;
+    //private int _currentField;
 
     // used to keep track of what is being displayed to the user
     // the order is unimportant EXCEPT that 'Welcome' must be the
@@ -78,7 +79,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
         Path.DirectorySeparatorChar;
 
-    //private string _statusText;
+    private Forms.IForm _currentForm;
     private DisplayType _displayType;
     private DisplayType _previousDisplayType;
     private bool _keyCtrl;
@@ -254,17 +255,19 @@ public partial class MainWindowViewModel : ViewModelBase {
                 // nothing to do
                 break;
             case DisplayType.Welcome:
-                _displayManagerAlt.Write(Display.Menus.GetWelcome());
+                _displayManagerAlt.Write(new Welcome().ToString());
                 break;
             case DisplayType.Menu:
                 // pop the menu into the placeholder
-                _displayManagerAlt.Write(Display.Menus.GetMenu().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
+                _displayManagerAlt.Write(new Menu().ToString().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
                 break;
             case DisplayType.Edit:
-                _displayManagerAlt.Write(Display.Menus.GetEdit());
+                _currentForm = new Forms.Edit();
+                _displayManagerAlt.Write(_currentForm.ToString());
                 break;
             case DisplayType.Help:
-                _displayManagerAlt.Write(Display.Menus.GetHelp());
+                _currentForm = new Help();
+                _displayManagerAlt.Write(_currentForm.ToString());
                 break;
             default:
                 return; // important
@@ -281,8 +284,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             Dispatcher.UIThread.Post(UpdateAltDisplay);
         }
     }
-
-
+    
     private string GetMenuFromConfig() {
 
         // get the menu details from the config file
@@ -297,26 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         return menuSb.ToString();
     }
-
-    /// <summary>
-    /// Returns a list of index values representing where fields are within the display.
-    /// Fields are identified by a colon ':'.
-    /// </summary>
-    /// <param name="dispayManager"></param>
-    /// <returns></returns>
-    private List<int> GetFieldsFromDisplay(Display.DisplayManager dispayManager) {
-
-        var result = new List<int>();
-
-        for (int index = 0; index < Models.Display.COLS * Models.Display.ROWS - 2; index++) {
-            if (_displayManagerAlt.Display.Chars[index].Value == ':') {
-                result.Add(index);
-            }
-        }
-
-        return result;
-    }
-
+    
     #endregion
 
 }

@@ -24,6 +24,7 @@ using System.Threading;
 using Avalonia.Controls.Converters;
 using Avalonia.Logging;
 using TelstarClient.Extensions;
+using TelstarClient.Forms;
 using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.Display;
@@ -90,12 +91,16 @@ public partial class DisplayManager {
 
     #region Public Methods
 
+    /// <summary>
+    /// Writes a string to the display.
+    /// </summary>
+    /// <param name="text"></param>
     public void Write(string text) {
         foreach (var c in text) {
             Write(c);
         }
     }
-
+    
     public bool Write(char character) {
 
         //Logging.Log.Information($"Write - Row: {_cursor.Row}, Col: {_cursor.Col}, Value: {(int)character:X2}");
@@ -224,24 +229,6 @@ public partial class DisplayManager {
         }
     }
     
-    /// <summary>
-    /// Returns a list of index values representing where fields are within the display.
-    /// Fields are identified by a delimter, typically a colon ':'.
-    /// </summary>
-    /// <param name="dispayManager"></param>
-    /// <returns></returns>
-    public List<int> GetFields(char delimeter) {
-
-        var result = new List<int>();
-
-        for (int index = 0; index < Models.Display.COLS * Models.Display.ROWS - 2; index++) {
-            if (Display.Chars[index].Value == delimeter) {
-                result.Add(index);
-            }
-        }
-
-        return result;
-    }
     #endregion
 
     #region Private Methods
