@@ -14,7 +14,7 @@ public class Menu : IForm {
         menu.Append(Converters.ConvertFromMarkup("[2][C]DIR NAME\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[PLACEHOLDER]"));
         menu.Append(Converters.ConvertFromMarkup("\r\n\n[4][C]Select '0' for Manual Dialling"));
-        menu.Append(Converters.ConvertFromMarkup("\r\n\n[7][W]Ctrl-H for to view Help"));
+        menu.Append(Converters.ConvertFromMarkup("\r\n\n[7][W]Alt-H for to view Help"));
         return menu.ToString();
     }
 

@@ -44,17 +44,26 @@ public partial class MainWindowViewModel
         {
             case DisplayType.Terminal:
 
-                // looking for control keys
+                /*
+                 
+                   // Alt+letter combinations used within the app
+                   Key.C when alt => 0x83,   // conceal
+                   Key.H when alt => 0x88,   // help/menus
+                   Key.R when alt => 0x92,   // reveal
+                   Key.X when alt => 0x98,   // escape/exit
+                 */
+                
+                // looking for alt key combinations (same as ctrl codes but with high bit set)
                 switch (asciiValue)
                 {
-                    case 24: // ' ctrl+x disconnect
+                    case 0x98: // ' alt+x disconnect
                         Disconnect();
                         SetDisplay(DisplayType.Directory);
                         break;
-                    case 8: // ctrl+h show help menus
+                    case 0x88: // alt+h show help menus
                         SetDisplay(DisplayType.Help);
                         break;
-                    case 3: // conceal
+                    case 0x83: // conceal
                         _displayManagerMain.Display.ToggleConceal();
                         break;
                 }
@@ -103,7 +112,7 @@ public partial class MainWindowViewModel
 
                         break;
 
-                    case 24: // ' ctrl+x disconnect
+                    case 0x98: // ' alt+x disconnect
                         Disconnect();
                         SetDisplay(DisplayType.Help);
 
@@ -123,7 +132,7 @@ public partial class MainWindowViewModel
                 
                     switch (asciiValue)
                     {
-                        case 24: // ctrl+x
+                        case 0x98: // alt+x
                             Disconnect();
                             Shutdown();
                             break;
@@ -202,6 +211,8 @@ public partial class MainWindowViewModel
     private static byte? GetControlKeyAscii(KeyEventArgs e)
     {
         bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        bool alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        
 
         return e.Key switch
         {
@@ -218,11 +229,38 @@ public partial class MainWindowViewModel
             Key.Right => 0x43,
             Key.Left => 0x44,
 
-            // Ctrl+letter combinations used within the app, all others get sent
-            Key.C when ctrl => 3,   // conceal
-            Key.H when ctrl => 8,   // help/menus
-            Key.R when ctrl => 18,  // reveal
-            Key.X when ctrl => 24,  // escape/exit
+            Key.A when ctrl => 1,
+            Key.B when ctrl => 2,
+            Key.C when ctrl => 3,
+            Key.D when ctrl => 4,
+            Key.E when ctrl => 5,
+            Key.F when ctrl => 6,
+            Key.G when ctrl => 7,
+            Key.H when ctrl => 8,
+            Key.J when ctrl => 9,
+            Key.K when ctrl => 10,
+            Key.L when ctrl => 11,
+            Key.M when ctrl => 12,
+            Key.N when ctrl => 13,
+            Key.O when ctrl => 14,
+            Key.P when ctrl => 15,
+            Key.Q when ctrl => 16,
+            Key.R when ctrl => 17,
+            Key.S when ctrl => 18,
+            Key.T when ctrl => 19,
+            Key.U when ctrl => 20,
+            Key.V when ctrl => 21,
+            Key.W when ctrl => 22,
+            Key.X when ctrl => 24,
+            Key.Y when ctrl => 25,
+            Key.Z when ctrl => 26,
+            
+            // Alt+letter combinations used within the app
+            // same as ctrl codes but with high bit set
+            Key.C when alt => 0x83,   // conceal
+            Key.H when alt => 0x88,   // help/menus
+            Key.R when alt => 0x92,   // reveal
+            Key.X when alt => 0x98,   // escape/exit
 
             // Pure modifier keys — nothing to send
             Key.LeftShift or Key.RightShift or

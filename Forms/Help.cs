@@ -13,12 +13,12 @@ public class Help : IForm {
         menu.Append("\r\n");
         menu.Append(Converters.ConvertFromMarkup("[17][D]HELP\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[M]Ctrl C[C]Conceal\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[M]Ctrl R[C]Reveal\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[M]Ctrl H[C]Help\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[M]Alt C[C]Conceal\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[M]Alt R[C]Reveal\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[M]Alt H[C]Help\r\n\n"));
         //menu.Append(Converters.ConvertFromMarkup(""));
         //menu.Append(Converters.ConvertFromMarkup(""));
-        menu.Append(Converters.ConvertFromMarkup("[M]Ctrl X[C]Disconnect\r\n\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[M]Alt X[C]Disconnect\r\n\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[9]Press any key to Return\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[3]Version 0.1 (c) John Newcombe 2025\r\n\n"));
