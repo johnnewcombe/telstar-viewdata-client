@@ -17,8 +17,6 @@
 
 */
 
-using System.Diagnostics;
-using System.Drawing.Printing;
 using Avalonia.Input;
 using TelstarClient.Extensions;
 using TelstarClient.Logging;
@@ -34,7 +32,8 @@ public partial class MainWindowViewModel
     public void ProcessKey(byte asciiValue)
     {
         // NOTE That this function does not run on the UI thread
-
+        Log.Debug($"ASCII Value:{asciiValue:X2}h, {asciiValue}d");
+    
         // The screen can be in any one of 'DisplayType' states. Also,
         // the client could be online or offline when in any of these states.
 
@@ -210,12 +209,11 @@ public partial class MainWindowViewModel
             Key.Right => 0x43,
             Key.Left => 0x44,
 
-            // Ctrl+letter combinations (Ctrl+A=1 ... Ctrl+Z=26)
-            Key.A when ctrl => 1,
-            Key.B when ctrl => 2,
-            Key.C when ctrl => 3,
-            Key.D when ctrl => 4,
-            Key.Z when ctrl => 26,
+            // Ctrl+letter combinations used within the app, all others get sent
+            Key.C when ctrl => 3,   // conceal
+            Key.H when ctrl => 8,   // help/menus
+            Key.R when ctrl => 18,  // reveal
+            Key.X when ctrl => 24,  // escape/exit
 
             // Pure modifier keys — nothing to send
             Key.LeftShift or Key.RightShift or
