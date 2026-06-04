@@ -64,7 +64,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     // first entry.
     private enum DisplayType {
         Welcome,
-        Menu,
+        Directory,
         Terminal,
         Help,
         Edit,
@@ -257,7 +257,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             case DisplayType.Welcome:
                 _displayManagerAlt.Write(new Welcome().ToString());
                 break;
-            case DisplayType.Menu:
+            case DisplayType.Directory:
                 // pop the menu into the placeholder
                 _displayManagerAlt.Write(new Menu().ToString().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
                 break;

@@ -17,6 +17,9 @@
 
 */
 
+using System;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using TelstarClient.Extensions;
 using TelstarClient.Logging;
@@ -46,7 +49,7 @@ public partial class MainWindowViewModel
                 {
                     case 24: // ' ctrl+x disconnect
                         Disconnect();
-                        SetDisplay(DisplayType.Menu);
+                        SetDisplay(DisplayType.Directory);
                         break;
                     case 8: // ctrl+h show help menus
                         SetDisplay(DisplayType.Help);
@@ -68,10 +71,10 @@ public partial class MainWindowViewModel
         
                 // if we get a key press of any kind whilst looking at the welcome page
                 // then load the menu
-                SetDisplay(DisplayType.Menu);
+                SetDisplay(DisplayType.Directory);
                 break;
         
-            case DisplayType.Menu:
+            case DisplayType.Directory:
 
                 switch (asciiValue)
                 {
@@ -99,6 +102,12 @@ public partial class MainWindowViewModel
                         }
 
                         break;
+
+                    case 24: // ' ctrl+x disconnect
+                        Disconnect();
+                        SetDisplay(DisplayType.Help);
+
+                        break;
                 }
 
                 break;
@@ -116,7 +125,7 @@ public partial class MainWindowViewModel
                     {
                         case 24: // ctrl+x
                             Disconnect();
-                            SetDisplay(DisplayType.Menu);
+                            Shutdown();
                             break;
                         default:
                             SetDisplay(_previousDisplayType);
@@ -224,6 +233,18 @@ public partial class MainWindowViewModel
 
             _ => null
         };
+    }
+
+    private void Shutdown()
+    {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+        {
+            lifetime.Shutdown();
+        }
+        else
+        {
+            Environment.Exit(0);
+        }
     }
 }
 
