@@ -146,13 +146,35 @@ namespace TelstarClient.Comms {
         /// <summary>
         /// Write Data to Socket
         /// </summary>
-        /// <param name="_data">Data to be written</param>
+        /// <param name="data">Data to be written</param>
         /// <returns>Success status as Boolean Value</returns>
-        public bool Write(byte[] _data) {
+        public bool Write(byte data)
+        {
+            byte[] array = [data];
+            return Write(array);
+        }
+
+        /// <summary>
+        /// Write Data to Socket
+        /// </summary>
+        /// <param name="data">Data to be written</param>
+        /// <returns>Success status as Boolean Value</returns>
+        public bool Write(char data)
+        {
+            byte[] array = [(byte)data];
+            return Write(array);
+        }
+        
+        /// <summary>
+        /// Write Data to Socket
+        /// </summary>
+        /// <param name="data">Data to be written</param>
+        /// <returns>Success status as Boolean Value</returns>
+        public bool Write(byte[] data) {
             // Check Connection
             if (IsConnected()) {
                 try {
-                    socket.Send(_data, _data.Length, 0);
+                    socket.Send(data, data.Length, 0);
                     return true;
                 }
                 catch (Exception ex) {

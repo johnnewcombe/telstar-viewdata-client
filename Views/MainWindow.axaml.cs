@@ -83,6 +83,7 @@ public partial class MainWindow : Window {
     private void Window_FullScreen(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
 
     }
+    
 
     private void Window_KeyDown(object sender, KeyEventArgs e) {
         Log.Debug(
@@ -98,6 +99,16 @@ public partial class MainWindow : Window {
 
     private void Window_TextInput(object sender, TextInputEventArgs e) { 
         Log.Debug($"TextInput:{e.Text}");
+        try
+        {
+            ViewModel.TextHandler(e);
+        }
+        
+        catch (Exception ex)
+        {
+            Log.Error(ex.Message);
+            throw;
+        }
     }
     
     private void ConnectButton_OnClick(object? sender, RoutedEventArgs e) {
@@ -161,5 +172,10 @@ public partial class MainWindow : Window {
         };
 
         return viewBox;
+    }
+
+    private void InputElement_OnTextInput(object sender, TextInputEventArgs e)
+    {
+        throw new NotImplementedException();
     }
 }
