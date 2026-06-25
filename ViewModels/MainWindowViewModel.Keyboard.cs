@@ -111,11 +111,9 @@ public partial class MainWindowViewModel
                         }
 
                         break;
-
-                    case 0x98: // ' alt+x disconnect
-                        Disconnect();
+                    
+                    case 0x88: // ' alt+x disconnect
                         SetDisplay(DisplayType.Help);
-
                         break;
                 }
 
@@ -229,6 +227,7 @@ public partial class MainWindowViewModel
             Key.Right => 0x43,
             Key.Left => 0x44,
 
+            // platfor and keyboard agnostic (hopefully!)
             Key.A when ctrl => 1,
             Key.B when ctrl => 2,
             Key.C when ctrl => 3,

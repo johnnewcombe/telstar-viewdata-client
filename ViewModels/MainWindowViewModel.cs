@@ -34,6 +34,7 @@ using TelstarClient.Extensions;
 using TelstarClient.Forms;
 using TelstarClient.Logging;
 using Char = TelstarClient.Models.Char;
+using Directory = TelstarClient.Forms.Directory;
 
 namespace TelstarClient.ViewModels;
 
@@ -106,9 +107,9 @@ public partial class MainWindowViewModel : ViewModelBase {
         var configFile = _appSupportDirectory + ConfigFile;
 
         // create the app suport directory if it doesn't exist
-        if (!Directory.Exists(_appSupportDirectory)) {
+        if (!System.IO.Directory.Exists(_appSupportDirectory)) {
             // create directory
-            Directory.CreateDirectory(_appSupportDirectory);
+            System.IO.Directory.CreateDirectory(_appSupportDirectory);
         }
 
         // set up the alt display and show the welcome message
@@ -259,7 +260,7 @@ public partial class MainWindowViewModel : ViewModelBase {
                 break;
             case DisplayType.Directory:
                 // pop the menu into the placeholder
-                _displayManagerAlt.Write(new Menu().ToString().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
+                _displayManagerAlt.Write(new Directory().ToString().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
                 break;
             case DisplayType.Edit:
                 _currentForm = new Forms.Edit();

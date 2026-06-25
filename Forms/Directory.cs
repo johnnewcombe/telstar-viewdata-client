@@ -4,7 +4,7 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
 
-public class Menu : IForm {
+public class Directory : IForm {
     public string ToString() {
 
         var menu = new StringBuilder();
