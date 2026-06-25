@@ -22,6 +22,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using TelstarClient.Extensions;
+using TelstarClient.Forms;
 using TelstarClient.Logging;
 
 namespace TelstarClient.ViewModels;
@@ -36,7 +37,7 @@ public partial class MainWindowViewModel
     {
         // NOTE That this function does not run on the UI thread
         Log.Debug($"ASCII Value:{asciiValue:X2}h, {asciiValue}d");
-    
+
         // The screen can be in any one of 'DisplayType' states. Also,
         // the client could be online or offline when in any of these states.
 
@@ -45,14 +46,14 @@ public partial class MainWindowViewModel
             case DisplayType.Terminal:
 
                 /*
-                 
+
                    // Alt+letter combinations used within the app
                    Key.C when alt => 0x83,   // conceal
                    Key.H when alt => 0x88,   // help/menus
                    Key.R when alt => 0x92,   // reveal
                    Key.X when alt => 0x98,   // escape/exit
                  */
-                
+
                 // looking for alt key combinations (same as ctrl codes but with high bit set)
                 switch (asciiValue)
                 {
@@ -73,16 +74,16 @@ public partial class MainWindowViewModel
                 {
                     Log.Error($"Keyboard entry not sent:{asciiValue}");
                 }
-                
+
                 break;
 
             case DisplayType.Welcome:
-        
+
                 // if we get a key press of any kind whilst looking at the welcome page
                 // then load the menu
                 SetDisplay(DisplayType.Directory);
                 break;
-        
+
             case DisplayType.Directory:
 
                 switch (asciiValue)
@@ -111,7 +112,7 @@ public partial class MainWindowViewModel
                         }
 
                         break;
-                    
+
                     case 0x88: // ' alt+x disconnect
                         SetDisplay(DisplayType.Help);
                         break;
@@ -127,17 +128,17 @@ public partial class MainWindowViewModel
 
                 break;
             case DisplayType.Help:
-                
-                    switch (asciiValue)
-                    {
-                        case 0x98: // alt+x
-                            Disconnect();
-                            Shutdown();
-                            break;
-                        default:
-                            SetDisplay(_previousDisplayType);
-                            break;
-                    }
+
+                switch (asciiValue)
+                {
+                    case 0x98: // alt+x
+                        Disconnect();
+                        Shutdown();
+                        break;
+                    default:
+                        SetDisplay(_previousDisplayType);
+                        break;
+                }
 
                 break;
         }
@@ -155,12 +156,27 @@ public partial class MainWindowViewModel
         //  Shift TAB navigates to previous field
         var currentField = _currentForm.GetCurrentField();
 
+        if (asciiValue == 0x08) // backspace
+        {
+            if (currentField.Value.Length > 0)
+            {
+                _displayManagerAlt.SetCursorPosition(currentField.Value.Length + currentField.StartIndex);
+                _displayManagerAlt.Write((char)0x20);
+                DisplayData = _displayManagerAlt.Display.Chars;
+
+                currentField.Value = currentField.Value.Substring(0, currentField.Value.Length - 1);
+
+                return true;
+            }
+        }
+
         // are we terminating the field?
         if (asciiValue is 0x0d or 0x09 || currentField.Value.Length >= currentField.Length)
         {
             if (_currentForm.Next())
             {
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
+                return true;
             }
 
             // all done
@@ -168,17 +184,40 @@ public partial class MainWindowViewModel
             return false;
         }
 
-        // TODO: FIX THIS! as each char is placed at the start of the field!
-        _displayManagerAlt.SetCursorPosition(currentField.StartIndex);
-
-        // not a CR or tab, so filter out control chars etc except backspace
-        if (asciiValue >= 0x20 || asciiValue == 0x08)
+        if (asciiValue >= 0x20 && asciiValue < 0x80)
         {
+            if (currentField.Type is FieldType.Alpha && !IsAlpha(asciiValue))
+                return true;
+            if (currentField.Type == FieldType.Numeric && !IsNumeric(asciiValue))
+                return true;
+            if (currentField.Type is FieldType.Numeric && !IsNumeric(asciiValue) || !IsAlpha(asciiValue))
+                return true;
+
+            currentField.Value += (char)asciiValue;
+            _displayManagerAlt.SetCursorPosition(currentField.Value.Length + currentField.StartIndex);
             _displayManagerAlt.Write((char)asciiValue);
             DisplayData = _displayManagerAlt.Display.Chars;
         }
 
         return true;
+    }
+    
+    public bool IsNumeric(int asciiValue)
+    {
+        return asciiValue >= 0x30 && asciiValue <= 0x39;
+    }
+/// <summary>
+/// In the following code alphanumeic means any printable character
+/// </summary>
+/// <param name="asciiValue"></param>
+/// <returns></returns>
+    public bool IsAlpha(int asciiValue)
+    {
+        return asciiValue >= 0x20 && asciiValue < 0x80;
+    }
+    public bool IsAlphaNumeric(int asciiValue)
+    {
+        return IsAlpha(asciiValue) || IsNumeric(asciiValue);
     }
 
     public void TextHandler(TextInputEventArgs args)
@@ -210,7 +249,7 @@ public partial class MainWindowViewModel
     {
         bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         bool alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
-        
+
 
         return e.Key switch
         {
@@ -253,13 +292,13 @@ public partial class MainWindowViewModel
             Key.X when ctrl => 24,
             Key.Y when ctrl => 25,
             Key.Z when ctrl => 26,
-            
+
             // Alt+letter combinations used within the app
             // same as ctrl codes but with high bit set
-            Key.C when alt => 0x83,   // conceal
-            Key.H when alt => 0x88,   // help/menus
-            Key.R when alt => 0x92,   // reveal
-            Key.X when alt => 0x98,   // escape/exit
+            Key.C when alt => 0x83, // conceal
+            Key.H when alt => 0x88, // help/menus
+            Key.R when alt => 0x92, // reveal
+            Key.X when alt => 0x98, // escape/exit
 
             // Pure modifier keys — nothing to send
             Key.LeftShift or Key.RightShift or

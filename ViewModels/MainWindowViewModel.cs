@@ -260,7 +260,7 @@ public partial class MainWindowViewModel : ViewModelBase {
                 break;
             case DisplayType.Directory:
                 // pop the menu into the placeholder
-                _displayManagerAlt.Write(new Directory().ToString().Replace(Constants.PlaceHolder, GetMenuFromConfig()));
+                _displayManagerAlt.Write(new Directory().ToString().Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
                 break;
             case DisplayType.Edit:
                 _currentForm = new Forms.Edit();
@@ -286,7 +286,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         }
     }
     
-    private string GetMenuFromConfig() {
+    private string GetDirectoryFromConfig() {
 
         // get the menu details from the config file
         var item = 0;
