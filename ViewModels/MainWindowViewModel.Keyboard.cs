@@ -20,6 +20,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
@@ -116,6 +117,27 @@ public partial class MainWindowViewModel
             case DisplayType.Edit:
                 if (!ProcessFormKey(asciiValue))
                 {
+                    // do we save or connect or ignore
+                    if (_currentForm is not null)
+                    {
+                        // either save or connect
+                        var lastField = _currentForm.Fields[^1];
+                        if (string.IsNullOrEmpty(lastField.Value))
+                        {
+                            // get host and port and connect
+                            var host = _currentForm.Fields[1].Value;
+                            int.TryParse(_currentForm.Fields[2].Value, out int port);
+
+                            Connect(host, port);
+                            SetDisplay(DisplayType.Terminal);
+                            break;
+                        }
+                        else // save
+                        {  
+                            // TODO implement save
+                        }
+                    }
+
                     //DisplayEditor returns false when complete or cancelled
                     SetDisplay(_previousDisplayType);
                 }
@@ -145,13 +167,10 @@ public partial class MainWindowViewModel
     /// <returns></returns>
     private bool ProcessFormKey(byte asciiValue)
     {
-        // TODO:
-        //  ESC to abort to previous screen
-        //  MAKE this suitable for generic use on all forms i.e. pass current form to method
-
         //var currentField = _currentForm.GetCurrentField();
         if (asciiValue == 0x1B)  // escape 
         {
+            _currentForm = null;
             return false;
         }
 
@@ -204,8 +223,6 @@ public partial class MainWindowViewModel
             }
 
             // all done
-            _currentForm = null;
-            
             return false;
         }
 
