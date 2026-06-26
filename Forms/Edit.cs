@@ -6,7 +6,7 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
 
-public class Edit : IForm {
+public class Edit : FormBase {
 
     private int _currentField;
 
@@ -22,13 +22,13 @@ public class Edit : IForm {
         
     }
 
-    public List<Field> Fields { get; set; }
+    public override List<Field> Fields { get; set; }
 
-    public Field GetCurrentField() {
+    public override Field GetCurrentField() {
         return Fields[_currentField];
     }
 
-    public bool Next() {
+    public override bool Next() {
         if (_currentField < Fields.Count - 1) {
             _currentField++;
             return true;
@@ -36,7 +36,7 @@ public class Edit : IForm {
         return false;
     }
     
-    public bool Previous() {
+    public override bool Previous() {
         if (_currentField > 0) {
             _currentField--;
             return true;
@@ -44,7 +44,7 @@ public class Edit : IForm {
         return false;
     }
     
-    public string ToString() {
+    public override string ToString() {
 
         var menu = new StringBuilder();
         menu.Append("\r\n");

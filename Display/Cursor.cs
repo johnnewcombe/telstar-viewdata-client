@@ -41,8 +41,8 @@ public class Cursor {
     }
 
     public Cursor(int startIndex) {
-        _row = startIndex/Models.Display.COLS;
-        _col = startIndex%Models.Display.COLS;
+        _row = startIndex / Models.Display.COLS;
+        _col = startIndex % Models.Display.COLS;
     }
     /// <summary>
     /// Returns the current cursor row position.

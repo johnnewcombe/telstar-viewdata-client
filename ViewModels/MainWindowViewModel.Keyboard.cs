@@ -19,6 +19,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
@@ -46,15 +47,6 @@ public partial class MainWindowViewModel
         switch (_displayType)
         {
             case DisplayType.Terminal:
-
-                /*
-
-                   // Alt+letter combinations used within the app
-                   Key.C when alt => 0x83,   // conceal
-                   Key.H when alt => 0x88,   // help/menus
-                   Key.R when alt => 0x92,   // reveal
-                   Key.X when alt => 0x98,   // escape/exit
-                 */
 
                 // looking for alt key combinations (same as ctrl codes but with high bit set)
                 switch (asciiValue)
@@ -122,7 +114,7 @@ public partial class MainWindowViewModel
 
                 break;
             case DisplayType.Edit:
-                if (!ProcessMenuEditKey(asciiValue))
+                if (!ProcessFormKey(asciiValue))
                 {
                     //DisplayEditor returns false when complete or cancelled
                     SetDisplay(_previousDisplayType);
@@ -151,25 +143,41 @@ public partial class MainWindowViewModel
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    private bool ProcessMenuEditKey(byte asciiValue)
+    private bool ProcessFormKey(byte asciiValue)
     {
         // TODO:
-        //  Shift TAB navigates to previous field
         //  ESC to abort to previous screen
-        //  cursor of some sort
-        var currentField = _currentForm.GetCurrentField();
+        //  MAKE this suitable for generic use on all forms i.e. pass current form to method
+
+        //var currentField = _currentForm.GetCurrentField();
+        if (asciiValue == 0x1B)  // escape 
+        {
+            return false;
+        }
 
         if (asciiValue == 0x08) // backspace
         {
-            if (currentField.Value.Length > 0)
+            if (_currentForm.GetCurrentField().Value.Length > 0)
             {
-                _displayManagerAlt.SetCursorPosition(currentField.Value.Length + currentField.StartIndex);
-                
+                // remove the char from the display by setting the cursor to the current position
+                // and then writing a space character
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length - 1
+                                                     + _currentForm.GetCurrentField().StartIndex);
                 _displayManagerAlt.Write((char)0x20);
-                DisplayData = _displayManagerAlt.Display.Chars;
-                
-                currentField.Value = currentField.Value.Substring(0, currentField.Value.Length - 1);
 
+                
+                // remove the char from the value property of the field this reduces he value
+                // length which is used when calculating where to place the cursor
+                _currentForm.GetCurrentField().Value =
+                    _currentForm.GetCurrentField().Value.Substring(0,
+                        _currentForm.GetCurrentField().Value.Length - 1);
+                
+                
+                // place the cursor at the new position
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length
+                                                     + _currentForm.GetCurrentField().StartIndex);
+
+                DisplayData = _displayManagerAlt.Display.Chars;
                 return true;
             }
         }
@@ -179,19 +187,21 @@ public partial class MainWindowViewModel
         {
             if (_currentForm.Previous())
             {
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex + 
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
                                                      _currentForm.GetCurrentField().Value.Length);
                 DisplayData = _displayManagerAlt.Display.Chars;
             }
+
             return true;
         }
 
         // are we terminating the field?
-        if (asciiValue is 0x0d or 0x09 || currentField.Value.Length >= currentField.Length)
+        if (asciiValue is 0x0d or 0x09 ||
+            _currentForm.GetCurrentField().Value.Length >= _currentForm.GetCurrentField().Length)
         {
             if (_currentForm.Next())
             {
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex + 
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
                                                      _currentForm.GetCurrentField().Value.Length);
                 DisplayData = _displayManagerAlt.Display.Chars;
                 return true;
@@ -204,35 +214,39 @@ public partial class MainWindowViewModel
 
         if (asciiValue >= 0x20 && asciiValue < 0x80)
         {
-            if (currentField.Type is FieldType.Alpha && !IsAlpha(asciiValue))
+            if (_currentForm.GetCurrentField().Type is FieldType.Alpha && !IsAlpha(asciiValue))
                 return true;
-            if (currentField.Type == FieldType.Numeric && !IsNumeric(asciiValue))
+            if (_currentForm.GetCurrentField().Type == FieldType.Numeric && !IsNumeric(asciiValue))
                 return true;
-            if (currentField.Type is FieldType.Numeric && !IsNumeric(asciiValue) || !IsAlpha(asciiValue))
+            if (_currentForm.GetCurrentField().Type is FieldType.Numeric && !IsNumeric(asciiValue) ||
+                !IsAlpha(asciiValue))
                 return true;
 
-            currentField.Value += (char)asciiValue;
+            _currentForm.GetCurrentField().Value += (char)asciiValue;
             _displayManagerAlt.Write((char)asciiValue);
-            _displayManagerAlt.SetCursorPosition(currentField.Value.Length + currentField.StartIndex);
+            _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length +
+                                                 _currentForm.GetCurrentField().StartIndex);
             DisplayData = _displayManagerAlt.Display.Chars;
         }
 
         return true;
     }
-    
+
     public bool IsNumeric(int asciiValue)
     {
         return asciiValue >= 0x30 && asciiValue <= 0x39;
     }
-/// <summary>
-/// In the following code alphanumeic means any printable character
-/// </summary>
-/// <param name="asciiValue"></param>
-/// <returns></returns>
+
+    /// <summary>
+    /// In the following code alphanumeic means any printable character
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
     public bool IsAlpha(int asciiValue)
     {
         return asciiValue >= 0x20 && asciiValue < 0x80;
     }
+
     public bool IsAlphaNumeric(int asciiValue)
     {
         return IsAlpha(asciiValue) || IsNumeric(asciiValue);
