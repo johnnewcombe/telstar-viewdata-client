@@ -15,10 +15,10 @@ public class Edit : IForm {
         // create fields
         Fields = new List<Field>();
         
-        Fields.Add(new Field (246,20,string.Empty, FieldType.AlphaNumeric));
-        Fields.Add(new Field (326,20,string.Empty, FieldType.AlphaNumeric));
-        Fields.Add(new Field (406,20,string.Empty, FieldType.Numeric));
-        Fields.Add(new Field (510,1,string.Empty, FieldType.Numeric));
+        Fields.Add(new Field (6,7,20,string.Empty, FieldType.AlphaNumeric));
+        Fields.Add(new Field (8,7,20,string.Empty, FieldType.AlphaNumeric));
+        Fields.Add(new Field (10,7,20,string.Empty, FieldType.Numeric));
+        Fields.Add(new Field (12,31,1,string.Empty, FieldType.Numeric));
         
     }
 

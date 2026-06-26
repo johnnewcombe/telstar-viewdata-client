@@ -26,6 +26,24 @@ public class Cursor {
     private int _row;
     private bool _visible = true;
 
+    public Cursor() {
+        _col = 0;
+        _row = 0;
+    }
+    public Cursor(int col, int row) {
+        _col = 0;
+        _row = 0;   
+    }
+    public Cursor(int col, int row, bool visible) {
+        _col = 0;
+        _row = 0;   
+        Visible = visible;
+    }
+
+    public Cursor(int startIndex) {
+        _row = startIndex/Models.Display.COLS;
+        _col = startIndex%Models.Display.COLS;
+    }
     /// <summary>
     /// Returns the current cursor row position.
     /// </summary>
@@ -51,6 +69,10 @@ public class Cursor {
         set { _visible = value; }
     }
 
+    public int GetCursorIndex() {
+       return Col + Row * Models.Display.COLS;
+    }
+    
     #region Cursor Movement
 
     /// <summary>

@@ -24,6 +24,7 @@ using Avalonia.Input;
 using TelstarClient.Extensions;
 using TelstarClient.Forms;
 using TelstarClient.Logging;
+using Cursor = TelstarClient.Display.Cursor;
 
 namespace TelstarClient.ViewModels;
 
@@ -88,7 +89,7 @@ public partial class MainWindowViewModel
 
                 switch (asciiValue)
                 {
-                    case 8: // // ctrl+h show help menus
+                    case 8: // ctrl+h show help menus
                         SetDisplay(DisplayType.Help);
                         break;
                     case >= 0x30 and <= 0x39:
@@ -122,7 +123,7 @@ public partial class MainWindowViewModel
             case DisplayType.Edit:
                 if (!ProcessMenuEditKey(asciiValue))
                 {
-                    //MenuEditor returns false when complete or cancelled
+                    //DisplayEditor returns false when complete or cancelled
                     SetDisplay(_previousDisplayType);
                 }
 
@@ -162,9 +163,10 @@ public partial class MainWindowViewModel
             if (currentField.Value.Length > 0)
             {
                 _displayManagerAlt.SetCursorPosition(currentField.Value.Length + currentField.StartIndex);
+                
                 _displayManagerAlt.Write((char)0x20);
                 DisplayData = _displayManagerAlt.Display.Chars;
-
+                
                 currentField.Value = currentField.Value.Substring(0, currentField.Value.Length - 1);
 
                 return true;
@@ -177,6 +179,7 @@ public partial class MainWindowViewModel
             if (_currentForm.Next())
             {
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
+                DisplayData = _displayManagerAlt.Display.Chars;
                 return true;
             }
 
@@ -195,8 +198,8 @@ public partial class MainWindowViewModel
                 return true;
 
             currentField.Value += (char)asciiValue;
-            _displayManagerAlt.SetCursorPosition(currentField.Value.Length + currentField.StartIndex);
             _displayManagerAlt.Write((char)asciiValue);
+            _displayManagerAlt.SetCursorPosition(currentField.Value.Length + currentField.StartIndex);
             DisplayData = _displayManagerAlt.Display.Chars;
         }
 
@@ -250,7 +253,6 @@ public partial class MainWindowViewModel
     {
         bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         bool alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
-
 
         return e.Key switch
         {

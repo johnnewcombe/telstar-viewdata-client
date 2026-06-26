@@ -247,8 +247,10 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// </summary>
     public Display.Cursor Cursor {
         get { return _cursor; }
-        set { _cursor = value; }
-
+        set {
+            _cursor = value; 
+            OnPropertyChanged();
+        }
     }   
     #endregion
 
@@ -279,6 +281,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             case DisplayType.Edit:
                 _currentForm = new Forms.Edit();
                 _displayManagerAlt.Write(_currentForm.ToString());
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
                 break;
             case DisplayType.Help:
                 _currentForm = new Help();

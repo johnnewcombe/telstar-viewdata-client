@@ -17,7 +17,14 @@ public class Field
         Length = length;
         Value = value;
         Type = type;
-//        currentIndex = StartIndex;
+    }
+
+    public Field(int col, int row, int length, string value, FieldType type)
+    {
+        StartIndex = col*Models.Display.COLS + row;
+        Length = length;
+        Value = value;
+        Type = type;
     }
 
     public int StartIndex = 0; // cell position on the display

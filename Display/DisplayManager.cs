@@ -235,6 +235,7 @@ public partial class DisplayManager {
             _cursor.Row = index / Models.Display.COLS;
             _cursor.Col = index % Models.Display.COLS;
         }
+        
     }
     
     #endregion
