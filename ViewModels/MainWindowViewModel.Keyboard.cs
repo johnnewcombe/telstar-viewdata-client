@@ -172,12 +172,9 @@ public partial class MainWindowViewModel
                     _currentForm.GetCurrentField().Value.Substring(0,
                         _currentForm.GetCurrentField().Value.Length - 1);
                 
-                
-                // place the cursor at the new position
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length
-                                                     + _currentForm.GetCurrentField().StartIndex);
+                //set cursor and update display
+                SetCursorAndUpdate();
 
-                DisplayData = _displayManagerAlt.Display.Chars;
                 return true;
             }
         }
@@ -187,9 +184,8 @@ public partial class MainWindowViewModel
         {
             if (_currentForm.Previous())
             {
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
-                                                     _currentForm.GetCurrentField().Value.Length);
-                DisplayData = _displayManagerAlt.Display.Chars;
+                //set cursor and update display
+                SetCursorAndUpdate();
             }
 
             return true;
@@ -201,14 +197,15 @@ public partial class MainWindowViewModel
         {
             if (_currentForm.Next())
             {
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
-                                                     _currentForm.GetCurrentField().Value.Length);
-                DisplayData = _displayManagerAlt.Display.Chars;
+                //set cursor and update display
+                SetCursorAndUpdate();
+
                 return true;
             }
 
             // all done
             _currentForm = null;
+            
             return false;
         }
 
@@ -224,14 +221,23 @@ public partial class MainWindowViewModel
 
             _currentForm.GetCurrentField().Value += (char)asciiValue;
             _displayManagerAlt.Write((char)asciiValue);
-            _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length +
-                                                 _currentForm.GetCurrentField().StartIndex);
-            DisplayData = _displayManagerAlt.Display.Chars;
+            
+            //set cursor and update display
+            SetCursorAndUpdate();
         }
 
         return true;
     }
 
+    private void SetCursorAndUpdate()
+    {
+        //set cursor and update display
+        _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length +
+                                             _currentForm.GetCurrentField().StartIndex);
+        DisplayData = _displayManagerAlt.Display.Chars;
+
+    }
+    
     public bool IsNumeric(int asciiValue)
     {
         return asciiValue >= 0x30 && asciiValue <= 0x39;
