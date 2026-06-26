@@ -18,6 +18,7 @@
 */
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
@@ -173,12 +174,25 @@ public partial class MainWindowViewModel
             }
         }
 
+        // shift tab
+        if (asciiValue is 0x89)
+        {
+            if (_currentForm.Previous())
+            {
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex + 
+                                                     _currentForm.GetCurrentField().Value.Length);
+                DisplayData = _displayManagerAlt.Display.Chars;
+            }
+            return true;
+        }
+
         // are we terminating the field?
         if (asciiValue is 0x0d or 0x09 || currentField.Value.Length >= currentField.Length)
         {
             if (_currentForm.Next())
             {
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex + 
+                                                     _currentForm.GetCurrentField().Value.Length);
                 DisplayData = _displayManagerAlt.Display.Chars;
                 return true;
             }
@@ -253,6 +267,7 @@ public partial class MainWindowViewModel
     {
         bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         bool alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
         return e.Key switch
         {
@@ -260,6 +275,7 @@ public partial class MainWindowViewModel
             Key.Enter or Key.Return => 13,
             Key.Escape => 27,
             Key.Back => 8,
+            Key.Tab when shift => 0x89, // TAB with msb set.
             Key.Tab => 9,
             Key.Delete => 127,
 
@@ -269,7 +285,7 @@ public partial class MainWindowViewModel
             Key.Right => 0x43,
             Key.Left => 0x44,
 
-            // platfor and keyboard agnostic (hopefully!)
+            // platform and keyboard agnostic (hopefully!)
             Key.A when ctrl => 1,
             Key.B when ctrl => 2,
             Key.C when ctrl => 3,

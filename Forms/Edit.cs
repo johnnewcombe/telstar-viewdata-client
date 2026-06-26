@@ -29,13 +29,21 @@ public class Edit : IForm {
     }
 
     public bool Next() {
-        _currentField++;
-        return _currentField < Fields.Count;
+        if (_currentField < Fields.Count - 1) {
+            _currentField++;
+            return true;
+        }
+        return false;
     }
+    
     public bool Previous() {
-        throw new System.NotImplementedException();
+        if (_currentField > 0) {
+            _currentField--;
+            return true;
+        }
+        return false;
     }
-
+    
     public string ToString() {
 
         var menu = new StringBuilder();
