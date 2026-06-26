@@ -18,16 +18,12 @@
 */
 
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Security.Cryptography;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using TelstarClient.Extensions;
 using TelstarClient.Forms;
 using TelstarClient.Logging;
-using Cursor = TelstarClient.Display.Cursor;
 
 namespace TelstarClient.ViewModels;
 
@@ -36,7 +32,7 @@ public partial class MainWindowViewModel
     /// <summary>
     /// Handles keyboard activity passed from the View.
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="asciiValue"></param>
     public void ProcessKey(byte asciiValue)
     {
         // NOTE That this function does not run on the UI thread
@@ -94,7 +90,7 @@ public partial class MainWindowViewModel
                         {
                             SetDisplay(DisplayType.Edit);
                         }
-                        else if (index > 0 && index < _settings.config.Connections.Count)
+                        else if (index < _settings.config.Connections.Count)
                         {
                             // index-1 as menu is '1' based and collection is '0' based
                             var con = _settings.config.Connections[index - 1];
@@ -114,35 +110,44 @@ public partial class MainWindowViewModel
                 }
 
                 break;
+
             case DisplayType.Edit:
                 if (!ProcessFormKey(asciiValue))
                 {
                     // do we save or connect or ignore
                     if (_currentForm is not null)
                     {
-                        // either save or connect
-                        var lastField = _currentForm.Fields[^1];
-                        if (string.IsNullOrEmpty(lastField.Value))
+                        if(_currentForm.IsValid())
                         {
                             // get host and port and connect
+                            var name = _currentForm.Fields[0].Value;
                             var host = _currentForm.Fields[1].Value;
                             int.TryParse(_currentForm.Fields[2].Value, out int port);
+                            int.TryParse(_currentForm.Fields[3].Value, out int memory);
 
-                            Connect(host, port);
-                            SetDisplay(DisplayType.Terminal);
-                            break;
-                        }
-                        else // save
-                        {  
-                            // TODO implement save
+                            // either save or connect depending on whether a memory was specified
+                            if (memory == 0) // not to be saved
+                            {
+                                Connect(host, port);
+                                SetDisplay(DisplayType.Terminal);
+                                break;
+                            }
+                            else // save
+                            {
+                                // form is valid and the last field is not empty
+                                // TODO implement save to config
+                                SetDisplay(DisplayType.Directory);
+                                break;
+                            }
                         }
                     }
 
-                    //DisplayEditor returns false when complete or cancelled
+                    //DisplayEditor returns false when complete or canceled
                     SetDisplay(_previousDisplayType);
                 }
 
                 break;
+
             case DisplayType.Help:
 
                 switch (asciiValue)
@@ -163,12 +168,12 @@ public partial class MainWindowViewModel
     /// <summary>
     /// MenuEditor returns false when complete or cancelled
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="asciiValue"></param>
     /// <returns></returns>
     private bool ProcessFormKey(byte asciiValue)
     {
         //var currentField = _currentForm.GetCurrentField();
-        if (asciiValue == 0x1B)  // escape 
+        if (asciiValue == 0x1B) // escape 
         {
             _currentForm = null;
             return false;
@@ -184,13 +189,13 @@ public partial class MainWindowViewModel
                                                      + _currentForm.GetCurrentField().StartIndex);
                 _displayManagerAlt.Write((char)0x20);
 
-                
+
                 // remove the char from the value property of the field this reduces he value
                 // length which is used when calculating where to place the cursor
                 _currentForm.GetCurrentField().Value =
                     _currentForm.GetCurrentField().Value.Substring(0,
                         _currentForm.GetCurrentField().Value.Length - 1);
-                
+
                 //set cursor and update display
                 SetCursorAndUpdate();
 
@@ -238,7 +243,7 @@ public partial class MainWindowViewModel
 
             _currentForm.GetCurrentField().Value += (char)asciiValue;
             _displayManagerAlt.Write((char)asciiValue);
-            
+
             //set cursor and update display
             SetCursorAndUpdate();
         }
@@ -252,29 +257,9 @@ public partial class MainWindowViewModel
         _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length +
                                              _currentForm.GetCurrentField().StartIndex);
         DisplayData = _displayManagerAlt.Display.Chars;
-
     }
+
     
-    public bool IsNumeric(int asciiValue)
-    {
-        return asciiValue >= 0x30 && asciiValue <= 0x39;
-    }
-
-    /// <summary>
-    /// In the following code alphanumeic means any printable character
-    /// </summary>
-    /// <param name="asciiValue"></param>
-    /// <returns></returns>
-    public bool IsAlpha(int asciiValue)
-    {
-        return asciiValue >= 0x20 && asciiValue < 0x80;
-    }
-
-    public bool IsAlphaNumeric(int asciiValue)
-    {
-        return IsAlpha(asciiValue) || IsNumeric(asciiValue);
-    }
-
     public void TextHandler(TextInputEventArgs args)
     {
         // e.Text is already fully composed by the OS — Shift+8 gives "*", etc.
@@ -300,11 +285,31 @@ public partial class MainWindowViewModel
         }
     }
 
+    /// <summary>
+    /// Returns true is a character is a number
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private static bool IsNumeric(int asciiValue)
+    {
+        return asciiValue >= 0x30 && asciiValue <= 0x39;
+    }
+
+    /// <summary>
+    /// In the following code alphanumeic means any printable character
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private static bool IsAlpha(int asciiValue)
+    {
+        return asciiValue >= 0x20 && asciiValue < 0x80;
+    }
+
     private static byte? GetControlKeyAscii(KeyEventArgs e)
     {
-        bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        bool alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
-        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        var alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
         return e.Key switch
         {

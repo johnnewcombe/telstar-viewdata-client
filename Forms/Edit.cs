@@ -6,24 +6,23 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
 
-public class Edit : FormBase {
-
+public class Edit : FormBase
+{
     private int _currentField;
 
-    public Edit() {
-
+    public Edit()
+    {
         // create fields
         Fields = new List<Field>();
-        
-        Fields.Add(new Field (6,7,20,string.Empty, FieldType.AlphaNumeric));
-        Fields.Add(new Field (8,7,20,string.Empty, FieldType.AlphaNumeric));
-        Fields.Add(new Field (10,7,20,string.Empty, FieldType.Numeric));
-        Fields.Add(new Field (12,31,1,string.Empty, FieldType.Numeric));
-        
-    }
-    
-    public override string ToString() {
 
+        Fields.Add(new Field(6, 7, 20, string.Empty, FieldType.AlphaNumeric, false));
+        Fields.Add(new Field(8, 7, 20, string.Empty, FieldType.AlphaNumeric, true));
+        Fields.Add(new Field(10, 7, 20, string.Empty, FieldType.Numeric, true));
+        Fields.Add(new Field(12, 31, 1, string.Empty, FieldType.Numeric, false));
+    }
+
+    public override string ToString()
+    {
         var menu = new StringBuilder();
         menu.Append("\r\n");
         menu.Append(Converters.ConvertFromMarkup("[17][D]EDIT\r\n\n"));

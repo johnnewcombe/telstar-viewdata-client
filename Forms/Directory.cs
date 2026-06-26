@@ -4,8 +4,8 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
 
-public class Directory : IForm {
-    public string ToString() {
+public class Directory : FormBase {
+    public override string ToString() {
 
         var menu = new StringBuilder();
         //menu.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
@@ -20,14 +20,5 @@ public class Directory : IForm {
 
     public List<Field> Fields { get; set; }
 
-    public Field GetCurrentField() {
-        throw new System.NotImplementedException();
-    }
 
-    public bool Next() {
-        throw new System.NotImplementedException();
-    }
-    public bool Previous() {
-        throw new System.NotImplementedException();
-    }
 }

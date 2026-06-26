@@ -8,5 +8,6 @@ public interface IForm {
     public Field GetCurrentField();
     public bool Next();
     public bool Previous();
+    public bool IsValid();
 }
 

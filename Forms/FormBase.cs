@@ -32,6 +32,12 @@ public abstract class FormBase : IForm
         return false;
     }
 
+    public bool IsValid()
+    {
+        // TODO: must check the values in each field to ensure they are valid for the field type
+        //   and that all required fields are present.
+        return true;
+    }
     // Forces derived classes to implement their own ToString
     public abstract override string ToString();
 }

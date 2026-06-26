@@ -4,9 +4,9 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
 
-public class Help : IForm {
+public class Help : FormBase {
 
-    public string ToString() {
+    public override string ToString() {
 
         var menu = new StringBuilder();
 
@@ -26,16 +26,4 @@ public class Help : IForm {
         return menu.ToString();
     }
 
-    public List<Field> Fields { get; set; }
-
-    public Field GetCurrentField() {
-        throw new System.NotImplementedException();
-    }
-
-    public bool Next() {
-        throw new System.NotImplementedException();
-    }
-    public bool Previous() {
-        throw new System.NotImplementedException();
-    }
 }

@@ -71,7 +71,7 @@ public partial class DisplayManager {
             }
         }
     }
-
+    
     /// <summary>
     /// Adds any new attributes to the character that this control character
     /// might require.
@@ -246,4 +246,5 @@ public partial class DisplayManager {
             c.DoubleHeight = false;
         }
     }
+
 }
