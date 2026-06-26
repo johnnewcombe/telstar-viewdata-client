@@ -21,28 +21,6 @@ public class Edit : FormBase {
         Fields.Add(new Field (12,31,1,string.Empty, FieldType.Numeric));
         
     }
-
-    public override List<Field> Fields { get; set; }
-
-    public override Field GetCurrentField() {
-        return Fields[_currentField];
-    }
-
-    public override bool Next() {
-        if (_currentField < Fields.Count - 1) {
-            _currentField++;
-            return true;
-        }
-        return false;
-    }
-    
-    public override bool Previous() {
-        if (_currentField > 0) {
-            _currentField--;
-            return true;
-        }
-        return false;
-    }
     
     public override string ToString() {
 
