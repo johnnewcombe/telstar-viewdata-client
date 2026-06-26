@@ -7,4 +7,5 @@ public interface IForm {
     public List<Field> Fields { set; get; }
     public Field GetCurrentField();
     public bool Next();
+    public bool Previous();
 }

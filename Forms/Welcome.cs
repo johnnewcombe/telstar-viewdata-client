@@ -41,5 +41,8 @@ public class Welcome : IForm {
     public bool Next() {
         throw new System.NotImplementedException();
     }
+    public bool Previous() {
+        throw new System.NotImplementedException();
+    }
 
 }

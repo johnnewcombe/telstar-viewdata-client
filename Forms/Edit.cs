@@ -32,6 +32,9 @@ public class Edit : IForm {
         _currentField++;
         return _currentField < Fields.Count;
     }
+    public bool Previous() {
+        throw new System.NotImplementedException();
+    }
 
     public string ToString() {
 

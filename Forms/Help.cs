@@ -35,4 +35,7 @@ public class Help : IForm {
     public bool Next() {
         throw new System.NotImplementedException();
     }
+    public bool Previous() {
+        throw new System.NotImplementedException();
+    }
 }
