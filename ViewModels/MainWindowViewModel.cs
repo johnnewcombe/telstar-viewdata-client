@@ -85,6 +85,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private DisplayType _previousDisplayType;
     private bool _keyCtrl;
     private List<Char> _displayData;
+    private Display.Cursor _cursor;
     private readonly Settings _settings;
     private readonly DisplayManager _displayManagerMain;
     private readonly DisplayManager _displayManagerAlt;
@@ -157,10 +158,13 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     private void UpdateMainDisplay() {
         DisplayData = _displayManagerMain.Display.Chars;
+        Cursor = _displayManagerMain.Cursor;
+        
     }
 
     private void UpdateAltDisplay() {
         DisplayData = _displayManagerAlt.Display.Chars;
+        Cursor = _displayManagerAlt.Cursor;
     }
 
     /// <summary>
@@ -186,9 +190,11 @@ public partial class MainWindowViewModel : ViewModelBase {
 
             if (_displayType == DisplayType.Terminal) {
                 DisplayData = _displayManagerMain.Display.Chars;
+                Cursor = _displayManagerMain.Cursor;
             }
             else {
                 DisplayData = _displayManagerAlt.Display.Chars;
+                Cursor = _displayManagerAlt.Cursor;
             }
         }
         catch (Exception e) {
@@ -226,7 +232,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     #region Public Properties and methods
 
     /// <summary>
-    /// Diplay data to be displayed by the View.
+    /// Display data to be displayed by the View.
     /// </summary>
     public List<Char> DisplayData {
         get { return _displayData; }
@@ -235,7 +241,15 @@ public partial class MainWindowViewModel : ViewModelBase {
             OnPropertyChanged();
         }
     }
+    
+    /// <summary>
+    /// The cursor position.
+    /// </summary>
+    public Display.Cursor Cursor {
+        get { return _cursor; }
+        set { _cursor = value; }
 
+    }   
     #endregion
 
     #region Private Methods

@@ -63,6 +63,7 @@ public partial class DisplayManager {
         _cursor = new Cursor();
         _fontMapper = new FontMapper();
         _colourMapper = new ColourMapper();
+        _cursor= new Cursor();
 
         if (enableFlash) {
             _stateTimer = new Timer(Flash, null, 1000, 1000);
@@ -85,6 +86,13 @@ public partial class DisplayManager {
     public Models.Display Display {
         set { _display = value; }
         get { return _display; }
+    }
+    
+    /// <summary>
+    /// The cursor position.
+    /// </summary>
+    public Cursor Cursor {
+        get { return _cursor; }
     }
     
     #endregion

@@ -123,8 +123,9 @@ public static class Extensions {
             if (c.Flash && !c.Concealed) {
                 
                 // TODO: By toggling the character it causes odd results if the toggle
-                // is invoked by the user whilst the frame is rendering as yet unrendered
-                // characters could unset attributes and end up being toggled the wrong way.
+                //  is invoked by the user whilst the frame is rendering as yet unrendered
+                //  characters could unset attributes and end up being toggled the wrong way.
+
                 
                 // TODO lock ??
                 c.InVisible = !c.InVisible;
@@ -138,8 +139,8 @@ public static class Extensions {
             if (c.Concealed) {
                 
                 // TODO: By toggling the character it causes odd results if the toggle
-                // is invoked by the user whilst the frame is rendering as yet unrendered
-                // characters could unset attributes and end up being toggled the wrong way.
+                //   is invoked by the user whilst the frame is rendering as yet unrendered
+                //   characters could unset attributes and end up being toggled the wrong way.
 
                 // TODO lock ??
                 c.InVisible = !c.InVisible;

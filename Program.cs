@@ -15,6 +15,8 @@
     You should have received a copy of the GNU General Public License 
     along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 
+    // TODO Remove reference to FOOBAR in this agreement everywhere.
+
 */
 
 using Avalonia;

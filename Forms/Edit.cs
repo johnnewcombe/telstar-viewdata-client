@@ -15,10 +15,10 @@ public class Edit : IForm {
         // create fields
         Fields = new List<Field>();
         
-        Fields.Add(new Field (247,20,string.Empty, FieldType.AlphaNumeric));
-        Fields.Add(new Field (327,20,string.Empty, FieldType.AlphaNumeric));
-        Fields.Add(new Field (407,20,string.Empty, FieldType.Numeric));
-        Fields.Add(new Field (503,1,string.Empty, FieldType.Numeric));
+        Fields.Add(new Field (246,20,string.Empty, FieldType.AlphaNumeric));
+        Fields.Add(new Field (326,20,string.Empty, FieldType.AlphaNumeric));
+        Fields.Add(new Field (406,20,string.Empty, FieldType.Numeric));
+        Fields.Add(new Field (510,1,string.Empty, FieldType.Numeric));
         
     }
 
@@ -42,7 +42,7 @@ public class Edit : IForm {
         menu.Append(Converters.ConvertFromMarkup("[C]NAME:\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[C]HOST:\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[C]PORT:\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[C]SAVE TO MEMORY? (0-9 or N):\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[C]SAVE TO MEMORY? (0-9 or RTN):\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[3]Press Escape to Return to Terminal"));
         //menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
         return menu.ToString();

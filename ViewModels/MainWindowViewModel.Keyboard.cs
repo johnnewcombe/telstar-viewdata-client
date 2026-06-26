@@ -152,8 +152,9 @@ public partial class MainWindowViewModel
     private bool ProcessMenuEditKey(byte asciiValue)
     {
         // TODO:
-        //  TAB and Return navigate to next field
         //  Shift TAB navigates to previous field
+        //  ESC to abort to previous screen
+        //  cursor of some sort
         var currentField = _currentForm.GetCurrentField();
 
         if (asciiValue == 0x08) // backspace

@@ -128,11 +128,31 @@ public partial class MainWindow : Window {
     private void UpdateDisplay() {
 
         var data = ViewModel.DisplayData;
-
+        
         if (data is null) {
             return;
         }
 
+        // TODO FIXME This cursor display code is called for every character 
+        //  perhaps the code needs moving to a more appropriate place
+        //  we have two cursors but only one display and noway to tell which to use
+        
+        var cursor = ViewModel.Cursor;
+        Debug.Print("CURSOR:" +cursor.Col + "," + cursor.Row);
+
+        // TODO remove this once cursor positioning is working
+        if (true)//cursor.Visible)
+        {
+            // TODO set position in data to cursor char
+            //   bear in mind there could be a character at that point
+            var cell = data[cursor.Col + cursor.Row * Models.Display.COLS];
+            cell.Value = '_';
+            // TODO we need to remove the previous cursor char before adding this one
+            //  as the cursor appears at the end of viewdata lines only. Normal help
+            //  pages and menus etc seem to work as expected.
+            //  what's the difference and surely there must be a simpler way!
+        }
+        
         foreach (var c in data) {
 
             var label = (Label)((Viewbox)display.Children[c.Index]).Child;

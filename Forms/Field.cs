@@ -17,14 +17,16 @@ public class Field
         Length = length;
         Value = value;
         Type = type;
-        currentIndex = StartIndex;
+//        currentIndex = StartIndex;
     }
 
     public int StartIndex = 0; // cell position on the display
     public int Length = 0; // number of cells
     public string Value = String.Empty;
     public FieldType Type = FieldType.AlphaNumeric;
-    private int currentIndex = 0; // keeps track of where the cursor is for this field
+    //private int currentIndex = 0; // keeps track of where the cursor is for this field
+
+    /*
 
     public int CurrentIndexInField
     {
@@ -35,7 +37,6 @@ public class Field
     /// Moves the cursor to the next element in the field. Returns false if the field is full, true otherwise.
     /// </summary>
     /// <returns></returns>
-/*
     public bool HT()
     {
         if (currentIndex < StartIndex+Length)
