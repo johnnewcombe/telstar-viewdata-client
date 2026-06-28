@@ -76,30 +76,31 @@ public partial class MainWindowViewModel
                 break;
 
             case DisplayType.Directory:
-
+                
                 switch (asciiValue)
                 {
-                    case 8: // ctrl+h show help menus
-                        SetDisplay(DisplayType.Help);
-                        break;
+                    // validate number
                     case >= 0x30 and <= 0x39:
 
+                        // convert to index
                         var index = asciiValue - 0x30;
 
+                        // manual dialling?
                         if (index == 0)
                         {
-                            SetDisplay(DisplayType.Edit);
+                            SetDisplay(DisplayType.EditConnection);
                         }
-                        else if (index < _settings.config.Connections.Count)
+                        else if (index < _settings.Config.Connections.Count)
                         {
+                            // user has selected a connection
                             // index-1 as menu is '1' based and collection is '0' based
-                            var con = _settings.config.Connections[index - 1];
-                            if (con.Name is not null)
+                            var con = _settings.Config.Connections[index - 1];
+                            
+                            if (!string.IsNullOrEmpty(con.Name))
                             {
-                                Connect(con.Address, con.Port);
+                                Connect(con.Host, con.Port);
+                                SetDisplay(DisplayType.Terminal);
                             }
-
-                            SetDisplay(DisplayType.Terminal);
                         }
 
                         break;
@@ -111,7 +112,8 @@ public partial class MainWindowViewModel
 
                 break;
 
-            case DisplayType.Edit:
+            case DisplayType.EditConnection:
+                
                 if (!ProcessFormKey(asciiValue))
                 {
                     // do we save or connect or ignore
@@ -119,26 +121,41 @@ public partial class MainWindowViewModel
                     {
                         if(_currentForm.IsValid())
                         {
-                            // get host and port and connect
+
+                            // TODO refactor this as the Name field isn't needed for manual
+                            //  dialling and this will throw out the index.
+                            // get host, port and memory
+                            var memory = 0;
+                            var port = 0;
                             var name = _currentForm.Fields[0].Value;
                             var host = _currentForm.Fields[1].Value;
-                            int.TryParse(_currentForm.Fields[2].Value, out int port);
-                            int.TryParse(_currentForm.Fields[3].Value, out int memory);
+                            int.TryParse(_currentForm.Fields[2].Value, out port);
+
+                            // TODO refactor this as the Name field isn't needed for manual
+                            //  dialling and this will throw out the index.
+                            // for manual dialling, the last field may not exist
+                            if (_currentForm.Fields.Count >3)
+                                int.TryParse(_currentForm.Fields[3].Value, out memory);
 
                             // either save or connect depending on whether a memory was specified
                             if (memory == 0) // not to be saved
                             {
                                 Connect(host, port);
                                 SetDisplay(DisplayType.Terminal);
-                                break;
                             }
                             else // save
                             {
+                                var connection = _settings.Config.Connections[memory - 1];
+                                connection.Name = name;
+                                connection.Host = host;
+                                connection.Port = port;
+                                _settings.Save();
+
                                 // form is valid and the last field is not empty
-                                // TODO implement save to config
+
                                 SetDisplay(DisplayType.Directory);
-                                break;
                             }
+                            break;
                         }
                     }
 

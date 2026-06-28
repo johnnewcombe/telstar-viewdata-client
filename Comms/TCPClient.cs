@@ -28,18 +28,20 @@ using System.Text;
 
  */
 
-namespace TelstarClient.Comms {
-
-    public class TCPClient {
+namespace TelstarClient.Comms
+{
+    public class TCPClient
+    {
         // *** Event Handlers *** //
 
         #region Delegates
-        
+
         /// <summary>
         /// Notify the Received Data
         /// </summary>
         /// <param name="data">Received Data</param>
         public delegate void DataReceivedEventHandler(string data);
+
         public event DataReceivedEventHandler OnDataReceivedEvent;
 
         /// <summary>
@@ -47,10 +49,11 @@ namespace TelstarClient.Comms {
         /// </summary>
         /// <param name="status">Connection Status</param>
         public delegate void OnConnectEventHandler(bool status);
+
         public event OnConnectEventHandler OnConnectEvent;
 
         #endregion
-        
+
         #region Properties
 
         // Connection Parameters
@@ -69,7 +72,18 @@ namespace TelstarClient.Comms {
         /// <summary>
         /// Create a TCP asynchronous client. This client is connect to the server and port with passed parameters.
         /// </summary>
-        public TCPClient() {
+        public TCPClient()
+        {
+        }
+
+        public System.Net.IPAddress IPAddrss
+        {
+            get { return ipAddress; }
+        }
+
+        public int Port
+        {
+            get { return port; }
         }
 
         /// <summary>
@@ -77,13 +91,15 @@ namespace TelstarClient.Comms {
         /// </summary>
         /// <param name="_ip">Server IP</param>
         /// <param name="_port">Server Port</param>
-        public void Connect(string ip, int port) {
-            
-            try {
+        public void Connect(string ip, int port)
+        {
+            try
+            {
                 ipAddress = (Dns.Resolve(ip)).AddressList[0];
-                
+
                 // Close the socket if open
-                if (socket != null && socket.Connected) {
+                if (socket != null && socket.Connected)
+                {
                     socket.Shutdown(SocketShutdown.Both);
                     System.Threading.Thread.Sleep(10);
                     socket.Close();
@@ -97,12 +113,13 @@ namespace TelstarClient.Comms {
 
                 // Connect to server non-Blocking method
                 socket.Blocking = false;
-                
+
                 // create and pass a callback for when it connects.
                 AsyncCallback onconnect = new AsyncCallback(OnConnect);
                 socket.BeginConnect(epServer, onconnect, socket);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 OnConnectEvent(false);
                 //throw new Exception($"Socket Connection Failed. Message : {ex}");
             }
@@ -112,8 +129,10 @@ namespace TelstarClient.Comms {
         /// Check connection status of the socket
         /// </summary>
         /// <returns>True or False based on status</returns>
-        public bool IsConnected() {
-            if (socket != null) {
+        public bool IsConnected()
+        {
+            if (socket != null)
+            {
                 return socket.Connected;
             }
 
@@ -125,20 +144,25 @@ namespace TelstarClient.Comms {
         /// </summary>
         /// <param name="_data">Data to be written</param>
         /// <returns>Success status as Boolean Value</returns>
-        public bool Write(String _data) {
+        public bool Write(String _data)
+        {
             // Check Connection
-            if (IsConnected()) {
-                try {
+            if (IsConnected())
+            {
+                try
+                {
                     Byte[] byteDateLine = Encoding.ASCII.GetBytes(_data.ToCharArray());
                     socket.Send(byteDateLine, byteDateLine.Length, 0);
                     return true;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Dispose();
                     throw new Exception($"Data Writing Operation Failed: {ex}");
                 }
             }
-            else {
+            else
+            {
                 return false;
             }
         }
@@ -164,25 +188,30 @@ namespace TelstarClient.Comms {
             byte[] array = [(byte)data];
             return Write(array);
         }
-        
+
         /// <summary>
         /// Write Data to Socket
         /// </summary>
         /// <param name="data">Data to be written</param>
         /// <returns>Success status as Boolean Value</returns>
-        public bool Write(byte[] data) {
+        public bool Write(byte[] data)
+        {
             // Check Connection
-            if (IsConnected()) {
-                try {
+            if (IsConnected())
+            {
+                try
+                {
                     socket.Send(data, data.Length, 0);
                     return true;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Dispose();
                     throw new Exception("Data Writing Operation Failed.");
                 }
             }
-            else {
+            else
+            {
                 return false;
             }
         }
@@ -190,8 +219,10 @@ namespace TelstarClient.Comms {
         /// <summary>
         /// Close the Socket Connection
         /// </summary>
-        public void Dispose() {
-            if (socket != null && socket.Connected) {
+        public void Dispose()
+        {
+            if (socket != null && socket.Connected)
+            {
                 OnConnectEvent(false);
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
@@ -201,8 +232,13 @@ namespace TelstarClient.Comms {
         /// <summary>
         /// Disconnect the socket
         /// </summary>
-        public void Disconnect() {
-            if (socket != null && socket.Connected) {
+        public void Disconnect()
+        {
+            ipAddress = null;
+            port = 0;
+            
+            if (socket != null && socket.Connected)
+            {
                 OnConnectEvent(false);
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
@@ -214,47 +250,59 @@ namespace TelstarClient.Comms {
         #region Private Methods
 
         // Setup Callbacks if Socket is Connected
-        private void OnConnect(IAsyncResult ar) {
+        private void OnConnect(IAsyncResult ar)
+        {
             Socket _socket = (Socket)ar.AsyncState;
 
-            try {
-                if (_socket.Connected) {
+            try
+            {
+                if (_socket.Connected)
+                {
                     SetupRecieveCallback(_socket);
                     OnConnectEvent(true);
                 }
-                else {
+                else
+                {
                     OnConnectEvent(false);
                 }
             }
-            catch (Exception ex) {
-
+            catch (Exception ex)
+            {
                 throw ex;
             }
         }
 
         // Setup Receive Callback for Async Listening
-        private void SetupRecieveCallback(Socket _socket) {
-            try {
+        private void SetupRecieveCallback(Socket _socket)
+        {
+            try
+            {
                 AsyncCallback receiveData = new AsyncCallback(OnReceivedData);
                 _socket.BeginReceive(readerBuffer, 0, readerBuffer.Length, SocketFlags.None, receiveData, _socket);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Dispose();
                 throw new Exception($"Receive Callback Setup Failed: {ex}");
             }
         }
 
         // Receive data from TCP
-        private void OnReceivedData(IAsyncResult ar) {
+        private void OnReceivedData(IAsyncResult ar)
+        {
             Socket _socket = (Socket)ar.AsyncState;
 
-            if (IsConnected()) {
-                try {
+            if (IsConnected())
+            {
+                try
+                {
                     // Check data is available
                     int nBytesRec = _socket.EndReceive(ar);
-                    if (nBytesRec > 0) {
+                    if (nBytesRec > 0)
+                    {
                         string sRecieved = "";
-                        for (int i = 0; i < nBytesRec; i++) {
+                        for (int i = 0; i < nBytesRec; i++)
+                        {
                             sRecieved += (char)readerBuffer[i];
                         }
 
@@ -264,11 +312,13 @@ namespace TelstarClient.Comms {
                         // If the Connection is Still Usable Re-establish the Callback
                         SetupRecieveCallback(_socket);
                     }
-                    else {
+                    else
+                    {
                         Dispose();
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Dispose();
                     throw new Exception($"Receive Operation Failed: {ex}");
                 }
@@ -276,6 +326,5 @@ namespace TelstarClient.Comms {
         }
 
         #endregion
-
     }
 }

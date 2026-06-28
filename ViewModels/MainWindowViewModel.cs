@@ -68,7 +68,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         Directory,
         Terminal,
         Help,
-        Edit,
+        EditConnection,
     }
 
     // this is used to access the appSettings.json file
@@ -256,7 +256,14 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     #region Private Methods
 
-    private void SetDisplay(DisplayType displayType) {
+    /// <summary>
+    /// Sets up the display based on the passed displayType. Optionally can receive
+    /// a Configuration.Connection for displayTypes that are tailored based on
+    /// a user selected connection, e.g. EditConnection.
+    /// </summary>
+    /// <param name="displayType"></param>
+    /// <param name="conection"></param>
+    private void SetDisplay(DisplayType displayType, Connection  connection = null) {
 
         // if we are using the alt display then clear it etc
         if (displayType > 0) {
@@ -278,10 +285,11 @@ public partial class MainWindowViewModel : ViewModelBase {
                 // pop the menu into the placeholder
                 _displayManagerAlt.Write(new Directory().ToString().Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
                 break;
-            case DisplayType.Edit:
-                _currentForm = new Forms.Edit();
+            case DisplayType.EditConnection:
+                _currentForm = new EditConnection(connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
+                // TODO need to read the currently selected connection so as to populate the fields
                 break;
             case DisplayType.Help:
                 _currentForm = new Help();
@@ -308,11 +316,11 @@ public partial class MainWindowViewModel : ViewModelBase {
         // get the menu details from the config file
         var item = 0;
         var menuSb = new StringBuilder();
-        foreach (var connection in _settings.config.Connections) {
-            if (connection.Name is not null) {
+        foreach (var connection in _settings.Config.Connections) {
+            //if (connection.Name is not null) {
                 item++;
-                menuSb.Append($"   \e{Constants.AlphaCyan}{item} \e{Constants.AlphaWhite}{connection.Name}\r\n\n");
-            }
+                menuSb.Append($"   \e{Constants.AlphaCyan}{item} \e{Constants.AlphaWhite}{connection.Name}\r\n");
+            //}
         }
 
         return menuSb.ToString();

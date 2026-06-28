@@ -29,16 +29,18 @@ namespace TelstarClient.Configuration;
 
 public class Settings {
     
-    public ConfigSections config;
-
+    public ConfigSections Config;
+    private string _jsonFilename;
+    
     public Settings(string jsonFilename) {
 
+        _jsonFilename = jsonFilename;
         string jsonString;
         
         // read the config from the application support file if it exists
         if (File.Exists(jsonFilename)) {
             jsonString = File.ReadAllText(jsonFilename);
-            config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
+            Config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
         }
         // config doesn't exist so load the default from Assets and save
         else {
@@ -47,30 +49,30 @@ public class Settings {
             jsonString = fs.ReadToEnd();
             File.WriteAllText(jsonFilename, jsonString);
         }
-        config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
+        Config = JsonSerializer.Deserialize<ConfigSections>(jsonString)!;
     }
 
-    public void Save(string jsonFilename) {
-        var jsonString = JsonSerializer.Serialize(config);
-        File.WriteAllText(jsonFilename, jsonString);
+    public void Save() {
+        var jsonString = JsonSerializer.Serialize(Config);
+        File.WriteAllText(_jsonFilename, jsonString);
     }
 }
 
 public class ConfigSections {
 
-    public List<Conection> Connections { get; set; } = new List<Conection>();
+    public List<Connection> Connections { get; set; } = new List<Connection>();
 
     public ConfigSections() {
-        Connections = new List<Conection>();
+        Connections = new List<Connection>();
         for (var i = 0; i < 9; i++) {
-            Connections.Add(new Conection());
+            Connections.Add(new Connection());
         }
     }
 }
 
-public class Conection {
+public class Connection {
 
     public string Name { get; set; }
-    public string Address { get; set; }
+    public string Host { get; set; }
     public int Port { get; set; }
 }
