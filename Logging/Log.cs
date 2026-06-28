@@ -32,7 +32,14 @@ public static class Log {
             Trace.TraceError(FormatMessage("ERROR", message));
         }
     }
-
+    public static void Error(string message, Exception ex = null) {
+        if (TraceSwitch.TraceError) {
+            var details = ex != null 
+                ? $"{message}{Environment.NewLine}{ex.StackTrace}"
+                : message;
+            Trace.TraceError(FormatMessage("ERROR", details));
+        }
+    }
     public static void LogLevel(string logLevel) {
         switch (logLevel) {
             case "Debug":

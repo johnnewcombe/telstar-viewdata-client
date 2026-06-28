@@ -18,6 +18,7 @@
 */
 
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
@@ -121,22 +122,32 @@ public partial class MainWindowViewModel
                     {
                         if(_currentForm.IsValid())
                         {
+                            Forms.Field field;
+                            var memory=0;
+                            var port=0;
+                            var name=string.Empty;
+                            var host = string.Empty;
 
-                            // TODO refactor this as the Name field isn't needed for manual
-                            //  dialling and this will throw out the index.
-                            // get host, port and memory
-                            var memory = 0;
-                            var port = 0;
-                            var name = _currentForm.Fields[0].Value;
-                            var host = _currentForm.Fields[1].Value;
-                            int.TryParse(_currentForm.Fields[2].Value, out port);
-
-                            // TODO refactor this as the Name field isn't needed for manual
-                            //  dialling and this will throw out the index.
-                            // for manual dialling, the last field may not exist
-                            if (_currentForm.Fields.Count >3)
-                                int.TryParse(_currentForm.Fields[3].Value, out memory);
-
+                            field = _currentForm.GetFieldById("dirName");
+                            if (field is not null)
+                            {
+                                name = field.Value;    
+                            }
+                            field = _currentForm.GetFieldById("dirEntry");
+                            if (field is not null)
+                            {
+                                int.TryParse(field.Value, out memory);
+                            }
+                            field = _currentForm.GetFieldById("host");
+                            if (field is not null)
+                            {
+                                host = field.Value;    
+                            }
+                            field = _currentForm.GetFieldById("port");
+                            if (field is not null)
+                            {
+                                int.TryParse(field.Value, out port); 
+                            }
                             // either save or connect depending on whether a memory was specified
                             if (memory == 0) // not to be saved
                             {

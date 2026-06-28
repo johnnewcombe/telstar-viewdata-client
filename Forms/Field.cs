@@ -11,27 +11,30 @@ public enum FieldType
 
 public class Field
 {
-    public Field(int startIndex, int length, string value, FieldType type, bool required)
+    public Field(string id, int startIndex, int length, string value, FieldType type, bool required)
     {
+        ID = id;
         StartIndex = startIndex;
         Length = length;
         Value = value;
         Type = type;
     }
 
-    public Field(int col, int row, int length, string value, FieldType type, bool required)
+    public Field(string id, int col, int row, int length, string value, FieldType type, bool required)
     {
+        ID = id;
         StartIndex = col*Models.Display.COLS + row;
         Length = length;
         Value = value;
         Type = type;
     }
 
-    public bool IsRequired =false;
+    public string ID;
     public int StartIndex = 0; // cell position on the display
     public int Length = 0; // number of cells
     public string Value = String.Empty;
     public FieldType Type = FieldType.AlphaNumeric;
+    public bool IsRequired =false;
     
     //private int currentIndex = 0; // keeps track of where the cursor is for this field
 

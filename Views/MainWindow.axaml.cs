@@ -74,7 +74,7 @@ public partial class MainWindow : Window {
                     UpdateDisplay();
                 }
                 catch (Exception ex) {
-                    Logging.Log.Error(ex.Message);
+                    Logging.Log.Error(ex.Message, ex);
                 }
 
                 break;
@@ -94,7 +94,7 @@ public partial class MainWindow : Window {
             ViewModel.KeyHandler(e);
         }
         catch (Exception ex) {
-            Logging.Log.Error(ex.Message);
+            Logging.Log.Error(ex.Message, ex);
         }
     }
 
@@ -107,7 +107,7 @@ public partial class MainWindow : Window {
         
         catch (Exception ex)
         {
-            Log.Error(ex.Message);
+            Log.Error(ex.Message, ex);
             throw;
         }
     }

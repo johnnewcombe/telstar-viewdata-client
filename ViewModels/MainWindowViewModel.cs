@@ -197,11 +197,11 @@ public partial class MainWindowViewModel : ViewModelBase {
                 Cursor = _displayManagerAlt.Cursor;
             }
         }
-        catch (Exception e) {
+        catch (Exception ex) {
             // ensures that all exceptions are handled within the async body
             // not handling them with void async methods can cause the process
             // to crash
-            Logging.Log.Error(e.Message);
+            Logging.Log.Error(ex.Message, ex);
         }
     }
 

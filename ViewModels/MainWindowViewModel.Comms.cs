@@ -58,7 +58,7 @@ public partial class MainWindowViewModel {
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
-            Logging.Log.Error($"Error : {ex}");
+            Logging.Log.Error($"Error : {ex}",ex);
         }
     }
 

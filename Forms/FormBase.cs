@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TelstarClient.Forms;
 public abstract class FormBase : IForm
@@ -12,6 +13,15 @@ public abstract class FormBase : IForm
         return Fields[_currentField];
     }
 
+    /// <summary>
+    /// Get the fiels based on the 'id' property.
+    /// </summary>
+    /// <param id="name"></param>
+    public Field GetFieldById(string id)
+    {
+        return Fields.FirstOrDefault(f => f.ID == id);
+    }
+    
     public bool Next()
     {
         if (_currentField < Fields.Count - 1)
