@@ -164,46 +164,46 @@ public partial class MainWindowViewModel
                     // save connection
                     if (_currentForm is not null)
                     {
-                            // get the values
-                            Forms.Field field;
-                            var port = 0;
-                            var name = string.Empty;
-                            var host = string.Empty;
+                        // get the values
+                        Forms.Field field;
+                        var port = 0;
+                        var name = string.Empty;
+                        var host = string.Empty;
 
-                            field = _currentForm.GetFieldById("dirName");
-                            if (field is not null)
-                                name = field.Value;
-                            //field = _currentForm.GetFieldById("dirEntry");
-                            //if (field is not null)
-                            //    int.TryParse(field.Value, out memory);
-                            field = _currentForm.GetFieldById("ip");
-                            if (field is not null)
-                                host = field.Value;
-                            field = _currentForm.GetFieldById("port");
-                            if (field is not null)
-                                int.TryParse(field.Value, out port);
+                        field = _currentForm.GetFieldById("dirName");
+                        if (field is not null)
+                            name = field.Value;
+                        //field = _currentForm.GetFieldById("dirEntry");
+                        //if (field is not null)
+                        //    int.TryParse(field.Value, out memory);
+                        field = _currentForm.GetFieldById("ip");
+                        if (field is not null)
+                            host = field.Value;
+                        field = _currentForm.GetFieldById("port");
+                        if (field is not null)
+                            int.TryParse(field.Value, out port);
 
-                            // if the form is valid
-                            if (_currentForm.IsValid() && _currentForm.Connection is not null)
-                            {
-                                // save
-                                _currentForm.Connection.Name = name;
-                                _currentForm.Connection.Host = host;
-                                _currentForm.Connection.Port = port;
-                                _settings.Save();
-                            }
-                            else
-                            {
-                                // TODO work out a way to display errors
-                                // error, not saved
-                                Log.Error($"Connection not saved::{_currentForm.Connection.ToString()}");
-                            }
-                            
+                        // if the form is valid
+                        if (_currentForm.IsValid() && _currentForm.Connection is not null)
+                        {
+                            // save
+                            _currentForm.Connection.Name = name;
+                            _currentForm.Connection.Host = host;
+                            _currentForm.Connection.Port = port;
+                            _settings.Save();
+                        }
+                        else
+                        {
+                            // TODO work out a way to display errors
+                            // error, not saved
+                            Log.Error($"Connection not saved::{_currentForm.Connection.ToString()}");
+                        }
                     }
+
                     //DisplayEditor returns false when complete or canceled
                     SetDisplay(_previousDisplayType);
                 }
-        
+
 
                 break;
 
@@ -331,7 +331,7 @@ public partial class MainWindowViewModel
     public void KeyHandler(KeyEventArgs args)
     {
         // Only handle keys that OnTextInput will NEVER fire for
-        byte? ascii = GetModifierKeyAscii(args);
+        byte? ascii = GetAsciiKey(args);
         if (ascii is not null)
         {
             ProcessKey(ascii.Value);
@@ -340,7 +340,7 @@ public partial class MainWindowViewModel
     }
 
 
-    private static byte? GetModifierKeyAscii(KeyEventArgs e)
+    private static byte? GetAsciiKey(KeyEventArgs e)
     {
         var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         var alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
@@ -356,11 +356,11 @@ public partial class MainWindowViewModel
             Key.Tab => 9,
             Key.Delete => 127,
 
-            // Arrow keys (VT100 single-byte — adjust if your server wants ESC sequences)
-            Key.Up => 0x41,
-            Key.Down => 0x42,
-            Key.Right => 0x43,
-            Key.Left => 0x44,
+            // Arrow keys
+            Key.Left => 0x08,
+            Key.Right => 0x09,
+            Key.Down => 0x0A,
+            Key.Up => 0x0B,
 
             // platform and keyboard agnostic (hopefully!)
             Key.A when ctrl => 1,

@@ -296,7 +296,7 @@ public partial class MainWindowViewModel : ViewModelBase {
                 _currentForm = new EditConnection(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
-                                                     _currentForm.GetCurrentField().Length);
+                                                     _currentForm.GetCurrentField().Value.Length);
                 
                 break;
             case DisplayType.Help:
