@@ -17,9 +17,82 @@ public abstract class FormBase : IForm
 
     public List<Field> Fields { get; set; } = new List<Field>();
 
-    public void ProcessFormKey(int asciiValue)
+    public bool ProcessFormKey(int asciiValue)
     {
-        
+                //var currentField = _currentForm.GetCurrentField();
+        if (asciiValue == 0x1B) // escape 
+        {
+            //_currentForm = null;
+            return false;
+        }
+
+        if (asciiValue == 0x08) // backspace
+        {
+            if (GetCurrentField().Value.Length > 0)
+            {
+                // remove the char from the display by setting the cursor to the current position
+                // and then writing a space character
+                _displayManager.SetCursorPosition(GetCurrentField().Value.Length - 1
+                                                     + GetCurrentField().StartIndex);
+                _displayManager.Write((char)0x20);
+
+
+                // remove the char from the value property of the field this reduces he value
+                // length which is used when calculating where to place the cursor
+                GetCurrentField().Value =
+                    GetCurrentField().Value.Substring(0,
+                        GetCurrentField().Value.Length - 1);
+
+                //set cursor and update display
+                SetCursor();
+
+                return true;
+            }
+        }
+
+        // shift tab
+        if (asciiValue is 0x89)
+        {
+            if (Previous())
+            {
+                //set cursor and update display
+                SetCursor();
+            }
+
+            return true;
+        }
+
+        // are we terminating the field?
+        if (asciiValue is 0x0d or 0x09 ||
+            GetCurrentField().Value.Length >= GetCurrentField().Length)
+        {
+            if (Next())
+            {
+                //set cursor and update display
+                SetCursor();
+                return true;
+            }
+
+            // all done
+            return false;
+        }
+
+        if (asciiValue >= 0x20 && asciiValue < 0x80)
+        {
+            if (GetCurrentField().Type is FieldType.Alpha && !char.IsAsciiLetterOrDigit((char)asciiValue))
+                return true;
+            if (GetCurrentField().Type == FieldType.Numeric && !char.IsAsciiDigit((char)asciiValue))
+                return true;
+
+            GetCurrentField().Value += (char)asciiValue;
+            _displayManager.Write((char)asciiValue);
+
+            //set cursor and update display
+            SetCursor();
+        }
+
+        return true;
+
     }
 
     public Connection Connection { get; }
@@ -81,5 +154,13 @@ public abstract class FormBase : IForm
             return $"{field.ID}:{field.Value}";
         }
         return string.Empty;
+    }
+
+    private void SetCursor()
+    {
+        //set cursor and update display
+        _displayManager.SetCursorPosition(GetCurrentField().Value.Length +
+                                             GetCurrentField().StartIndex);
+        //DisplayData = _displayManager.Display.Chars;
     }
 }

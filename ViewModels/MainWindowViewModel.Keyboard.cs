@@ -159,7 +159,7 @@ public partial class MainWindowViewModel
 
             case DisplayType.EditConnection:
 
-                if (!ProcessFormKey(asciiValue))
+                if (!_currentForm.ProcessFormKey(asciiValue))
                 {
                     // save connection
                     if (_currentForm is not null)
@@ -202,6 +202,11 @@ public partial class MainWindowViewModel
 
                     //DisplayEditor returns false when complete or canceled
                     SetDisplay(_previousDisplayType);
+                }
+                else
+                {
+                    // updte the display as something was processed by _currentForm.ProcessFormKey
+                    DisplayData = _displayManagerAlt.Display.Chars;
                 }
 
 
