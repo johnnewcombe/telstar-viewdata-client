@@ -10,5 +10,7 @@ public interface IForm {
     public bool Next();
     public bool Previous();
     public bool IsValid();
+    public void ProcessFormKey(int asciiValue);
+    Configuration.Connection Connection { get; }
 }
 

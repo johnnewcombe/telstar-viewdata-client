@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,6 +67,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private enum DisplayType {
         Welcome,
         Directory,
+        Connect,
         Terminal,
         Help,
         EditConnection,
@@ -279,20 +281,26 @@ public partial class MainWindowViewModel : ViewModelBase {
                 // nothing to do
                 break;
             case DisplayType.Welcome:
-                _displayManagerAlt.Write(new Welcome().ToString());
+                _displayManagerAlt.Write(new Welcome(_displayManagerAlt,connection).ToString());
                 break;
             case DisplayType.Directory:
                 // pop the menu into the placeholder
-                _displayManagerAlt.Write(new Directory().ToString().Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
+                _displayManagerAlt.Write(new Directory(_displayManagerAlt,connection).ToString().Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
+                break;
+            case DisplayType.Connect:
+                _currentForm = new Connect(_displayManagerAlt,connection);
+                _displayManagerAlt.Write(_currentForm.ToString());
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
                 break;
             case DisplayType.EditConnection:
-                _currentForm = new EditConnection(connection);
+                _currentForm = new EditConnection(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
                 // TODO need to read the currently selected connection so as to populate the fields
+                
                 break;
             case DisplayType.Help:
-                _currentForm = new Help();
+                _currentForm = new Help(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 break;
             default:

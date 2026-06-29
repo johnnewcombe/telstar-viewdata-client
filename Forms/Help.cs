@@ -5,7 +5,11 @@ using TelstarClient.Display;
 namespace TelstarClient.Forms;
 
 public class Help : FormBase {
-
+    
+    public Help(DisplayManager displayManager, Configuration.Connection connection):base(displayManager, connection)
+    {
+    }
+    
     public override string ToString() {
 
         var menu = new StringBuilder();

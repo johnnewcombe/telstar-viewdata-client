@@ -18,7 +18,6 @@
 */
 
 using System;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
@@ -38,6 +37,7 @@ public partial class MainWindowViewModel
     {
         // NOTE That this function does not run on the UI thread
         Log.Debug($"ASCII Value:{asciiValue:X2}h, {asciiValue}d");
+        Configuration.Connection con = null;
 
         // The screen can be in any one of 'DisplayType' states. Also,
         // the client could be online or offline when in any of these states.
@@ -77,31 +77,48 @@ public partial class MainWindowViewModel
                 break;
 
             case DisplayType.Directory:
-                
+
+                int index;
+
+
                 switch (asciiValue)
                 {
-                    // validate number
+                    // validate number Connect)
                     case >= 0x30 and <= 0x39:
 
                         // convert to index
-                        var index = asciiValue - 0x30;
+                        index = asciiValue - 0x30;
 
                         // manual dialling?
                         if (index == 0)
                         {
-                            SetDisplay(DisplayType.EditConnection);
+                            SetDisplay(DisplayType.Connect);
                         }
-                        else if (index < _settings.Config.Connections.Count)
+                        else if (index - 1 < _settings.Config.Connections.Count)
                         {
                             // user has selected a connection
                             // index-1 as menu is '1' based and collection is '0' based
-                            var con = _settings.Config.Connections[index - 1];
-                            
+                            con = _settings.Config.Connections[index - 1];
+
                             if (!string.IsNullOrEmpty(con.Name))
                             {
                                 Connect(con.Host, con.Port);
                                 SetDisplay(DisplayType.Terminal);
                             }
+                        }
+
+                        break;
+
+                    // validate alt+number (Edit)
+                    case >= 0xB0 and <= 0xB9:
+                        index = asciiValue - 0xB0;
+
+                        if (index - 1 < _settings.Config.Connections.Count)
+                        {
+                            // user has selected a connection
+                            // index-1 as menu is '1' based and collection is '0' based
+                            con = _settings.Config.Connections[index - 1];
+                            SetDisplay(DisplayType.EditConnection, con);
                         }
 
                         break;
@@ -112,68 +129,86 @@ public partial class MainWindowViewModel
                 }
 
                 break;
+            case DisplayType.Connect:
+                // connect or ignore
+                if (!ProcessFormKey(asciiValue))
+                {
+                    if (_currentForm is not null)
+                    {
+                        if (_currentForm.IsValid())
+                        {
+                            // get the values
+                            Forms.Field field;
+                            var port = 0;
+                            var host = string.Empty;
+
+                            field = _currentForm.GetFieldById("host");
+                            if (field is not null)
+                                host = field.Value;
+                            field = _currentForm.GetFieldById("port");
+                            if (field is not null)
+                                int.TryParse(field.Value, out port);
+
+                            Connect(host, port);
+                            SetDisplay(DisplayType.Terminal);
+                        }
+                    }
+                }
+
+                break;
 
             case DisplayType.EditConnection:
-                
+
                 if (!ProcessFormKey(asciiValue))
                 {
                     // do we save or connect or ignore
                     if (_currentForm is not null)
                     {
-                        if(_currentForm.IsValid())
-                        {
+
+                            // get the values
                             Forms.Field field;
-                            var memory=0;
-                            var port=0;
-                            var name=string.Empty;
+                            var port = 0;
+                            var name = string.Empty;
                             var host = string.Empty;
 
                             field = _currentForm.GetFieldById("dirName");
                             if (field is not null)
-                            {
-                                name = field.Value;    
-                            }
-                            field = _currentForm.GetFieldById("dirEntry");
+                                name = field.Value;
+                            //field = _currentForm.GetFieldById("dirEntry");
+                            //if (field is not null)
+                            //    int.TryParse(field.Value, out memory);
+                            field = _currentForm.GetFieldById("ip");
                             if (field is not null)
-                            {
-                                int.TryParse(field.Value, out memory);
-                            }
-                            field = _currentForm.GetFieldById("host");
-                            if (field is not null)
-                            {
-                                host = field.Value;    
-                            }
+                                host = field.Value;
                             field = _currentForm.GetFieldById("port");
                             if (field is not null)
+                                int.TryParse(field.Value, out port);
+
+                            // if the form is valid
+                            if (_currentForm.IsValid() && _currentForm.Connection is not null)
                             {
-                                int.TryParse(field.Value, out port); 
-                            }
-                            // either save or connect depending on whether a memory was specified
-                            if (memory == 0) // not to be saved
-                            {
-                                Connect(host, port);
-                                SetDisplay(DisplayType.Terminal);
-                            }
-                            else // save
-                            {
-                                var connection = _settings.Config.Connections[memory - 1];
-                                connection.Name = name;
-                                connection.Host = host;
-                                connection.Port = port;
+                                // save
+                                // TODO FIXME FIXME FIXME need correct index not zero
+
+                                _currentForm.Connection.Name = name;
+                                _currentForm.Connection.Host = host;
+                                _currentForm.Connection.Port = port;
                                 _settings.Save();
-
-                                // form is valid and the last field is not empty
-
-                                SetDisplay(DisplayType.Directory);
+                                //SetDisplay(DisplayType.Directory);
                             }
+                            else
+                            {
+                                // TODO work out a way to display errors
+                                // error, not saved
+                            }
+
                             break;
-                        }
+                        
                     }
-
-                    //DisplayEditor returns false when complete or canceled
-                    SetDisplay(_previousDisplayType);
                 }
-
+                
+                //DisplayEditor returns false when complete or canceled
+                SetDisplay(_previousDisplayType);
                 break;
 
             case DisplayType.Help:
@@ -251,7 +286,6 @@ public partial class MainWindowViewModel
             {
                 //set cursor and update display
                 SetCursorAndUpdate();
-
                 return true;
             }
 
@@ -261,12 +295,10 @@ public partial class MainWindowViewModel
 
         if (asciiValue >= 0x20 && asciiValue < 0x80)
         {
-            if (_currentForm.GetCurrentField().Type is FieldType.Alpha && !IsAlpha(asciiValue))
+            // TODO Refactor this to use char
+            if (_currentForm.GetCurrentField().Type is FieldType.Alpha && !char.IsAsciiLetterOrDigit((char)asciiValue))
                 return true;
-            if (_currentForm.GetCurrentField().Type == FieldType.Numeric && !IsNumeric(asciiValue))
-                return true;
-            if (_currentForm.GetCurrentField().Type is FieldType.Numeric && !IsNumeric(asciiValue) ||
-                !IsAlpha(asciiValue))
+            if (_currentForm.GetCurrentField().Type == FieldType.Numeric && !char.IsAsciiDigit((char)asciiValue))
                 return true;
 
             _currentForm.GetCurrentField().Value += (char)asciiValue;
@@ -287,7 +319,6 @@ public partial class MainWindowViewModel
         DisplayData = _displayManagerAlt.Display.Chars;
     }
 
-    
     public void TextHandler(TextInputEventArgs args)
     {
         // e.Text is already fully composed by the OS — Shift+8 gives "*", etc.
@@ -305,7 +336,7 @@ public partial class MainWindowViewModel
     public void KeyHandler(KeyEventArgs args)
     {
         // Only handle keys that OnTextInput will NEVER fire for
-        byte? ascii = GetControlKeyAscii(args);
+        byte? ascii = GetModifierKeyAscii(args);
         if (ascii is not null)
         {
             ProcessKey(ascii.Value);
@@ -313,27 +344,8 @@ public partial class MainWindowViewModel
         }
     }
 
-    /// <summary>
-    /// Returns true is a character is a number
-    /// </summary>
-    /// <param name="asciiValue"></param>
-    /// <returns></returns>
-    private static bool IsNumeric(int asciiValue)
-    {
-        return asciiValue >= 0x30 && asciiValue <= 0x39;
-    }
 
-    /// <summary>
-    /// In the following code alphanumeic means any printable character
-    /// </summary>
-    /// <param name="asciiValue"></param>
-    /// <returns></returns>
-    private static bool IsAlpha(int asciiValue)
-    {
-        return asciiValue >= 0x20 && asciiValue < 0x80;
-    }
-
-    private static byte? GetControlKeyAscii(KeyEventArgs e)
+    private static byte? GetModifierKeyAscii(KeyEventArgs e)
     {
         var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         var alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
@@ -383,11 +395,20 @@ public partial class MainWindowViewModel
             Key.Z when ctrl => 26,
 
             // Alt+letter combinations used within the app
-            // same as ctrl codes but with high bit set
+            // same as normal codes but with high bit set
             Key.C when alt => 0x83, // conceal
             Key.H when alt => 0x88, // help/menus
             Key.R when alt => 0x92, // reveal
             Key.X when alt => 0x98, // escape/exit
+            Key.D1 when alt => 0xb1, // Alt+1...
+            Key.D2 when alt => 0xb2, // ... etc
+            Key.D3 when alt => 0xb3,
+            Key.D4 when alt => 0xb4,
+            Key.D5 when alt => 0xb5,
+            Key.D6 when alt => 0xb6,
+            Key.D7 when alt => 0xb7,
+            Key.D8 when alt => 0xb8,
+            Key.D9 when alt => 0xb9,
 
             // Pure modifier keys — nothing to send
             Key.LeftShift or Key.RightShift or

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace TelstarClient.Forms;
 
@@ -35,29 +36,32 @@ public class Field
     public string Value = String.Empty;
     public FieldType Type = FieldType.AlphaNumeric;
     public bool IsRequired =false;
-    
-    //private int currentIndex = 0; // keeps track of where the cursor is for this field
 
-    /*
-
-    public int CurrentIndexInField
+    public bool IsValid()
     {
-        get { return currentIndex; }
-    }
+        // Check required fields have a value
+        if (IsRequired && string.IsNullOrWhiteSpace(Value))
+            return false;
 
-    /// <summary>
-    /// Moves the cursor to the next element in the field. Returns false if the field is full, true otherwise.
-    /// </summary>
-    /// <returns></returns>
-    public bool HT()
-    {
-        if (currentIndex < StartIndex+Length)
-        {
-            currentIndex++;
+        // If not required and empty, no further checks needed
+        if (string.IsNullOrWhiteSpace(Value))
             return true;
+
+        // Check length
+        if (Value.Length > Length)
+            return false;
+
+        // Check type
+        switch (Type)
+        {
+            case FieldType.Alpha:
+                return Value.All(char.IsLetter);
+            case FieldType.AlphaNumeric:
+                return Value.All(char.IsLetterOrDigit);
+            case FieldType.Numeric:
+                return Value.All(char.IsDigit);
+            default:
+                return false;
         }
-        return false;
     }
-*/
-    
 }

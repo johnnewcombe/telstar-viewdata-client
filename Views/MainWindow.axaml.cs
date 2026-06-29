@@ -129,7 +129,7 @@ public partial class MainWindow : Window {
     private void UpdateCursor()
     {
         var cursor = ViewModel.Cursor;
-        if (cursor.Visible) // TODO change to use .Visible property once cursor positioning is working
+        if (cursor is not null && cursor.Visible) // TODO change to use .Visible property once cursor positioning is working
         {
             var label = (Label)((Viewbox)display.Children[cursor.GetCursorIndex()]).Child;
             label.Content = "_";

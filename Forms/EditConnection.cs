@@ -9,51 +9,38 @@ namespace TelstarClient.Forms;
 
 public class EditConnection : FormBase
 {
+    
     private int _currentField;
     private Configuration.Connection _connection;
 
-    public EditConnection(Configuration.Connection connection)
+    public EditConnection(DisplayManager displayManager,Configuration.Connection connection):base(displayManager, connection)
     {
-        _connection = connection;
-
+        
         // create fields
         Fields = new List<Field>();
 
         // if connection is null then
-        if (connection is not null)
-        {
-            Fields.Add(new Field("dirName", 6, 7, 20, string.Empty, FieldType.AlphaNumeric, false));
-        }
-
-        Fields.Add(new Field("ip", 8, 7, 20, string.Empty, FieldType.AlphaNumeric, true));
-        Fields.Add(new Field("port", 10, 7, 20, string.Empty, FieldType.Numeric, true));
-
-        if (connection is not null)
-        {
-            Fields.Add(new Field("dirEntry", 12, 31, 1, string.Empty, FieldType.Numeric, false));
-        }
+        Fields.Add(new Field("dirName", 6, 7, 20, connection.Name, FieldType.AlphaNumeric, false));
+        Fields.Add(new Field("ip", 8, 7, 20, connection.Host, FieldType.AlphaNumeric, true));
+        Fields.Add(new Field("port", 10, 7, 20, connection.Port.ToString(), FieldType.Numeric, true));
+        //Fields.Add(new Field("dirEntry", 12, 31, 1, connection.DirEntry.ToString(), FieldType.Numeric, false));
     }
 
     public override string ToString()
     {
+        // TODO Values of fileds will need to be included here
+        
         var menu = new StringBuilder();
-        menu.Append("\r\n");
+        menu.Append(Converters.ConvertFromMarkup("\r\n[_+]")); // cursor on
         menu.Append(Converters.ConvertFromMarkup("[17][D]EDIT\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        if (_connection is not null)
-        {
-            menu.Append(Converters.ConvertFromMarkup("[C]NAME:\r\n\n"));
-        }
+        menu.Append(Converters.ConvertFromMarkup("[C]NAME: [PLACEHOLDER]\r\n\n").Replace("[PLACEHOLDER]", Fields[0].Value));
+        menu.Append(Converters.ConvertFromMarkup("[C]HOST: [PLACEHOLDER]\r\n\n").Replace("[PLACEHOLDER]", Fields[1].Value));
+        menu.Append(Converters.ConvertFromMarkup("[C]PORT: [PLACEHOLDER]\r\n\n").Replace("[PLACEHOLDER]", Fields[2].Value));
+        menu.Append(Converters.ConvertFromMarkup("\n[9]Press Escape to Return"));
 
-        menu.Append(Converters.ConvertFromMarkup("[C]HOST:\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[C]PORT:\r\n\n"));
-        if (_connection is not null)
-        {
-            menu.Append(Converters.ConvertFromMarkup("[C]SAVE TO MEMORY? (0-9 or RTN):\r\n\n"));
-        }
-
-        menu.Append(Converters.ConvertFromMarkup("[3]Press Escape to Return to Terminal"));
-        //menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
+        
+        
         return menu.ToString();
     }
 }
