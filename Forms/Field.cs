@@ -55,9 +55,9 @@ public class Field
         switch (Type)
         {
             case FieldType.Alpha:
-                return Value.All(char.IsLetter);
+                return Value.All(c => char.IsBetween(c,(char)0x20,(char)0x7f));
             case FieldType.AlphaNumeric:
-                return Value.All(char.IsLetterOrDigit);
+                return Value.All(c => char.IsLetterOrDigit(c) || c == '.');
             case FieldType.Numeric:
                 return Value.All(char.IsDigit);
             default:

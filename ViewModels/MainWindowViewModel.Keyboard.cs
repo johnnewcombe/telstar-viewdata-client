@@ -161,10 +161,9 @@ public partial class MainWindowViewModel
 
                 if (!ProcessFormKey(asciiValue))
                 {
-                    // do we save or connect or ignore
+                    // save connection
                     if (_currentForm is not null)
                     {
-
                             // get the values
                             Forms.Field field;
                             var port = 0;
@@ -188,27 +187,24 @@ public partial class MainWindowViewModel
                             if (_currentForm.IsValid() && _currentForm.Connection is not null)
                             {
                                 // save
-                                // TODO FIXME FIXME FIXME need correct index not zero
-
                                 _currentForm.Connection.Name = name;
                                 _currentForm.Connection.Host = host;
                                 _currentForm.Connection.Port = port;
                                 _settings.Save();
-                                //SetDisplay(DisplayType.Directory);
                             }
                             else
                             {
                                 // TODO work out a way to display errors
                                 // error, not saved
+                                Log.Error($"Connection not saved::{_currentForm.Connection.ToString()}");
                             }
-
-                            break;
-                        
+                            
                     }
+                    //DisplayEditor returns false when complete or canceled
+                    SetDisplay(_previousDisplayType);
                 }
-                
-                //DisplayEditor returns false when complete or canceled
-                SetDisplay(_previousDisplayType);
+        
+
                 break;
 
             case DisplayType.Help:
@@ -295,7 +291,6 @@ public partial class MainWindowViewModel
 
         if (asciiValue >= 0x20 && asciiValue < 0x80)
         {
-            // TODO Refactor this to use char
             if (_currentForm.GetCurrentField().Type is FieldType.Alpha && !char.IsAsciiLetterOrDigit((char)asciiValue))
                 return true;
             if (_currentForm.GetCurrentField().Type == FieldType.Numeric && !char.IsAsciiDigit((char)asciiValue))

@@ -72,6 +72,14 @@ public abstract class FormBase : IForm
         
         return true;
     }
+    
     // Forces derived classes to implement their own ToString
-    public abstract override string ToString();
+    public override string ToString()
+    {
+        foreach(var field in Fields)
+        {
+            return $"{field.ID}:{field.Value}";
+        }
+        return string.Empty;
+    }
 }

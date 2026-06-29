@@ -20,8 +20,8 @@ public class Directory : FormBase {
         menu.Append(Converters.ConvertFromMarkup("[14][C][D]DIRECTORY\r\n\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[2][C]DIR NAME\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[PLACEHOLDER]"));
-        menu.Append(Converters.ConvertFromMarkup("\r\n\n[4][W]Select 0 for Manual Dialling"));
-        menu.Append(Converters.ConvertFromMarkup("\r\n\n[7][W]Select Alt 1-9 to Edit"));
+        menu.Append(Converters.ConvertFromMarkup("\r\n\n[4][G]Select 0 for Manual Dialling"));
+        menu.Append(Converters.ConvertFromMarkup("\r\n\n[7][G]Select Alt 1-9 to Edit"));
         //menu.Append(Converters.ConvertFromMarkup("\r\n\n[0][M]Alt 1-9 to Edit"));
         //menu.Append(Converters.ConvertFromMarkup("\r\n[0][W]Alt-H for to view Help"));
         return menu.ToString();

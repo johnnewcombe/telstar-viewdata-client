@@ -9,13 +9,12 @@ namespace TelstarClient.Forms;
 
 public class EditConnection : FormBase
 {
-    
     private int _currentField;
     private Configuration.Connection _connection;
 
-    public EditConnection(DisplayManager displayManager,Configuration.Connection connection):base(displayManager, connection)
+    public EditConnection(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
+        connection)
     {
-        
         // create fields
         Fields = new List<Field>();
 
@@ -29,18 +28,19 @@ public class EditConnection : FormBase
     public override string ToString()
     {
         // TODO Values of fileds will need to be included here
-        
+
         var menu = new StringBuilder();
         menu.Append(Converters.ConvertFromMarkup("\r\n[_+]")); // cursor on
         menu.Append(Converters.ConvertFromMarkup("[17][D]EDIT\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[C]NAME: [PLACEHOLDER]\r\n\n").Replace("[PLACEHOLDER]", Fields[0].Value));
-        menu.Append(Converters.ConvertFromMarkup("[C]HOST: [PLACEHOLDER]\r\n\n").Replace("[PLACEHOLDER]", Fields[1].Value));
-        menu.Append(Converters.ConvertFromMarkup("[C]PORT: [PLACEHOLDER]\r\n\n").Replace("[PLACEHOLDER]", Fields[2].Value));
-        menu.Append(Converters.ConvertFromMarkup("\n[9]Press Escape to Return"));
+        menu.Append(Converters.ConvertFromMarkup("[C]NAME: [PLACEHOLDER]\r\n\n")
+            .Replace("[PLACEHOLDER]", Fields[0].Value));
+        menu.Append(Converters.ConvertFromMarkup("[C]HOST: [PLACEHOLDER]\r\n\n")
+            .Replace("[PLACEHOLDER]", Fields[1].Value));
+        menu.Append(Converters.ConvertFromMarkup("[C]PORT: [PLACEHOLDER]\r\n\n")
+            .Replace("[PLACEHOLDER]", Fields[2].Value));
+        menu.Append(Converters.ConvertFromMarkup("\n[9][G]Press Escape to Return"));
 
-        
-        
         return menu.ToString();
     }
 }

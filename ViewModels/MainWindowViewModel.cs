@@ -295,8 +295,8 @@ public partial class MainWindowViewModel : ViewModelBase {
             case DisplayType.EditConnection:
                 _currentForm = new EditConnection(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
-                // TODO need to read the currently selected connection so as to populate the fields
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
+                                                     _currentForm.GetCurrentField().Length);
                 
                 break;
             case DisplayType.Help:
