@@ -89,7 +89,7 @@ public partial class MainWindowViewModel
                     case 0x98: // alt+x
                         Disconnect();
                         SetDisplay(DisplayType.Directory);
-                        break;
+                        return;
 
                     // validate number Connect)
                     case >= 0x30 and <= 0x39:
@@ -140,6 +140,17 @@ public partial class MainWindowViewModel
 
             case DisplayType.Connect:
 
+                switch (asciiValue)
+                {
+                    case 0x1B:
+                        SetDisplay(_previousDisplayType);
+                        return;
+                    case 0x98: // alt+x
+                        Disconnect();
+                        SetDisplay(DisplayType.Directory);
+                        return;
+                }
+
                 // connect or ignore
                 if (!_currentForm.ProcessFormKey(asciiValue))
                 {
@@ -173,6 +184,17 @@ public partial class MainWindowViewModel
 
             case DisplayType.EditConnection:
 
+                switch (asciiValue)
+                {
+                    case 0x1B:
+                        SetDisplay(_previousDisplayType);
+                        return;
+                    case 0x98: // alt+x
+                        Disconnect();
+                        SetDisplay(DisplayType.Directory);
+                        return;
+                }
+                
                 if (!_currentForm.ProcessFormKey(asciiValue))
                 {
                     // save connection

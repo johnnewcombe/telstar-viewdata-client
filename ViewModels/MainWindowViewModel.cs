@@ -299,7 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             case DisplayType.Connect:
                 _currentForm = new Connect(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.EditConnection:
@@ -307,8 +307,7 @@ public partial class MainWindowViewModel : ViewModelBase {
                 _displayManagerAlt.Write(_currentForm.ToString());
                 
                 // TODO use form GetCursor here and elsewhere
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
-                                                     _currentForm.GetCurrentField().Value.Length);
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.Help:
