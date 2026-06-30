@@ -20,7 +20,7 @@ public class Connect : FormBase
         
         // create fields
         Fields = new List<Field>();
-        Fields.Add(new Field("ip", 6, 7, 20, string.Empty, FieldType.AlphaNumeric, true));
+        Fields.Add(new Field("host", 6, 7, 20, string.Empty, FieldType.AlphaNumeric, true));
         Fields.Add(new Field("port", 8, 7, 20, string.Empty, FieldType.Numeric, true));
 
     }

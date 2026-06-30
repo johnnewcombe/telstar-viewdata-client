@@ -20,7 +20,7 @@ public class EditConnection : FormBase
 
         // if connection is null then
         Fields.Add(new Field("dirName", 6, 7, 20, connection.Name, FieldType.AlphaNumeric, false));
-        Fields.Add(new Field("ip", 8, 7, 20, connection.Host, FieldType.AlphaNumeric, true));
+        Fields.Add(new Field("host", 8, 7, 20, connection.Host, FieldType.AlphaNumeric, true));
         Fields.Add(new Field("port", 10, 7, 20, connection.Port.ToString(), FieldType.Numeric, true));
     }
 

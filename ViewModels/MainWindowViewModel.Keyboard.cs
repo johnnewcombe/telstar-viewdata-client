@@ -186,7 +186,7 @@ public partial class MainWindowViewModel
                         //field = _currentForm.GetFieldById("dirEntry");
                         //if (field is not null)
                         //    int.TryParse(field.Value, out memory);
-                        field = _currentForm.GetFieldById("ip");
+                        field = _currentForm.GetFieldById("host");
                         if (field is not null)
                             host = field.Value;
                         field = _currentForm.GetFieldById("port");
