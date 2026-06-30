@@ -1,6 +1,6 @@
 /*
     Copyright (c) 2025 John Newcombe
-   
+
     This file is part of the Software known as GlassTTY Viewdata Client.
 
     GlassTTY Viewdata Client is free software: you can redistribute
@@ -16,7 +16,6 @@
     along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 
 */
-
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -25,6 +24,9 @@ using Avalonia.Markup.Xaml;
 using log4net;
 using TelstarClient.ViewModels;
 using TelstarClient.Views;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace TelstarClient;
 
@@ -32,9 +34,22 @@ public partial class App : Application
 {
     private static readonly ILog log = LogManager.GetLogger(typeof(App));
     private MainWindowViewModel ViewModel;
-    
+
     public override void Initialize()
-    {
+    {        var host = Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration((context, config) =>
+            {
+                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            })
+            .ConfigureLogging((context, logging) =>
+            {
+                logging.AddConfiguration(context.Configuration.GetSection("Logging"));
+                logging.AddConsole();
+                logging.AddDebug();
+                // .AddFile(...) if you bring in Serilog or a file provider
+            })
+            .Build();
+        
         AvaloniaXamlLoader.Load(this);
 
     }
@@ -43,9 +58,9 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            
+
             //var args = desktop.Args;
-            
+
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
@@ -53,9 +68,9 @@ public partial class App : Application
             {
                 //DataContext = new MainWindowViewModel(),
             };
-            
+
         }
-        
+
         base.OnFrameworkInitializationCompleted();
     }
 

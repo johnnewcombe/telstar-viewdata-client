@@ -7,7 +7,9 @@ Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
 * Configuration files etc.
 * Serial Port access.
 * Full Screen
-* Cursor display and on/off control
+* Logging needs to be sorted.
+* Alt+Q needs to work from all screens, maybe help too?
+
 
 ## Viewdata Nuances
 
@@ -48,3 +50,4 @@ char but everything after that will not until a Graphic foreground is shown.
 The GH character displayed for an alpha or graphic foreground control takes previous cell colour not new one.
 
 The GH character is set to blank for an Alpha char and for each new row.
+

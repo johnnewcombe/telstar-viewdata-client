@@ -1,4 +1,4 @@
-version := 0.0.7
+version := 0.0.8
 
 build:
 	# This will fail if the version already exists, this is by design

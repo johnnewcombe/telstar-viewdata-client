@@ -32,13 +32,13 @@ public class EditConnection : FormBase
         menu.Append(Converters.ConvertFromMarkup("\r\n[_+]")); // cursor on
         menu.Append(Converters.ConvertFromMarkup("[17][D]EDIT\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[C]NAME: [PLACEHOLDER]\r\n\n")
+        menu.Append(Converters.ConvertFromMarkup("[C]NAME:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[0].Value));
-        menu.Append(Converters.ConvertFromMarkup("[C]HOST: [PLACEHOLDER]\r\n\n")
+        menu.Append(Converters.ConvertFromMarkup("[C]HOST:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[1].Value));
-        menu.Append(Converters.ConvertFromMarkup("[C]PORT: [PLACEHOLDER]\r\n\n")
+        menu.Append(Converters.ConvertFromMarkup("[C]PORT:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[2].Value));
-        menu.Append(Converters.ConvertFromMarkup("\n[9][G]Press Escape to Return"));
+        menu.Append(Converters.ConvertFromMarkup("\n[9][C]Press[W]Escape[C]to Return"));
 
         return menu.ToString();
     }

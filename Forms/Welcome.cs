@@ -20,6 +20,7 @@ public class Welcome : FormBase {
         // field with 10 spaces
 
         logo.Append("\r\n\n\n\n\n\n");
+        logo.Append(Converters.ConvertFromMarkup("[_-]")); // cursor off
         logo.Append(Converters.ConvertFromMarkup("[w]///////////////////////////////////////\r\n\n"));
         logo.Append(Converters.ConvertFromMarkup("[c][sg] ppp p   `pp0 ppp `pp0 pppp`ppp0p  p\r\n"));
         logo.Append(

@@ -4,6 +4,7 @@ using TelstarClient.Configuration;
 using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
+
 public abstract class FormBase : IForm
 {
     private int _currentField = 0;
@@ -15,11 +16,11 @@ public abstract class FormBase : IForm
         Connection = connection;
     }
 
-    public List<Field> Fields { get; set; } = new List<Field>();
+    protected List<Field> Fields { get; set; } = new List<Field>();
 
     public bool ProcessFormKey(int asciiValue)
     {
-                //var currentField = _currentForm.GetCurrentField();
+        //var currentField = _currentForm.GetCurrentField();
         if (asciiValue == 0x1B) // escape 
         {
             //_currentForm = null;
@@ -33,7 +34,7 @@ public abstract class FormBase : IForm
                 // remove the char from the display by setting the cursor to the current position
                 // and then writing a space character
                 _displayManager.SetCursorPosition(GetCurrentField().Value.Length - 1
-                                                     + GetCurrentField().StartIndex);
+                                                  + GetCurrentField().StartIndex);
                 _displayManager.Write((char)0x20);
 
 
@@ -92,7 +93,6 @@ public abstract class FormBase : IForm
         }
 
         return true;
-
     }
 
     public Connection Connection { get; }
@@ -110,24 +110,26 @@ public abstract class FormBase : IForm
     {
         return Fields.FirstOrDefault(f => f.ID == id);
     }
-    
-    public bool Next()
+
+    private bool Next()
     {
         if (_currentField < Fields.Count - 1)
         {
             _currentField++;
             return true;
         }
+
         return false;
     }
 
-    public bool Previous()
+    private bool Previous()
     {
         if (_currentField > 0)
         {
             _currentField--;
             return true;
         }
+
         return false;
     }
 
@@ -142,25 +144,30 @@ public abstract class FormBase : IForm
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     // Forces derived classes to implement their own ToString
     public override string ToString()
     {
-        foreach(var field in Fields)
+        foreach (var field in Fields)
         {
             return $"{field.ID}:{field.Value}";
         }
+
         return string.Empty;
+    }
+    
+    public int GetCursor()
+    {
+        return GetCurrentField().StartIndex + GetCurrentField().Value.Length;
     }
 
     private void SetCursor()
     {
         //set cursor and update display
         _displayManager.SetCursorPosition(GetCurrentField().Value.Length +
-                                             GetCurrentField().StartIndex);
-        //DisplayData = _displayManager.Display.Chars;
+                                          GetCurrentField().StartIndex);
     }
 }

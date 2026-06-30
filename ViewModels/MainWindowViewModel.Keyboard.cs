@@ -131,7 +131,7 @@ public partial class MainWindowViewModel
                 break;
             case DisplayType.Connect:
                 // connect or ignore
-                if (!ProcessFormKey(asciiValue))
+                if (!_currentForm.ProcessFormKey(asciiValue))
                 {
                     if (_currentForm is not null)
                     {
@@ -218,105 +218,19 @@ public partial class MainWindowViewModel
                 {
                     case 0x98: // alt+x
                         Disconnect();
+                        break;
+                    case 0x90: // alt+q
+                        Disconnect();
                         Shutdown();
                         break;
                     default:
-                        SetDisplay(_previousDisplayType);
                         break;
                 }
+                
+                SetDisplay(_previousDisplayType);
 
                 break;
         }
-    }
-
-    /// <summary>
-    /// MenuEditor returns false when complete or cancelled
-    /// </summary>
-    /// <param name="asciiValue"></param>
-    /// <returns></returns>
-    private bool ProcessFormKey(byte asciiValue)
-    {
-        //var currentField = _currentForm.GetCurrentField();
-        if (asciiValue == 0x1B) // escape 
-        {
-            _currentForm = null;
-            return false;
-        }
-
-        if (asciiValue == 0x08) // backspace
-        {
-            if (_currentForm.GetCurrentField().Value.Length > 0)
-            {
-                // remove the char from the display by setting the cursor to the current position
-                // and then writing a space character
-                _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length - 1
-                                                     + _currentForm.GetCurrentField().StartIndex);
-                _displayManagerAlt.Write((char)0x20);
-
-
-                // remove the char from the value property of the field this reduces he value
-                // length which is used when calculating where to place the cursor
-                _currentForm.GetCurrentField().Value =
-                    _currentForm.GetCurrentField().Value.Substring(0,
-                        _currentForm.GetCurrentField().Value.Length - 1);
-
-                //set cursor and update display
-                SetCursorAndUpdate();
-
-                return true;
-            }
-        }
-
-        // shift tab
-        if (asciiValue is 0x89)
-        {
-            if (_currentForm.Previous())
-            {
-                //set cursor and update display
-                SetCursorAndUpdate();
-            }
-
-            return true;
-        }
-
-        // are we terminating the field?
-        if (asciiValue is 0x0d or 0x09 ||
-            _currentForm.GetCurrentField().Value.Length >= _currentForm.GetCurrentField().Length)
-        {
-            if (_currentForm.Next())
-            {
-                //set cursor and update display
-                SetCursorAndUpdate();
-                return true;
-            }
-
-            // all done
-            return false;
-        }
-
-        if (asciiValue >= 0x20 && asciiValue < 0x80)
-        {
-            if (_currentForm.GetCurrentField().Type is FieldType.Alpha && !char.IsAsciiLetterOrDigit((char)asciiValue))
-                return true;
-            if (_currentForm.GetCurrentField().Type == FieldType.Numeric && !char.IsAsciiDigit((char)asciiValue))
-                return true;
-
-            _currentForm.GetCurrentField().Value += (char)asciiValue;
-            _displayManagerAlt.Write((char)asciiValue);
-
-            //set cursor and update display
-            SetCursorAndUpdate();
-        }
-
-        return true;
-    }
-
-    private void SetCursorAndUpdate()
-    {
-        //set cursor and update display
-        _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().Value.Length +
-                                             _currentForm.GetCurrentField().StartIndex);
-        DisplayData = _displayManagerAlt.Display.Chars;
     }
 
     public void TextHandler(TextInputEventArgs args)
@@ -398,6 +312,7 @@ public partial class MainWindowViewModel
             // same as normal codes but with high bit set
             Key.C when alt => 0x83, // conceal
             Key.H when alt => 0x88, // help/menus
+            Key.Q when alt => 0x90, // quit
             Key.R when alt => 0x92, // reveal
             Key.X when alt => 0x98, // escape/exit
             Key.D1 when alt => 0xb1, // Alt+1...
@@ -434,7 +349,7 @@ public partial class MainWindowViewModel
     }
 }
 
-
+// TODO Create an external Keymap file that is read in on startup
 /* Keyboard Key Table
 
 None 0 Represents no key.

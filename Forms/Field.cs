@@ -33,6 +33,9 @@ public class Field
     public string ID;
     public int StartIndex = 0; // cell position on the display
     public int Length = 0; // number of cells
+    
+    // TODO turn this into a property so that Value if null is returned as an empty string
+    //  that will preven .Length from failing.
     public string Value = String.Empty;
     public FieldType Type = FieldType.AlphaNumeric;
     public bool IsRequired =false;
