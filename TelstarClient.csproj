@@ -13,7 +13,14 @@
         <PublishReadyToRun>true</PublishReadyToRun>
         <!---->
     </PropertyGroup>
-
+    <PropertyGroup>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    </PropertyGroup>
+    <PropertyGroup>
+        <VersionFileContent Condition="Exists('$(MSBuildProjectDirectory)/VERSION')">$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/VERSION').Trim())</VersionFileContent>
+        <Version Condition="'$(VersionFileContent)' != ''">$(VersionFileContent)</Version>
+        <InformationalVersion Condition="'$(VersionFileContent)' != ''">$(VersionFileContent)</InformationalVersion>
+    </PropertyGroup>
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
         <None Remove="Assets\defaultConfig.json" />
@@ -36,7 +43,6 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
-        <PackageReference Include="log4net" Version="3.0.4" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.9" />

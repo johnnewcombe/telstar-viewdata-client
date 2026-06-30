@@ -18,7 +18,6 @@
 */
 
 using System.Collections.Generic;
-using log4net.Config;
 
 namespace TelstarClient.Display;
 

@@ -35,7 +35,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.ViewModels;
 using Brushes = Avalonia.Media.Brushes;
-using Logger = log4net.Repository.Hierarchy.Logger;
 
 namespace TelstarClient.Views;
 

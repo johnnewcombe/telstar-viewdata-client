@@ -122,6 +122,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             // create directory
             System.IO.Directory.CreateDirectory(_appSupportDirectory);
         }
+        // check that the directory was created
         if (!System.IO.Directory.Exists(_appSupportDirectory))
         {
             logger.LogError("Failed to create AppSupport directory:{Directory}",_appSupportDirectory);
