@@ -3,7 +3,7 @@
 !define INSTALLDIR "$PROGRAMFILES64\${APPNAME}"
 
 Name "${APPNAME}"
-OutFile "../releases/$(VERSION)/TelstarClient-Setup-${VERSION}.exe"
+OutFile "../releases/${VERSION}/TelstarClient-Setup-${VERSION}.exe"
 InstallDir "${INSTALLDIR}"
 Icon "Assets/icon.ico"
 UninstallIcon "Assets/icon.ico"

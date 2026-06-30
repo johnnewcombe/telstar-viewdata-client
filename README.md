@@ -4,10 +4,9 @@ Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
 
 ## TODO:
 
-* Configuration files etc.
 * Serial Port access.
 * Full Screen
-* Logging needs to be sorted.
+* Logging file destination needs to be sorted.
 * Alt+Q needs to work from all screens, maybe help too?
 
 
