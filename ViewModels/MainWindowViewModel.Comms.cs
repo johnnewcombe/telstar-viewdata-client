@@ -20,6 +20,7 @@
 using System;
 using System.Threading;
 using Avalonia.Threading;
+using Microsoft.Extensions.Logging;
 using TelstarClient.Extensions;
 
 namespace TelstarClient.ViewModels;
@@ -51,18 +52,20 @@ public partial class MainWindowViewModel {
 
             // open the tcp client
             _cyclicBuffer.Clear();
-
+            logger.LogInformation("Connecting to {Ip}:{Port}", ip,port);
             _tcp.Connect(ip, port);
             Dispatcher.UIThread.Post(UpdateMainDisplay);
             
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
-            Logging.Log.Error($"Error : {ex}",ex);
+            logger.LogError(ex, "Failed to connect to {Ip}:{Port}", ip,port);
         }
     }
 
     public void Disconnect() {
+
+        logger.LogInformation("Disconnecting TCP connection");
 
         if (_tcp is not null) {
             _tcp.Disconnect();
@@ -78,6 +81,8 @@ public partial class MainWindowViewModel {
 
     // Connection Status Listener
     private void OnConnect(bool status) {
+
+        logger.LogInformation("Connected:{Status}", status);
 
         // set the thread safe property
         ConnectStatus = status;

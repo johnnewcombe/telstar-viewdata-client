@@ -28,12 +28,13 @@ using System.Threading.Tasks;
 using Avalonia.Input;
 using Avalonia.Threading;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
 using TelstarClient.Display;
 using TelstarClient.Extensions;
 using TelstarClient.Forms;
-using TelstarClient.Logging;
 using Char = TelstarClient.Models.Char;
 using Directory = TelstarClient.Forms.Directory;
 
@@ -75,7 +76,10 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     // this is used to access the appSettings.json file
     // this is separate from the user config.json
-    private IConfiguration _appSettings;
+    //private IConfiguration _appSettings;
+
+    private ILogger<MainWindowViewModel> logger = 
+        App.Host.Services.GetRequiredService<ILogger<MainWindowViewModel>>();
 
     private readonly string _appSupportDirectory =
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
@@ -98,21 +102,29 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// <summary>
     /// Constructor
     /// </summary>
+    //public MainWindowViewModel(ILogger<MainWindowViewModel> logger) {
     public MainWindowViewModel() {
+    
+        //_appSettings = App.Host.Services.GetRequiredService<IConfiguration>();
+        //var logger = App.Host.Services.GetRequiredService<ILogger<MainWindowViewModel>>();
+        logger.LogInformation("Logging pipeline initialised");
 
-        _appSettings = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
-
+        // TODO Remove this once logging has shifted to MicrosoftExtentions
         // set the log level
-        Log.LogLevel(_appSettings.GetSection("Logging:LogLevel:System").Value);
-
+        //Log.LogLevel(_appSettings.GetSection("Logging:LogLevel:System").Value);
         var configFile = _appSupportDirectory + ConfigFile;
 
+        logger.LogInformation("Config File:{Config}",ConfigFile);
+
+        logger.LogInformation("Checking AppSupport directory:{Directory}",_appSupportDirectory);
         // create the app suport directory if it doesn't exist
         if (!System.IO.Directory.Exists(_appSupportDirectory)) {
             // create directory
             System.IO.Directory.CreateDirectory(_appSupportDirectory);
+        }
+        if (!System.IO.Directory.Exists(_appSupportDirectory))
+        {
+            logger.LogError("Failed to create AppSupport directory:{Directory}",_appSupportDirectory);
         }
 
         // set up the alt display and show the welcome message
@@ -173,7 +185,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// This called on the UI Tread via the dispatcher (see OnConnect event).
     /// </summary>
     private void UpdateConnectStatus() {
-
+        
         string statusText;
 
         try {
@@ -203,7 +215,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             // ensures that all exceptions are handled within the async body
             // not handling them with void async methods can cause the process
             // to crash
-            Logging.Log.Error(ex.Message, ex);
+            logger.LogError(ex,"Failed to update the Connection Status");
         }
     }
 

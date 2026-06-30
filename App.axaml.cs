@@ -16,49 +16,47 @@
     along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 
 */
+
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using log4net;
 using TelstarClient.ViewModels;
 using TelstarClient.Views;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace TelstarClient;
 
 public partial class App : Application
 {
-    private static readonly ILog log = LogManager.GetLogger(typeof(App));
+    //private static readonly ILog log = LogManager.GetLogger(typeof(App));
     private MainWindowViewModel ViewModel;
+    public static IHost Host { get; private set; }
 
     public override void Initialize()
-    {        var host = Host.CreateDefaultBuilder()
+    {
+        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             })
-            .ConfigureLogging((context, logging) =>
+            .UseSerilog((context, services, loggerConfig) =>
             {
-                logging.AddConfiguration(context.Configuration.GetSection("Logging"));
-                logging.AddConsole();
-                logging.AddDebug();
-                // .AddFile(...) if you bring in Serilog or a file provider
+                loggerConfig.ReadFrom.Configuration(context.Configuration);
             })
             .Build();
-        
-        AvaloniaXamlLoader.Load(this);
 
+        AvaloniaXamlLoader.Load(this);
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-
             //var args = desktop.Args;
 
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
@@ -68,7 +66,6 @@ public partial class App : Application
             {
                 //DataContext = new MainWindowViewModel(),
             };
-
         }
 
         base.OnFrameworkInitializationCompleted();

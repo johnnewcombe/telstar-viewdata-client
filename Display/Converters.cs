@@ -20,7 +20,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text.RegularExpressions;
-using TelstarClient.Logging;
 
 namespace TelstarClient.Display;
 

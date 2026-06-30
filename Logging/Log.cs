@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
-
+/*
 namespace TelstarClient.Logging;
 
 public static class Log {
@@ -64,3 +64,4 @@ public static class Log {
 
 
 }
+*/

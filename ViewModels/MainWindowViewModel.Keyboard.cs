@@ -21,9 +21,9 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Microsoft.Extensions.Logging;
 using TelstarClient.Extensions;
 using TelstarClient.Forms;
-using TelstarClient.Logging;
 
 namespace TelstarClient.ViewModels;
 
@@ -36,7 +36,7 @@ public partial class MainWindowViewModel
     public void ProcessKey(byte asciiValue)
     {
         // NOTE That this function does not run on the UI thread
-        Log.Debug($"ASCII Value:{asciiValue:X2}h, {asciiValue}d");
+        logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
         Configuration.Connection con = null;
 
         // The screen can be in any one of 'DisplayType' states. Also,
@@ -64,7 +64,11 @@ public partial class MainWindowViewModel
                 // send to remote end
                 if (!_tcp.Write(asciiValue))
                 {
-                    Log.Error($"Keyboard entry not sent:{asciiValue}");
+                    logger.LogError("Failed to send character to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
+                }
+                else
+                {
+                    logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
                 }
 
                 break;
@@ -196,7 +200,10 @@ public partial class MainWindowViewModel
                         {
                             // TODO work out a way to display errors
                             // error, not saved
-                            Log.Error($"Connection not saved::{_currentForm.Connection.ToString()}");
+                            logger.LogError("Connection not saved:{Name}, {IP}, {Port}", 
+                                _currentForm.Connection.Name,
+                                _currentForm.Connection.Host,
+                                _currentForm.Connection.Port);
                         }
                     }
 
@@ -226,7 +233,7 @@ public partial class MainWindowViewModel
                     default:
                         break;
                 }
-                
+
                 SetDisplay(_previousDisplayType);
 
                 break;

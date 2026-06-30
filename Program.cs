@@ -34,8 +34,8 @@ sealed class Program
     // yet and stuff might break.
     [STAThread]
     public static void Main(string[] args) {
-        Trace.Listeners.Add(new ConsoleTraceListener());
-        Trace.Listeners.Add(new TextWriterTraceListener("telstar-client.log"));
+//        Trace.Listeners.Add(new ConsoleTraceListener());
+//        Trace.Listeners.Add(new TextWriterTraceListener("telstar-client.log"));
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
