@@ -17,11 +17,11 @@ public class Connect : FormBase
     public Connect(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
         connection)
     {
-
+        
         // create fields
         Fields = new List<Field>();
-        Fields.Add(new Field("ip", 8, 7, 20, string.Empty, FieldType.AlphaNumeric, true));
-        Fields.Add(new Field("port", 10, 7, 20, string.Empty, FieldType.Numeric, true));
+        Fields.Add(new Field("ip", 6, 7, 20, string.Empty, FieldType.AlphaNumeric, true));
+        Fields.Add(new Field("port", 8, 7, 20, string.Empty, FieldType.Numeric, true));
 
     }
 

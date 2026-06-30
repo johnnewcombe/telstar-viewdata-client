@@ -1,0 +1,49 @@
+{
+  "Connections": [
+    {
+      "Name": "Telstar (CURRER)",
+      "Host": "glasstty.com",
+      "Port": 6502
+    },
+    {
+      "Name": "Telstar (ELLIS)",
+      "Host": "glasstty.com",
+      "Port": 6503
+    },
+    {
+      "Name": "Tetrachloromethane",
+      "Host": "fish.ccl4.org",
+      "Port": 23
+    },
+    {
+      "Name": "End of the Line BBS",
+      "Host": "endofthelinebbs.com",
+      "Port": 6502
+    },
+    {
+      "Name": "TeeFax",
+      "Host": "pegasus.matrixnetwork.co.uk",
+      "Port": 6502
+    },
+    {
+      "Name": "",
+      "Host": "",
+      "Port": 0
+    },
+    {
+      "Name": "",
+      "Host": "",
+      "Port": 0
+    },
+    {
+      "Name": "",
+      "Host": "",
+      "Port": 0
+    },
+    {
+      "Name": "",
+      "Host": "",
+      "Port": 0
+    }
+  ]
+}

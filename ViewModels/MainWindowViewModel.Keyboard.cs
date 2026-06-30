@@ -83,10 +83,14 @@ public partial class MainWindowViewModel
             case DisplayType.Directory:
 
                 int index;
-
-
+                
                 switch (asciiValue)
                 {
+                    case 0x98: // alt+x
+                        Disconnect();
+                        SetDisplay(DisplayType.Directory);
+                        break;
+
                     // validate number Connect)
                     case >= 0x30 and <= 0x39:
 
@@ -133,7 +137,9 @@ public partial class MainWindowViewModel
                 }
 
                 break;
+            
             case DisplayType.Connect:
+                
                 // connect or ignore
                 if (!_currentForm.ProcessFormKey(asciiValue))
                 {
@@ -200,7 +206,7 @@ public partial class MainWindowViewModel
                         {
                             // TODO work out a way to display errors
                             // error, not saved
-                            logger.LogError("Connection not saved:{Name}, {IP}, {Port}", 
+                            logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}", 
                                 _currentForm.Connection.Name,
                                 _currentForm.Connection.Host,
                                 _currentForm.Connection.Port);
@@ -225,6 +231,7 @@ public partial class MainWindowViewModel
                 {
                     case 0x98: // alt+x
                         Disconnect();
+                        SetDisplay(DisplayType.Directory);
                         break;
                     case 0x90: // alt+q
                         Disconnect();

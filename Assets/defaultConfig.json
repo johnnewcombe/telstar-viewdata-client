@@ -1,39 +1,39 @@
 {
   "Connections" : [ {
     "Name" : "Telstar CURRER",
-    "Address" : "glasstty.com",
+    "Host" : "glasstty.com",
     "Port" : 6502
   }, {
+    "Name" : "Telstar ELLIS",
+    "Host" : "glasstty.com",
+    "Port" : 6503
+  }, {
     "Name" : "NxTel",
-    "Address" : "nx.nxtel.org",
+    "Host" : "nx.nxtel.org",
     "Port" : 23280
   }, {
     "Name" : "Tetrachloromethane",
-    "Address" : "fish.ccl4.org",
+    "Host" : "fish.ccl4.org",
     "Port" : 23
   }, {
     "Name" : "End of the Line BBS",
-    "Address" : "endofthelinebbs.com",
+    "Host" : "endofthelinebbs.com",
     "Port" : 6502
   }, {
     "Name" : "TeeFax",
-    "Address" : "pegasus.matrixnetwork.co.uk",
+    "Host" : "pegasus.matrixnetwork.co.uk",
     "Port" : 6502
   }, {
-    "Name" : null,
-    "Address" : null,
+    "Name" : "",
+    "Host" : "",
     "Port" : 0
   }, {
-    "Name" : null,
-    "Address" : null,
+    "Name" : "",
+    "Host" : "",
     "Port" : 0
   }, {
-    "Name" : null,
-    "Address" : null,
-    "Port" : 0
-  }, {
-    "Name" : null,
-    "Address" : null,
+    "Name" : "",
+    "Host" : "",
     "Port" : 0
   } ]
 }

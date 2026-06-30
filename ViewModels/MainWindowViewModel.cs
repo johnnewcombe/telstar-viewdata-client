@@ -102,21 +102,17 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// <summary>
     /// Constructor
     /// </summary>
-    //public MainWindowViewModel(ILogger<MainWindowViewModel> logger) {
-    public MainWindowViewModel() {
-    
-        //_appSettings = App.Host.Services.GetRequiredService<IConfiguration>();
-        //var logger = App.Host.Services.GetRequiredService<ILogger<MainWindowViewModel>>();
-        logger.LogInformation("Logging pipeline initialised");
 
-        // TODO Remove this once logging has shifted to MicrosoftExtentions
-        // set the log level
-        //Log.LogLevel(_appSettings.GetSection("Logging:LogLevel:System").Value);
+    public MainWindowViewModel() {
+        
+        logger.LogInformation("Logging pipeline initialised");
+        
         var configFile = _appSupportDirectory + ConfigFile;
 
         logger.LogInformation("Config File:{Config}",ConfigFile);
 
         logger.LogInformation("Checking AppSupport directory:{Directory}",_appSupportDirectory);
+        
         // create the app suport directory if it doesn't exist
         if (!System.IO.Directory.Exists(_appSupportDirectory)) {
             // create directory
@@ -304,13 +300,16 @@ public partial class MainWindowViewModel : ViewModelBase {
                 _currentForm = new Connect(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex);
+                DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.EditConnection:
                 _currentForm = new EditConnection(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
+                
+                // TODO use form GetCursor here and elsewhere
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCurrentField().StartIndex +
                                                      _currentForm.GetCurrentField().Value.Length);
-                
+                DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.Help:
                 _currentForm = new Help(_displayManagerAlt,connection);
