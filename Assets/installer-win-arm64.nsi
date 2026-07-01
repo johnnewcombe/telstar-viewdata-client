@@ -3,10 +3,10 @@
 !define INSTALLDIR "$PROGRAMFILES64\${APPNAME}"
 
 Name "${APPNAME}"
-OutFile "../releases/${VERSION}/TelstarClient-Win-arm64-Setup-${VERSION}.exe"
+OutFile "../../releases/${VERSION}/TelstarClient-Win-arm64-Setup-${VERSION}.exe"
 InstallDir "${INSTALLDIR}"
-Icon "Assets/icon.ico"
-UninstallIcon "Assets/icon.ico"
+Icon "icon.ico"
+UninstallIcon "icon.ico"
 
 ; --- Pages ---
 Page license
@@ -15,13 +15,13 @@ Page instfiles
 UninstPage uninstConfirm
 UninstPage instfiles
 
-LicenseData "LICENCE"
+LicenseData "../LICENCE"
 
 ; --- Install ---
 Section "Install"
   SetOutPath "$INSTDIR"
-  File /r "bin/Release/net9.0/win-arm64/publish/*"
-  File "Assets/icon.ico"
+  File /r "../bin/Release/net9.0/win-arm64/publish/*"
+  File "icon.ico"
 
   ; Start Menu shortcut
   CreateDirectory "$SMPROGRAMS\${APPNAME}"

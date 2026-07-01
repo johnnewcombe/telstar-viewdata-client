@@ -42,10 +42,10 @@ linux-x64:
 	cp ./bin/Release/net9.0/linux-x64/publish/TelstarClient-linux-x64.zip ../releases/$(VERSION)
 
 win-arm64:
-	makensis -DVERSION=$(VERSION) installer-win-arm64.nsi
+	makensis -DVERSION=$(VERSION) Assets/installer-win-arm64.nsi
 
 win-x64:
-	makensis -DVERSION=$(VERSION) installer-win-x64.nsi
+	makensis -DVERSION=$(VERSION) Assets/installer-win-x64.nsi
 
 macos-arm64:
 	mkdir -p $(APPBUNDLE-ARM)/Contents/MacOS

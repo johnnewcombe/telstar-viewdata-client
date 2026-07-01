@@ -9,11 +9,24 @@ Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
 * Consider an option to start up in kiosk mode via cmd line.
 * Sort the many TODOs in the code.
 
-## MacOS
+## Installation
+
+Extract all of the files  from the archive and from withing the archive directory run the install.sh script.
+
+```text
+$ ./install.sh
+```
+You will be presented with an option to install for all users or for the current user.
+
+### MacOS
 
 After downloading, right-click TelstarClient.app and choose Open,
 then click Open in the dialog that appears. This is only needed once.
 Alternatively: System Settings → Privacy & Security → Open Anyway.
+
+### Linux
+
+### Windows
 
 ## Log Files
 
