@@ -13,7 +13,7 @@
  See the GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+ along with the product. If not, see <https://www.gnu.org/licenses/>.
 
 */
 
@@ -104,11 +104,7 @@ public partial class MainWindowViewModel
 
                 switch (asciiValue)
                 {
-                    case 0x98: // alt+x
-                        Disconnect();
-                        SetDisplay(DisplayType.Directory);
-                        return;
-
+                    // TODO maybe use char.IsDigit
                     // validate number Connect)
                     case >= 0x30 and <= 0x39:
 
@@ -148,10 +144,7 @@ public partial class MainWindowViewModel
                         }
 
                         break;
-
-                    case 0x88: // ' alt+x disconnect
-                        SetDisplay(DisplayType.Help);
-                        break;
+                    
                 }
 
                 break;
@@ -163,10 +156,7 @@ public partial class MainWindowViewModel
                     case 0x1B:
                         SetDisplay(_previousDisplayType);
                         return;
-                    case 0x98: // alt+x
-                        Disconnect();
-                        SetDisplay(DisplayType.Directory);
-                        return;
+
                 }
 
                 // connect or ignore
@@ -207,10 +197,6 @@ public partial class MainWindowViewModel
                     case 0x1B:
                         SetDisplay(_previousDisplayType);
                         return;
-                    case 0x98: // alt+x
-                        Disconnect();
-                        SetDisplay(DisplayType.Directory);
-                        return;
                 }
                 
                 if (!_currentForm.ProcessFormKey(asciiValue))
@@ -227,9 +213,6 @@ public partial class MainWindowViewModel
                         field = _currentForm.GetFieldById("dirName");
                         if (field is not null)
                             name = field.Value;
-                        //field = _currentForm.GetFieldById("dirEntry");
-                        //if (field is not null)
-                        //    int.TryParse(field.Value, out memory);
                         field = _currentForm.GetFieldById("host");
                         if (field is not null)
                             host = field.Value;
@@ -265,28 +248,12 @@ public partial class MainWindowViewModel
                     // updte the display as something was processed by _currentForm.ProcessFormKey
                     DisplayData = _displayManagerAlt.Display.Chars;
                 }
-
-
+                
                 break;
 
             case DisplayType.Help:
-
-                switch (asciiValue)
-                {
-                    case 0x98: // alt+x
-                        Disconnect();
-                        SetDisplay(DisplayType.Directory);
-                        break;
-                    case 0x90: // alt+q
-                        Disconnect();
-                        Shutdown();
-                        break;
-                    default:
-                        break;
-                }
-
+                // any key returns
                 SetDisplay(_previousDisplayType);
-
                 break;
         }
     }

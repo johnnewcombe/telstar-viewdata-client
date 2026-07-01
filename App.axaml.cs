@@ -13,7 +13,7 @@
     See the GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+    along with the product. If not, see <https://www.gnu.org/licenses/>.
 
 */
 
@@ -42,7 +42,9 @@ public partial class App : Application
     
     public override void Initialize()
     {
+
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
+            .UseContentRoot(AppContext.BaseDirectory)
             .ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);

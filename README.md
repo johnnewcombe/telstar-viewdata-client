@@ -5,9 +5,15 @@ Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
 ## TODO:
 
 * Serial Port access.
-* Full Screen
-* Logging file destination needs to be sorted.
-* Alt+Q needs to work from all screens, maybe help too?
+* Remove literals where possible.
+* Consider an option to start up in kiosk mode via cmd line.
+* Sort the many TODOs in the code.
+
+## MacOS
+
+After downloading, right-click TelstarClient.app and choose Open,
+then click Open in the dialog that appears. This is only needed once.
+Alternatively: System Settings → Privacy & Security → Open Anyway.
 
 ## Log Files
 

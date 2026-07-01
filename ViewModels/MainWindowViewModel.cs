@@ -13,7 +13,7 @@
     See the GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+    along with the product. If not, see <https://www.gnu.org/licenses/>.
 
 */
 
@@ -116,6 +116,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         
         // create the app suport directory if it doesn't exist
         if (!System.IO.Directory.Exists(_appSupportDirectory)) {
+            logger.LogDebug("Creating AppSupport directory:{Directory}",_appSupportDirectory);
             // create directory
             System.IO.Directory.CreateDirectory(_appSupportDirectory);
         }
@@ -123,6 +124,10 @@ public partial class MainWindowViewModel : ViewModelBase {
         if (!System.IO.Directory.Exists(_appSupportDirectory))
         {
             logger.LogError("Failed to create AppSupport directory:{Directory}",_appSupportDirectory);
+        }
+        else
+        {
+            logger.LogDebug("AppSupport directory created:{Directory}",_appSupportDirectory);
         }
 
         // set up the alt display and show the welcome message
