@@ -20,7 +20,7 @@ LicenseData "../LICENCE"
 ; --- Install ---
 Section "Install"
   SetOutPath "$INSTDIR"
-  File /r "bin/Release/net9.0/win-x64/publish/*"
+  File /r "../bin/Release/net9.0/win-x64/publish/*"
   File "icon.ico"
 
   ; Start Menu shortcut

@@ -1,0 +1,66 @@
+name: Linux and Windows Release Builder
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: echo "VERSION=$(cat VERSION)" >> $GITHUB_OUTPUT
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish all targets
+        run: |
+          dotnet publish --self-contained --configuration Release --os linux --arch x64   -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
+          dotnet publish --self-contained --configuration Release --os linux --arch arm64 -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
+          dotnet publish --self-contained --configuration Release --os win --arch x64     -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
+          dotnet publish --self-contained --configuration Release --os win --arch arm64   -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
+
+      - name: Install NSIS
+        run: sudo apt-get install -y nsis
+
+      - name: Package Linux arm64
+        run: |
+          cd ./bin/Release/net9.0/linux-arm64/publish
+          zip -r TelstarClient-linux-arm64-${{ steps.version.outputs.VERSION }}.zip *
+          cd -
+          cp ./bin/Release/net9.0/linux-arm64/publish/TelstarClient-linux-arm64-${{ steps.version.outputs.VERSION }}.zip .
+
+      - name: Package Linux x64
+        run: |
+          cd ./bin/Release/net9.0/linux-x64/publish
+          zip -r TelstarClient-linux-x64-${{ steps.version.outputs.VERSION }}.zip *
+          cd -
+          cp ./bin/Release/net9.0/linux-x64/publish/TelstarClient-linux-x64-${{ steps.version.outputs.VERSION }}.zip .
+
+      - name: Build Windows arm64 installer
+        run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} installer-win-arm64.nsi
+
+      - name: Build Windows x64 installer
+        run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} installer-win-x64.nsi
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            TelstarClient-linux-arm64-${{ steps.version.outputs.VERSION }}.zip
+            TelstarClient-linux-x64-${{ steps.version.outputs.VERSION }}.zip
+            TelstarClient-Win-arm64-Setup-${{ steps.version.outputs.VERSION }}.exe
+            TelstarClient-Win-x64-Setup-${{ steps.version.outputs.VERSION }}.exe
