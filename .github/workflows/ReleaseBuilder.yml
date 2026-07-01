@@ -1,4 +1,4 @@
-name: Linux and Windows Release Builder
+name: Release Builder
 
 on:
   push:
@@ -30,6 +30,8 @@ jobs:
         run: |
           dotnet publish --self-contained --configuration Release --os linux --arch x64   -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
           dotnet publish --self-contained --configuration Release --os linux --arch arm64 -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
+          dotnet publish --self-contained --configuration Release --os osx --arch x64     -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
+          dotnet publish --self-contained --configuration Release --os osx --arch arm64   -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
           dotnet publish --self-contained --configuration Release --os win --arch x64     -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
           dotnet publish --self-contained --configuration Release --os win --arch arm64   -p:Version=${{ steps.version.outputs.VERSION }} -p:InformationalVersion=${{ steps.version.outputs.VERSION }}
 
@@ -50,6 +52,32 @@ jobs:
           cd -
           cp ./bin/Release/net9.0/linux-x64/publish/TelstarClient-linux-x64-${{ steps.version.outputs.VERSION }}.zip .
 
+      - name: Package macOS arm64
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          APPBUNDLE="TelstarClient.app"
+          mkdir -p $APPBUNDLE/Contents/MacOS
+          mkdir -p $APPBUNDLE/Contents/Resources
+          cp -r bin/Release/net9.0/osx-arm64/publish/* $APPBUNDLE/Contents/MacOS/
+          chmod +x $APPBUNDLE/Contents/MacOS/TelstarClient
+          cp Assets/icon.icns $APPBUNDLE/Contents/Resources/icon.icns
+          sed "s/VERSION_PLACEHOLDER/$VERSION/g" Assets/TelstarClient.app.plist > $APPBUNDLE/Contents/Info.plist
+          zip -r TelstarClient-macos-arm64-$VERSION.zip $APPBUNDLE
+          rm -rf $APPBUNDLE
+
+      - name: Package macOS x64
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          APPBUNDLE="TelstarClient.app"
+          mkdir -p $APPBUNDLE/Contents/MacOS
+          mkdir -p $APPBUNDLE/Contents/Resources
+          cp -r bin/Release/net9.0/osx-x64/publish/* $APPBUNDLE/Contents/MacOS/
+          chmod +x $APPBUNDLE/Contents/MacOS/TelstarClient
+          cp Assets/icon.icns $APPBUNDLE/Contents/Resources/icon.icns
+          sed "s/VERSION_PLACEHOLDER/$VERSION/g" Assets/TelstarClient.app.plist > $APPBUNDLE/Contents/Info.plist
+          zip -r TelstarClient-macos-x64-$VERSION.zip $APPBUNDLE
+          rm -rf $APPBUNDLE
+
       - name: Build Windows arm64 installer
         run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} -DOUTDIR=. Assets/installer-win-arm64.nsi
 
@@ -62,5 +90,7 @@ jobs:
           files: |
             TelstarClient-linux-arm64-${{ steps.version.outputs.VERSION }}.zip
             TelstarClient-linux-x64-${{ steps.version.outputs.VERSION }}.zip
+            TelstarClient-macos-arm64-${{ steps.version.outputs.VERSION }}.zip
+            TelstarClient-macos-x64-${{ steps.version.outputs.VERSION }}.zip
             TelstarClient-Win-arm64-Setup-${{ steps.version.outputs.VERSION }}.exe
             TelstarClient-Win-x64-Setup-${{ steps.version.outputs.VERSION }}.exe

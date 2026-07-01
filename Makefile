@@ -65,3 +65,8 @@ macos-x64:
 	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > $(APPBUNDLE-X64)/Contents/Info.plist
 	cp -r $(APPBUNDLE-X64) ../releases/$(VERSION)/
 
+update-tag:
+	git tag -d v$(VERSION)
+	git push origin :refs/tags/v$(VERSION)
+	git tag v$(VERSION)
+	git push origin v$(VERSION)
