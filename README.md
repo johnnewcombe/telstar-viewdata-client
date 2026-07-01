@@ -34,6 +34,15 @@ Alternatively: System Settings → Privacy & Security → Open Anyway.
 * macOS → ~/Library/Application Support
 * Linux → ~/.config/TelstarClient/logs
 
+### Building the .DMG
+
+Heres an example of how to build the .DMG file.
+```text
+git tag -d v0.0.15
+git push origin :refs/tags/v0.0.15
+git tag v0.0.15
+git push origin v0.0.15
+```
 ## Viewdata Nuances
 
 If a character on the screen is updated, this may very well affect

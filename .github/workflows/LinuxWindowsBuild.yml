@@ -53,8 +53,8 @@ jobs:
       - name: Build Windows arm64 installer
         run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} installer-win-arm64.nsi
 
-      - name: Build Windows x64 installer
-        run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} installer-win-x64.nsi
+      - name: Build Windows arm64 installer
+        run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} -DOUTDIR=. installer-win-arm64.nsi
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
