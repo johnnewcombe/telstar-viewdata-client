@@ -68,9 +68,14 @@ public partial class MainWindowViewModel
                 // looking for alt key combinations (same as ctrl codes but with high bit set)
                 switch (asciiValue)
                 {
-
                     case 0x83: // conceal
                         _displayManagerMain.Display.ToggleConceal();
+                        break;
+                    case 0x0d: // return
+                        asciiValue = 0x5F;
+                        break;
+                    case 0x04: // ctrl+D sends CR for modems etc.
+                        asciiValue = 0x0D;
                         break;
                 }
 

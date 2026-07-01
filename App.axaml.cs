@@ -38,7 +38,8 @@ public partial class App : Application
     //private static readonly ILog log = LogManager.GetLogger(typeof(App));
     private MainWindowViewModel ViewModel;
     public static IHost Host { get; private set; }
-
+    public static string LogPath { get; private set; }
+    
     public override void Initialize()
     {
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
@@ -48,7 +49,7 @@ public partial class App : Application
             })
             .UseSerilog((context, services, loggerConfig) =>
             {
-                var logPath = Path.Combine(
+                LogPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "TelstarClient",
                     "logs",
@@ -56,14 +57,14 @@ public partial class App : Application
 
                 loggerConfig
                     .ReadFrom.Configuration(context.Configuration)
-                    .WriteTo.File(logPath, rollingInterval: RollingInterval.Day);
+                    .WriteTo.File(LogPath, rollingInterval: RollingInterval.Day);
             })
 //            .UseSerilog((context, services, loggerConfig) =>
 //            {
 //                loggerConfig.ReadFrom.Configuration(context.Configuration);
 //            })
             .Build();
-
+        
         AvaloniaXamlLoader.Load(this);
     }
 

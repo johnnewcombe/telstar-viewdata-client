@@ -105,18 +105,14 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// Constructor
     /// </summary>
 
-    public MainWindowViewModel() {
-        
-        logger.LogInformation("Logging pipeline initialised");
-        
-
-        
-        
+    public MainWindowViewModel()
+    {
         var configFile = _appSupportDirectory + ConfigFile;
 
-        logger.LogInformation("Config File:{Config}",ConfigFile);
-
-        logger.LogInformation("Checking AppSupport directory:{Directory}",_appSupportDirectory);
+        logger.LogInformation("Logging pipeline initialised");
+        logger.LogInformation("LogFile:{LogFile}", App.LogPath);
+        logger.LogInformation("Config File:{Directory}{Config}",_appSupportDirectory,ConfigFile);
+        logger.LogDebug("Checking AppSupport directory:{Directory}",_appSupportDirectory);
         
         // create the app suport directory if it doesn't exist
         if (!System.IO.Directory.Exists(_appSupportDirectory)) {
@@ -354,7 +350,7 @@ public partial class MainWindowViewModel : ViewModelBase {
         foreach (var connection in _settings.Config.Connections) {
             //if (connection.Name is not null) {
                 item++;
-                menuSb.Append($"   \e{Constants.AlphaCyan}{item} \e{Constants.AlphaWhite}{connection.Name}\r\n");
+                menuSb.Append($"   \e{Constants.AlphaWhite}{item} \e{Constants.AlphaCyan}{connection.Name}\r\n");
             //}
         }
 
