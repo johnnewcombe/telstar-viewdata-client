@@ -42,6 +42,25 @@ public partial class MainWindowViewModel
         // The screen can be in any one of 'DisplayType' states. Also,
         // the client could be online or offline when in any of these states.
 
+        // generic operations only, Form specific operations are below
+        switch (asciiValue)
+        {
+            case 0x86: // full screen
+                ToggleKioskMode();
+                return;
+            case 0x98: // ' alt+x disconnect
+                Disconnect();
+                SetDisplay(DisplayType.Directory);
+                return;
+            case 0x88: // alt+h show help menus
+                SetDisplay(DisplayType.Help);
+                return;    
+            case 0x90: // alt+q
+                Disconnect();
+                Shutdown();
+                return;
+        }
+        // TODO consider moving more generic operations out of the swich below e.g.Disconnect, Help, Exit etc. 
         switch (_displayType)
         {
             case DisplayType.Terminal:
@@ -49,13 +68,7 @@ public partial class MainWindowViewModel
                 // looking for alt key combinations (same as ctrl codes but with high bit set)
                 switch (asciiValue)
                 {
-                    case 0x98: // ' alt+x disconnect
-                        Disconnect();
-                        SetDisplay(DisplayType.Directory);
-                        break;
-                    case 0x88: // alt+h show help menus
-                        SetDisplay(DisplayType.Help);
-                        break;
+
                     case 0x83: // conceal
                         _displayManagerMain.Display.ToggleConceal();
                         break;
@@ -351,6 +364,7 @@ public partial class MainWindowViewModel
             // Alt+letter combinations used within the app
             // same as normal codes but with high bit set
             Key.C when alt => 0x83, // conceal
+            Key.F when alt => 0x86,
             Key.H when alt => 0x88, // help/menus
             Key.Q when alt => 0x90, // quit
             Key.R when alt => 0x92, // reveal

@@ -9,6 +9,11 @@ Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
 * Logging file destination needs to be sorted.
 * Alt+Q needs to work from all screens, maybe help too?
 
+## Log Files
+
+* Windows → %APPDATA%
+* macOS → ~/Library/Application Support
+* Linux → ~/.config/TelstarClient/logs
 
 ## Viewdata Nuances
 

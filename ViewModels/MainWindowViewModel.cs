@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Threading;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,7 @@ using TelstarClient.Configuration;
 using TelstarClient.Display;
 using TelstarClient.Extensions;
 using TelstarClient.Forms;
+using TelstarClient.Views;
 using Char = TelstarClient.Models.Char;
 using Directory = TelstarClient.Forms.Directory;
 
@@ -107,6 +109,9 @@ public partial class MainWindowViewModel : ViewModelBase {
         
         logger.LogInformation("Logging pipeline initialised");
         
+
+        
+        
         var configFile = _appSupportDirectory + ConfigFile;
 
         logger.LogInformation("Config File:{Config}",ConfigFile);
@@ -155,6 +160,17 @@ public partial class MainWindowViewModel : ViewModelBase {
     public string[]? Args { set; get; }
 
     #region Data Processing and Notification
+
+    private void ToggleKioskMode()
+    {
+        // get MainWindow
+        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            logger.LogDebug("MainWindow type is {Type}", desktop.MainWindow?.GetType().FullName);
+            (desktop.MainWindow as TelstarClient.Views.MainWindow)?.ToggleKioskMode();
+        }
+        
+    }
 
     private void DisplayDataChanged() {
         // this method is called if the DiplayManager has updated the display internally

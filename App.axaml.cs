@@ -17,6 +17,8 @@
 
 */
 
+using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -46,8 +48,20 @@ public partial class App : Application
             })
             .UseSerilog((context, services, loggerConfig) =>
             {
-                loggerConfig.ReadFrom.Configuration(context.Configuration);
+                var logPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "TelstarClient",
+                    "logs",
+                    "app-.log");
+
+                loggerConfig
+                    .ReadFrom.Configuration(context.Configuration)
+                    .WriteTo.File(logPath, rollingInterval: RollingInterval.Day);
             })
+//            .UseSerilog((context, services, loggerConfig) =>
+//            {
+//                loggerConfig.ReadFrom.Configuration(context.Configuration);
+//            })
             .Build();
 
         AvaloniaXamlLoader.Load(this);

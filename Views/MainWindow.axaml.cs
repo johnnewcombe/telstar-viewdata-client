@@ -44,6 +44,7 @@ public partial class MainWindow : Window
         App.Host.Services.GetRequiredService<ILogger<MainWindow>>();
 
     public MainWindowViewModel ViewModel { get; set; }
+    public bool KioskMode { get; set; }
 
     public MainWindow()
     {
@@ -92,8 +93,31 @@ public partial class MainWindow : Window
     private void Window_FullScreen(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
     }
+    
+    public void ToggleKioskMode()
+    {
+        if (KioskMode)
+        {
+            // turn kiosk mode off
+            ExtendClientAreaToDecorationsHint = false;
+            ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.Default;
+            WindowState = WindowState.Normal;
+            Topmost = false;
+        }
+        else
+        {
+            // turn kiosk mode on
+            ExtendClientAreaToDecorationsHint = true;
+            ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
+            WindowState = WindowState.FullScreen;
+            Topmost = true;
+            
+        }
 
-
+        // toggle the flag
+        KioskMode = !KioskMode;
+    }
+    
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         logger.LogDebug("Keypress:{Key}, Physical Key:{PhysicalKey}, Modifiers:{Modifiers}", e.Key,
