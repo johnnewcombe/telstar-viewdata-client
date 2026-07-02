@@ -80,7 +80,7 @@ fi
 
 # Update icon cache
 if command -v gtk-update-icon-cache &> /dev/null; then
-    run gtk-update-icon-cache -f -t "$ICON_DIR/../../../"
+    run gtk-update-icon-cache -f -t "$ICON_DIR/../.."
 fi
 
 # Write uninstaller
