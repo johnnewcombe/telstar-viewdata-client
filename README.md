@@ -1,15 +1,19 @@
 # Telstar Viewdata Client
 
-Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
+Experimental cross platform Viewdata Client.
+
+Platforms:
+
+* Linux (x64/arm64)
+* MacOS (intel/Apple Silicon)
+* Windows (x64/arm64)
+
 
 ![alt text](./Assets/Screenshot1.png)
 
-## TODO:
+## Outstanding Development:
 
-* Serial Port access.
-* Remove literals where possible.
-* Consider an option to start up in kiosk mode via cmd line.
-* Sort the many TODOs in the code.
+* Support for serial ports.
 
 ## Installation
 

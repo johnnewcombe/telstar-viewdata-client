@@ -49,8 +49,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private const string ErrorStatus = "UNABLE TO CONNECT";
     private const string ConnectingStatus = "CONNECTING";
     private const string ConfigFile = "config.json";
-
-
+    
     // TODO consider simplifying this field stuff or moving into a FormObject with the edit screen text?
     private class Field() {
         public int Col;
