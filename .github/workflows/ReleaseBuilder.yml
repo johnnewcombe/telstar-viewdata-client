@@ -87,7 +87,6 @@ jobs:
       - name: List release files
         run: ls -la *.exe *.zip 2>/dev/null || echo "No matching files found"
   
-  Put that immediately before the upload step, push, and trigger another run. That'll tell us
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
