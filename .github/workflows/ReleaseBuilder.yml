@@ -79,10 +79,16 @@ jobs:
           rm -rf $APPBUNDLE
 
       - name: Build Windows arm64 installer
-        run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} -DOUTDIR=. Assets/installer-win-arm64.nsi
+        run: |
+          cd Assets
+          makensis -DVERSION=${{ steps.version.outputs.VERSION }} -DOUTDIR=.. installer-win-arm64.nsi
+          ls -la *.exe 2>/dev/null || echo "No exe found after arm64 build"
 
       - name: Build Windows x64 installer
-        run: makensis -DVERSION=${{ steps.version.outputs.VERSION }} -DOUTDIR=. Assets/installer-win-x64.nsi
+        run: |
+          cd Assets
+          makensis -DVERSION=${{ steps.version.outputs.VERSION }} -DOUTDIR=.. installer-win-x64.nsi
+          ls -la *.exe 2>/dev/null || echo "No exe found after x64 build"
 
       - name: List release files
         run: ls -la *.exe *.zip 2>/dev/null || echo "No matching files found"
