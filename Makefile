@@ -65,13 +65,13 @@ macos-x64:
 	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > $(APPBUNDLE-X64)/Contents/Info.plist
 	cp -r $(APPBUNDLE-X64) ../releases/$(VERSION)/
 
-ad-tag:
+add-tag:
 	# triggers a remote build on GitHub and populated the GitHub Releases area on the GitHub website.
 	# this not related to the Releases directory in the local project directory.
 	git tag v$(VERSION)
 	git push origin v$(VERSION)
 
-update-tage:
+update-tag:
 	# this will delete a tage and recreate it allowing a remote build to be re-invokked. See above.
 	git tag -d v$(VERSION)
 	git push origin :refs/tags/v$(VERSION)
