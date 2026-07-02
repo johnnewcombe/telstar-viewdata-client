@@ -2,6 +2,8 @@
 
 Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
 
+![alt text](./Assets/Screenshot1.png)
+
 ## TODO:
 
 * Serial Port access.
@@ -11,22 +13,60 @@ Experimental cross platform Viewdata Client written using Avalonia on .Net 9.
 
 ## Installation
 
-Extract all of the files  from the archive and from withing the archive directory run the install.sh script.
+### MacOS Installation
 
-```text
+Download the appropriate zip from releases:
+ 
+- `TelstarClient-macos-arm64-<version>.zip` — Apple Silicon (M1/M2/M3/M4)
+- `TelstarClient-macos-x64-<version>.zip` — Intel
+
+Extract the zip and move `TelstarClient.app` to your Applications folder.
+
+#### First Run
+
+As TelstarClient is not notarized with Apple, macOS may report it as damaged
+or block it from running. To bypass this:
+
+**Option 1 — Right-click method:**
+Right-click `TelstarClient.app` → Open → click Open in the dialog that appears.
+This only needs to be done once.
+
+**Option 2 — Terminal method:**
+```bash
+xattr -cr /Applications/TelstarClient.app
+```
+Then double-click as normal.
+
+**Option 3 — System Settings:**
+System Settings → Privacy & Security → scroll down → click Open Anyway.
+
+**Option 4 — Ad-hoc signing:**
+If you have Xcode command line tools installed:
+```bash
+codesign --force --deep --sign - /Applications/TelstarClient.app
+```
+Then double-click as normal.
+
+### Linux
+
+Download the appropriate zip from releases:
+
+- `TelstarClient-linux-arm64-<version>.zip` — arm64
+- `TelstarClient-linux-x64-<version>.zip` — x64
+
+```bash
 $ ./install.sh
 ```
 You will be presented with an option to install for all users or for the current user.
 
-### MacOS
-
-After downloading, right-click TelstarClient.app and choose Open,
-then click Open in the dialog that appears. This is only needed once.
-Alternatively: System Settings → Privacy & Security → Open Anyway.
-
-### Linux
-
 ### Windows
+
+Download the appropriate executable from releases:
+
+- `TelstarClient-Win-arm64-Setup-<version>.zip` — ARM 64
+- `TelstarClient-Win-x64-Setup-<version>.zip` — x64
+
+Run the downloaded setup program.
 
 ## Log Files
 
@@ -34,15 +74,6 @@ Alternatively: System Settings → Privacy & Security → Open Anyway.
 * macOS → ~/Library/Application Support
 * Linux → ~/.config/TelstarClient/logs
 
-### Building the .DMG
-
-Heres an example of how to build the .DMG file.
-```text
-git tag -d v0.0.15
-git push origin :refs/tags/v0.0.15
-git tag v0.0.15
-git push origin v0.0.15
-```
 ## Viewdata Nuances
 
 If a character on the screen is updated, this may very well affect
@@ -83,3 +114,21 @@ The GH character displayed for an alpha or graphic foreground control takes prev
 
 The GH character is set to blank for an Alpha char and for each new row.
 
+## Development Notes
+
+The build process is automated using Github Actions. See the .github/workflows/ReleaseBuilder.yml file.
+
+This is triggered by a new tag being pushed to the repository.
+```text
+git tag v0.0.15
+git push origin v0.0.15
+```
+This will trigger the build process and create a new release for Linux, MacOS and Windows within 
+GitHub Releases. Releases can be seen on the right hand side of the Github Code tab.
+
+If the label exists already it can be deleted first with the following command.
+
+```text
+git tag -d v0.0.15
+git push origin :refs/tags/v0.0.15
+```
