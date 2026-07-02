@@ -17,8 +17,6 @@
 
 */
 
-using TelstarClient.Models;
-
 namespace TelstarClient.Display;
 
 public class Cursor {
@@ -30,19 +28,9 @@ public class Cursor {
         _col = 0;
         _row = 0;
     }
-    public Cursor(int col, int row) {
-        _col = 0;
-        _row = 0;   
-    }
-    public Cursor(int col, int row, bool visible) {
-        _col = 0;
-        _row = 0;   
-        Visible = visible;
-    }
-
     public Cursor(int startIndex) {
-        _row = startIndex / Models.Display.COLS;
-        _col = startIndex % Models.Display.COLS;
+        _row = startIndex / Models.Display.Cols;
+        _col = startIndex % Models.Display.Cols;
     }
     /// <summary>
     /// Returns the current cursor row position.
@@ -70,7 +58,7 @@ public class Cursor {
     }
 
     public int GetCursorIndex() {
-       return Col + Row * Models.Display.COLS;
+       return Col + Row * Models.Display.Cols;
     }
     
     #region Cursor Movement
@@ -88,10 +76,10 @@ public class Cursor {
 
     public void HorizontalTab() {
         _col++;
-        if (_col < Models.Display.COLS) return;
+        if (_col < Models.Display.Cols) return;
         _col = 0;
         _row++;
-        if (_row == Models.Display.ROWS)
+        if (_row == Models.Display.Rows)
             _row = 0;
     }
 
@@ -101,10 +89,10 @@ public class Cursor {
     public void Backspace() {
         _col--;
         if (_col >= 0) return;
-        _col = Models.Display.COLS - 1;
+        _col = Models.Display.Cols - 1;
         _row--;
         if (_row < 0)
-            _row = Models.Display.ROWS - 1;
+            _row = Models.Display.Rows - 1;
     }
 
     /// <summary>
@@ -113,7 +101,7 @@ public class Cursor {
     public void VerticalTab() {
         _row--;
         if (_row >= 0) return;
-        _row = Models.Display.ROWS - 1;
+        _row = Models.Display.Rows - 1;
     }
 
     /// <summary>
@@ -121,7 +109,7 @@ public class Cursor {
     /// </summary>
     public void LineFeed() {
         _row++;
-        if (_row < Models.Display.ROWS) return;
+        if (_row < Models.Display.Rows) return;
         _row = 0;
     }
 

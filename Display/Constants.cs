@@ -17,6 +17,9 @@
 
 */
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
+
 namespace TelstarClient.Display;
 
 public static class Constants {

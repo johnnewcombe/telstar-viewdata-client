@@ -22,8 +22,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Microsoft.Extensions.Logging;
-using TelstarClient.Extensions;
-using TelstarClient.Forms;
+using TelstarClient.Display;
 
 namespace TelstarClient.ViewModels;
 
@@ -36,8 +35,8 @@ public partial class MainWindowViewModel
     public void ProcessKey(byte asciiValue)
     {
         // NOTE That this function does not run on the UI thread
-        logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
-        Configuration.Connection con = null;
+        _logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
+        Configuration.Connection con;
 
         // The screen can be in any one of 'DisplayType' states. Also,
         // the client could be online or offline when in any of these states.
@@ -82,11 +81,11 @@ public partial class MainWindowViewModel
                 // send to remote end
                 if (!_tcp.Write(asciiValue))
                 {
-                    logger.LogError("Failed to send character to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
+                    _logger.LogError("Failed to send character to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
                 }
                 else
                 {
-                    logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
+                    _logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
                 }
 
                 break;
@@ -233,10 +232,17 @@ public partial class MainWindowViewModel
                         {
                             // TODO work out a way to display errors
                             // error, not saved
-                            logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
-                                _currentForm.Connection.Name,
-                                _currentForm.Connection.Host,
-                                _currentForm.Connection.Port);
+                            if (_currentForm.Connection != null)
+                            {
+                                _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
+                                    _currentForm.Connection.Name,
+                                    _currentForm.Connection.Host,
+                                    _currentForm.Connection.Port);
+                            }
+                            else
+                            {
+                                _logger.LogError("Connection invalid and not saved, the forms connection is null");
+                            }
                         }
                     }
 

@@ -17,9 +17,8 @@
 
 */
 
-using System.Collections.Generic;
-using System.Runtime.InteropServices.Marshalling;
 using System.Text.RegularExpressions;
+// ReSharper disable UnusedMember.Local
 
 namespace TelstarClient.Display;
 
@@ -93,11 +92,10 @@ public static class Converters {
             foreach (var match in matches) {
 
                 // get the match without the brackets
-                var ms = match.ToString().TrimEnd(']').TrimStart('[');
+                var ms = match.ToString()?.TrimEnd(']').TrimStart('[');
 
                 // get number of spaces and pop them in the message
-                int iSpaces = 0;
-                if (int.TryParse(ms, out iSpaces)) {
+                if (int.TryParse(ms, out var iSpaces)) {
                     markup = markup.Replace($"[{ms}]", string.Empty.PadLeft(iSpaces));
                 }
             }

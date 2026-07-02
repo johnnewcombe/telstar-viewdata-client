@@ -18,7 +18,7 @@
 */
 
 
-namespace TelstarClient.Net;
+namespace TelstarClient.Comms;
 
 public class SerialClient
 {

@@ -19,11 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using Avalonia.Platform;
-using Tmds.DBus.Protocol;
 
 namespace TelstarClient.Configuration;
 
@@ -60,7 +58,7 @@ public class Settings {
 
 public class ConfigSections {
 
-    public List<Connection> Connections { get; set; } = new List<Connection>();
+    public List<Connection> Connections { get; set; }
 
     public ConfigSections() {
         Connections = new List<Connection>();

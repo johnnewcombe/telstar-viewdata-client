@@ -1,16 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using TelstarClient.Display;
-using Tmds.DBus.Protocol;
 
 namespace TelstarClient.Forms;
 
 public class EditConnection : FormBase
 {
-    private int _currentField;
-    private Configuration.Connection _connection;
 
     public EditConnection(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
         connection)

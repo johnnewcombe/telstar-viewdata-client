@@ -24,19 +24,15 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using TelstarClient.ViewModels;
 using TelstarClient.Views;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace TelstarClient;
 
-public partial class App : Application
+public class App : Application
 {
-    //private static readonly ILog log = LogManager.GetLogger(typeof(App));
-    private MainWindowViewModel ViewModel;
     public static IHost Host { get; private set; }
     public static string LogPath { get; private set; }
     
@@ -45,11 +41,11 @@ public partial class App : Application
 
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
             .UseContentRoot(AppContext.BaseDirectory)
-            .ConfigureAppConfiguration((context, config) =>
+            .ConfigureAppConfiguration((_, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             })
-            .UseSerilog((context, services, loggerConfig) =>
+            .UseSerilog((context, _, loggerConfig) =>
             {
                 LogPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

@@ -5,37 +5,29 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
 
-public abstract class FormBase : IForm
+public abstract class FormBase(DisplayManager displayManager, Connection connection)
+    : IForm
 {
-    private int _currentField = 0;
-    protected DisplayManager _displayManager;
-
-    protected FormBase(DisplayManager displayManager, Configuration.Connection connection)
-    {
-        _displayManager = displayManager;
-        Connection = connection;
-    }
+    private int _currentField;
 
     protected List<Field> Fields { get; set; } = new List<Field>();
 
     public bool ProcessFormKey(int asciiValue)
     {
-        //var currentField = _currentForm.GetCurrentField();
-        if (asciiValue == 0x1B) // escape 
+        switch (asciiValue)
         {
-            //_currentForm = null;
-            return false;
-        }
-
-        if (asciiValue == 0x08) // backspace
-        {
-            if (GetCurrentField().Value.Length > 0)
-            {
+            //var currentField = _currentForm.GetCurrentField();
+            // escape 
+            case 0x1B:
+                //_currentForm = null;
+                return false;
+            // backspace
+            case 0x08 when GetCurrentField().Value.Length > 0:
                 // remove the char from the display by setting the cursor to the current position
                 // and then writing a space character
-                _displayManager.SetCursorPosition(GetCurrentField().Value.Length - 1
-                                                  + GetCurrentField().StartIndex);
-                _displayManager.Write((char)0x20);
+                displayManager.SetCursorPosition(GetCurrentField().Value.Length - 1
+                                                 + GetCurrentField().StartIndex);
+                displayManager.Write((char)0x20);
 
 
                 // remove the char from the value property of the field this reduces he value
@@ -48,19 +40,17 @@ public abstract class FormBase : IForm
                 SetCursor();
 
                 return true;
-            }
-        }
-
-        // shift tab
-        if (asciiValue is 0x89)
-        {
-            if (Previous())
+            // shift tab
+            case 0x89:
             {
-                //set cursor and update display
-                SetCursor();
-            }
+                if (Previous())
+                {
+                    //set cursor and update display
+                    SetCursor();
+                }
 
-            return true;
+                return true;
+            }
         }
 
         // are we terminating the field?
@@ -86,7 +76,7 @@ public abstract class FormBase : IForm
                 return true;
 
             GetCurrentField().Value += (char)asciiValue;
-            _displayManager.Write((char)asciiValue);
+            displayManager.Write((char)asciiValue);
 
             //set cursor and update display
             SetCursor();
@@ -95,7 +85,7 @@ public abstract class FormBase : IForm
         return true;
     }
 
-    public Connection Connection { get; }
+    public Connection Connection { get; } = connection;
 
     public Field GetCurrentField()
     {
@@ -108,7 +98,7 @@ public abstract class FormBase : IForm
     /// <param id="name"></param>
     public Field GetFieldById(string id)
     {
-        return Fields.FirstOrDefault(f => f.ID == id);
+        return Fields.FirstOrDefault(f => f.Id == id);
     }
 
     private bool Next()
@@ -153,7 +143,7 @@ public abstract class FormBase : IForm
     {
         foreach (var field in Fields)
         {
-            return $"{field.ID}:{field.Value}";
+            return $"{field.Id}:{field.Value}";
         }
 
         return string.Empty;
@@ -167,7 +157,7 @@ public abstract class FormBase : IForm
     private void SetCursor()
     {
         //set cursor and update display
-        _displayManager.SetCursorPosition(GetCurrentField().Value.Length +
+        displayManager.SetCursorPosition(GetCurrentField().Value.Length +
                                           GetCurrentField().StartIndex);
     }
 }

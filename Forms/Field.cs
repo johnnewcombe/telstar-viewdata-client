@@ -14,30 +14,31 @@ public class Field
 {
     public Field(string id, int startIndex, int length, string value, FieldType type, bool required)
     {
-        ID = id;
+        Id = id;
         StartIndex = startIndex;
         Length = length;
         Value = value;
         Type = type;
+        IsRequired = required;
     }
 
     public Field(string id, int row, int col, int length, string value, FieldType type, bool required)
     {
-        ID = id;
-        StartIndex = row*Models.Display.COLS + col;
+        Id = id;
+        StartIndex = row*Models.Display.Cols + col;
         Length = length;
         Value = value;
         Type = type;
+        IsRequired = required;
     }
 
-    public string ID;
-    public int StartIndex = 0; // cell position on the display
-    public int Length = 0; // number of cells
-    
+    public readonly string Id;
+    public readonly int StartIndex; // cell position on the display
+    public readonly int Length; // number of cells
+    public readonly FieldType Type;
+    public readonly bool IsRequired;
+
     private string _value = String.Empty;
-    
-    public FieldType Type = FieldType.AlphaNumeric;
-    public bool IsRequired =false;
 
     public string Value
     {

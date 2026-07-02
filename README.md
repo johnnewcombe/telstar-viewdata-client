@@ -9,7 +9,7 @@ Platforms:
 * Windows (x64/arm64)
 
 
-![alt text](./Assets/Screenshot1.png)
+![alt text](./Assets/ScreenshotAll.png)
 
 ## Outstanding Development:
 

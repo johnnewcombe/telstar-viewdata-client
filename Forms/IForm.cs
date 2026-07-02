@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace TelstarClient.Forms;
 
 public interface IForm {

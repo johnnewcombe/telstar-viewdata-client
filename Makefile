@@ -42,10 +42,10 @@ linux-x64:
 	cp ./bin/Release/net9.0/linux-x64/publish/TelstarClient-linux-x64.zip ../releases/$(VERSION)
 
 win-arm64:
-	makensis -DVERSION=$(VERSION) Assets/installer-win-arm64.nsi
+	cd Assets && makensis -DVERSION=$(VERSION) -DOUTDIR=.. installer-win-arm64.nsi
 
 win-x64:
-	makensis -DVERSION=$(VERSION) Assets/installer-win-x64.nsi
+	cd Assets && makensis -V4 -DVERSION=$(VERSION) -DOUTDIR=.. installer-win-x64.nsi
 
 macos-arm64:
 	mkdir -p $(APPBUNDLE-ARM)/Contents/MacOS
@@ -65,8 +65,11 @@ macos-x64:
 	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > $(APPBUNDLE-X64)/Contents/Info.plist
 	cp -r $(APPBUNDLE-X64) ../releases/$(VERSION)/
 
-update-tag:
-	git tag -d v$(VERSION)
-	git push origin :refs/tags/v$(VERSION)
+add-tag:
 	git tag v$(VERSION)
 	git push origin v$(VERSION)
+
+update-tage:
+	git tag -d v$(VERSION)
+	git push origin :refs/tags/v$(VERSION)
+	$(MAKE) add-tag

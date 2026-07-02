@@ -18,10 +18,7 @@
 */
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using Avalonia.Controls;
-using Avalonia.Rendering;
 
 namespace TelstarClient.Comms;
 
@@ -33,12 +30,12 @@ public class CyclicBuffer {
     /// cannot access the same element at the same time when using Add and Remove
     /// methods.
     /// </summary>
-    private char[] _buffer;
+    private readonly char[] _buffer;
 
-    private int _bufferSize;
-    private int inPtr = 0;
-    private int outtPtr = 0;
-    private static Lock iLock = new Lock();
+    private readonly int _bufferSize;
+    private int _inPtr;
+    private int _outtPtr;
+    private static readonly Lock Lock = new Lock();
 
     /// <summary>
     /// Constructor.
@@ -59,7 +56,7 @@ public class CyclicBuffer {
     /// </summary>
     public char[] InternalBuffer {
         get {
-            lock (iLock) {
+            lock (Lock) {
                 // not really needed
                 return _buffer;
             }
@@ -70,10 +67,10 @@ public class CyclicBuffer {
     /// <summary>
     /// Adds a byte to the buffer.
     /// </summary>
-    /// <param name="b"></param>
+    /// <param name="c"></param>
     public void Add(char c) {
 
-        lock (iLock) {
+        lock (Lock) {
             // we don't populate the last buffer location as this would
             // move inPtr to match outPtr and it would then appear as
             // if the buffer was empty, hence BufferSize-1.
@@ -81,10 +78,10 @@ public class CyclicBuffer {
                 throw new InvalidOperationException("Buffer is full.");
             }
 
-            _buffer[inPtr] = c;
-            inPtr++;
-            if (inPtr >= _bufferSize) {
-                inPtr = 0;
+            _buffer[_inPtr] = c;
+            _inPtr++;
+            if (_inPtr >= _bufferSize) {
+                _inPtr = 0;
             }
         }
     }
@@ -96,16 +93,16 @@ public class CyclicBuffer {
     /// <exception cref="Exception"></exception>
     public char Remove() {
 
-        lock (iLock) {
+        lock (Lock) {
 
             if (this.Count == 0) {
                 throw new Exception("Buffer is empty. Check the Count property prior to calling Remove.");
             }
 
-            var c = _buffer[outtPtr];
-            outtPtr++;
-            if (outtPtr >= _bufferSize) {
-                outtPtr = 0;
+            var c = _buffer[_outtPtr];
+            _outtPtr++;
+            if (_outtPtr >= _bufferSize) {
+                _outtPtr = 0;
             }
 
             return c;
@@ -117,19 +114,19 @@ public class CyclicBuffer {
     /// </summary>
     public int Count {
         get {
-            lock (iLock) {
-                if (outtPtr <= inPtr) {
-                    return inPtr - outtPtr;
+            lock (Lock) {
+                if (_outtPtr <= _inPtr) {
+                    return _inPtr - _outtPtr;
                 }
 
                 // buffer inPtr has wrapped and outPtr has not
-                return _bufferSize - outtPtr + inPtr;
+                return _bufferSize - _outtPtr + _inPtr;
             }
         }
     }
 
     public void Clear() {
-        inPtr = 0;
-        outtPtr = 0;
+        _inPtr = 0;
+        _outtPtr = 0;
     }
 }

@@ -17,14 +17,12 @@
 
 */
 
-using System.Diagnostics;
-using TelstarClient.Extensions;
 using TelstarClient.Models;
 
 namespace TelstarClient.Display;
 
 public partial class DisplayManager {
-
+    ///<summary>
     /// Sets the Graphics Hold status, specify true to hold graphics, false to release.
     /// Adds any new attributes to the character that this control character
     /// might require.
@@ -76,8 +74,7 @@ public partial class DisplayManager {
     /// Adds any new attributes to the character that this control character
     /// might require.
     /// </summary>
-    /// <param name="chr"></param>
-    private void SetSeparatedMode(ref Char chr, bool separated) {
+    private void SetSeparatedMode(bool separated) {
 
         var row = _display.GetRemainderOfRow(_cursor.Row, _cursor.Col);
 
@@ -127,9 +124,9 @@ public partial class DisplayManager {
     /// <summary>
     /// Helper function to set a colour change.
     /// </summary>
-    /// <param name="chr"></param>
     /// <param name="colour"></param>
-    private void SetForeground(ref Char chr, string colour, bool isGraphic) {
+    /// <param name="isGraphic"></param>
+    private void SetForeground(string colour, bool isGraphic) {
 
         // The colour change control only affects the chars following,
         // the control itself holds the previous colour. This matters
@@ -219,7 +216,6 @@ public partial class DisplayManager {
             // TODO do we need this as this is done during the
             //  ProcessDoubleHeight() function.
             // copy the colours to all chars in the row below
-            var cb = _display.GetCharBelow(c);
             _display.GetCharBelow(c).Background = c.Background;
             _display.GetCharBelow(c).Foreground = c.Foreground;
         }

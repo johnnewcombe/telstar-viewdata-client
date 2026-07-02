@@ -19,11 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using TelstarClient.Display;
 using Char = TelstarClient.Models.Char;
 
-namespace TelstarClient.Extensions;
+namespace TelstarClient.Display;
 
 public static class Extensions {
     
@@ -92,11 +90,11 @@ public static class Extensions {
     public static void Clear(this Models.Display display) {
 
         // display is 25 rows (0-24) but we don't clear the last (status) row
-        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+        for (var i = 0; i < Models.Display.Rows * Models.Display.Cols; i++) {
             var c = display.Chars[i];
             c.Foreground = Constants.DefaultForeground;
             c.Background = Constants.DefaultBackground;
-            c.Value = Models.Display.SPC;
+            c.Value = Models.Display.Spc;
             c.InVisible = false;
             c.Control = false;
             c.Flash = false;
@@ -108,7 +106,7 @@ public static class Extensions {
         }
 
         // clear the row references
-        for (var i = 0; i < Models.Display.ROWS-1; i++) {
+        for (var i = 0; i < Models.Display.Rows-1; i++) {
             display.RowReferences[i] = 0;
         }
     }
@@ -118,7 +116,7 @@ public static class Extensions {
         // TODO access c.Flash in a threadsafe way as this method is called from
         //   a thread pool thread
         
-        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+        for (var i = 0; i < Models.Display.Rows * Models.Display.Cols; i++) {
             var c = display.Chars[i];
             if (c.Flash && !c.Concealed) {
                 
@@ -134,7 +132,7 @@ public static class Extensions {
     }
 
     public static void ToggleConceal(this Models.Display display) {
-        for (var i = 0; i < Models.Display.ROWS * Models.Display.COLS; i++) {
+        for (var i = 0; i < Models.Display.Rows * Models.Display.Cols; i++) {
             var c = display.Chars[i];
             if (c.Concealed) {
                 
@@ -181,13 +179,18 @@ public static class Extensions {
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static Char GetChar(this Models.Display display, int row, int col) {
 
-        if (row < 0 || row >= Models.Display.ROWS || col < 0 || col >= Models.Display.COLS) {
-            throw new ArgumentOutOfRangeException("The row and columm specified do not correspond to a character within the display.");
+        var isRowOutsideDisplayBounds = row is < 0 or >= Models.Display.Rows;
+        var isColumnOutsideDisplayBounds = col is < 0 or >= Models.Display.Cols;
+        var isOutsideDisplayBounds = isRowOutsideDisplayBounds || isColumnOutsideDisplayBounds;
+
+        if (isOutsideDisplayBounds) {
+            throw new ArgumentOutOfRangeException(
+                $"{nameof(row)}, {nameof(col)}",
+                "The row and column specified do not correspond to a character within the display.");
         }
 
-        return display.Chars[(row * Models.Display.COLS) + col];
+        return display.Chars[(row * Models.Display.Cols) + col];
     }
-
     /// <summary>
     /// Returns the character below the specified character from the display.
     /// </summary>
@@ -195,9 +198,9 @@ public static class Extensions {
     /// <param name="chr"></param>
     /// <returns></returns>
     public static Char GetCharBelow(this Models.Display display, Char chr) {
-        var index = chr.Index + Models.Display.COLS;
-        if (index < Models.Display.ROWS * Models.Display.COLS) {
-            return display.Chars[chr.Index + Models.Display.COLS];
+        var index = chr.Index + Models.Display.Cols;
+        if (index < Models.Display.Rows * Models.Display.Cols) {
+            return display.Chars[chr.Index + Models.Display.Cols];
         }
 
         throw new IndexOutOfRangeException("The character requested is beyond the bounds of the display.");
@@ -213,7 +216,7 @@ public static class Extensions {
 
         var result = new List<Char>();
 
-        for (var i = col + 1; i < Models.Display.COLS; i++) {
+        for (var i = col + 1; i < Models.Display.Cols; i++) {
             //results.Add(_display.Rows[_cursor.Row].Chars[i]);
             result.Add(display.GetChar(row, i));
         }
@@ -226,7 +229,6 @@ public static class Extensions {
     /// The colour values are those defined by Avalonia.
     /// </summary>
     /// <param name="display"></param>
-    /// <param name="col"></param>
     /// <param name="status"></param>
     /// <param name="foregroundColour"></param>
     /// <param name="backgroundColour"></param>
@@ -234,25 +236,25 @@ public static class Extensions {
         string foregroundColour = Constants.Green, string backgroundColour = Constants.Black) {
         
         // clear the row
-        for (var i = 0; i < Models.Display.COLS; i++) {
-            var cell = display.Chars[24 * Models.Display.COLS + i];
-            cell.Value = Models.Display.SPC;
+        for (var i = 0; i < Models.Display.Cols; i++) {
+            var cell = display.Chars[24 * Models.Display.Cols + i];
+            cell.Value = Models.Display.Spc;
         }
         
         // work out the starting column so that the text is centred
-        var col = (Models.Display.COLS / 2) - (status.Length / 2);
+        var col = (Models.Display.Cols / 2) - (status.Length / 2);
 
         // add the text and attributes to the status row
         foreach (var c in status) {
 
-            var cell = display.Chars[24 * Models.Display.COLS + col];
+            var cell = display.Chars[24 * Models.Display.Cols + col];
             cell.Value = c;
             cell.Foreground = foregroundColour;
             cell.Background = backgroundColour;
             col++;
 
             // belts and braces
-            if (col >= Models.Display.COLS) {
+            if (col >= Models.Display.Cols) {
                 break;
             }
         }

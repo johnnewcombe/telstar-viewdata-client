@@ -19,24 +19,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Input;
 using Avalonia.Threading;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
 using TelstarClient.Display;
-using TelstarClient.Extensions;
 using TelstarClient.Forms;
-using TelstarClient.Views;
 using Char = TelstarClient.Models.Char;
 using Directory = TelstarClient.Forms.Directory;
 
@@ -44,17 +37,9 @@ namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase {
 
-    private const string ConnectedStatus = "CONNECTED";
-    private const string DisconnectedStatus = "DISCONNECTED";
-    private const string ErrorStatus = "UNABLE TO CONNECT";
-    private const string ConnectingStatus = "CONNECTING";
-    private const string ConfigFile = "config.json";
-    
-    // TODO consider simplifying this field stuff or moving into a FormObject with the edit screen text?
-    private class Field() {
-        public int Col;
-        public int Row;
-    }
+    private const string CONNECTED_STATUS = "CONNECTED";
+    private const string DISCONNECTED_STATUS = "DISCONNECTED";
+    private const string CONFIG_FILE = "config.json";
 
     // Used to store the index (screen pos) of any fields within the display.
     // Fields are marked with a colon.
@@ -79,7 +64,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     // this is separate from the user config.json
     //private IConfiguration _appSettings;
 
-    private ILogger<MainWindowViewModel> logger = 
+    private ILogger<MainWindowViewModel> _logger = 
         App.Host.Services.GetRequiredService<ILogger<MainWindowViewModel>>();
 
     private readonly string _appSupportDirectory =
@@ -87,18 +72,16 @@ public partial class MainWindowViewModel : ViewModelBase {
         Path.DirectorySeparatorChar + AppDomain.CurrentDomain.FriendlyName +
         Path.DirectorySeparatorChar;
 
-    private Forms.IForm _currentForm;
+    private IForm _currentForm;
     private DisplayType _displayType;
     private DisplayType _previousDisplayType;
-    private bool _keyCtrl;
     private List<Char> _displayData;
-    private Display.Cursor _cursor;
+    private Cursor _cursor;
     private readonly Settings _settings;
     private readonly DisplayManager _displayManagerMain;
     private readonly DisplayManager _displayManagerAlt;
     private readonly CyclicBuffer _cyclicBuffer;
-    private readonly KeyMapper _keyMapper;
-    private readonly TCPClient _tcp;
+    private readonly TcpClient _tcp;
 
     /// <summary>
     /// Constructor
@@ -106,27 +89,27 @@ public partial class MainWindowViewModel : ViewModelBase {
 
     public MainWindowViewModel()
     {
-        var configFile = _appSupportDirectory + ConfigFile;
+        var configFile = _appSupportDirectory + CONFIG_FILE;
 
-        logger.LogInformation("Logging pipeline initialised");
-        logger.LogInformation("LogFile:{LogFile}", App.LogPath);
-        logger.LogInformation("Config File:{Directory}{Config}",_appSupportDirectory,ConfigFile);
-        logger.LogDebug("Checking AppSupport directory:{Directory}",_appSupportDirectory);
+        _logger.LogInformation("Logging pipeline initialised");
+        _logger.LogInformation("LogFile:{LogFile}", App.LogPath);
+        _logger.LogInformation("Config File:{Directory}{Config}",_appSupportDirectory,CONFIG_FILE);
+        _logger.LogDebug("Checking AppSupport directory:{Directory}",_appSupportDirectory);
         
         // create the app suport directory if it doesn't exist
         if (!System.IO.Directory.Exists(_appSupportDirectory)) {
-            logger.LogDebug("Creating AppSupport directory:{Directory}",_appSupportDirectory);
+            _logger.LogDebug("Creating AppSupport directory:{Directory}",_appSupportDirectory);
             // create directory
             System.IO.Directory.CreateDirectory(_appSupportDirectory);
         }
         // check that the directory was created
         if (!System.IO.Directory.Exists(_appSupportDirectory))
         {
-            logger.LogError("Failed to create AppSupport directory:{Directory}",_appSupportDirectory);
+            _logger.LogError("Failed to create AppSupport directory:{Directory}",_appSupportDirectory);
         }
         else
         {
-            logger.LogDebug("AppSupport directory created:{Directory}",_appSupportDirectory);
+            _logger.LogDebug("AppSupport directory created:{Directory}",_appSupportDirectory);
         }
 
         // set up the alt display and show the welcome message
@@ -135,17 +118,17 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         // note that this method is asynchronous and includes a delay such
         // that it completes AFTER the constructor has completed
-        DisplayWelcomeMessage();
+        // we ignore the result of this method to avoid the compiler warning
+        _ = DisplayWelcomeMessage();
 
         _displayManagerMain = new DisplayManager(true);
         _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChanged;
-        _displayManagerMain.Display.SetStatusText(DisconnectedStatus);
+        _displayManagerMain.Display.SetStatusText(DISCONNECTED_STATUS);
 
         _settings = new Settings(configFile);
-        _keyMapper = new KeyMapper();
         _cyclicBuffer = new CyclicBuffer(2048);
 
-        _tcp = new TCPClient();
+        _tcp = new TcpClient();
         _tcp.OnConnectEvent += OnConnect;
         _tcp.OnDataReceivedEvent += OnReceived;
 
@@ -157,19 +140,17 @@ public partial class MainWindowViewModel : ViewModelBase {
         SetDisplay(DisplayType.Welcome);
     }
 
-    public string[]? Args { set; get; }
+    public string[] Args { get; set; }
 
     #region Data Processing and Notification
 
     private void ToggleKioskMode()
     {
         // get MainWindow
-        if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            logger.LogDebug("MainWindow type is {Type}", desktop.MainWindow?.GetType().FullName);
-            (desktop.MainWindow as TelstarClient.Views.MainWindow)?.ToggleKioskMode();
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
+            _logger.LogDebug("MainWindow type is {Type}", desktop.MainWindow?.GetType().FullName);
+            (desktop.MainWindow as Views.MainWindow)?.ToggleKioskMode();
         }
-        
     }
 
     private void DisplayDataChanged() {
@@ -205,10 +186,10 @@ public partial class MainWindowViewModel : ViewModelBase {
             // this function cannot have parameters so read from thread safe property
             // to get the current status.
             if (ConnectStatus) {
-                statusText = ConnectedStatus;
+                statusText = CONNECTED_STATUS;
             }
             else {
-                statusText = DisconnectedStatus;
+                statusText = DISCONNECTED_STATUS;
             }
 
             // update both displays
@@ -228,7 +209,7 @@ public partial class MainWindowViewModel : ViewModelBase {
             // ensures that all exceptions are handled within the async body
             // not handling them with void async methods can cause the process
             // to crash
-            logger.LogError(ex,"Failed to update the Connection Status");
+            _logger.LogError(ex,"Failed to update the Connection Status");
         }
     }
 
@@ -272,7 +253,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// <summary>
     /// The cursor position.
     /// </summary>
-    public Display.Cursor Cursor {
+    public Cursor Cursor {
         get { return _cursor; }
         set {
             _cursor = value; 
@@ -289,7 +270,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// a user selected connection, e.g. EditConnection.
     /// </summary>
     /// <param name="displayType"></param>
-    /// <param name="conection"></param>
+    /// <param name="connection"></param>
     private void SetDisplay(DisplayType displayType, Connection  connection = null) {
 
         // if we are using the alt display then clear it etc

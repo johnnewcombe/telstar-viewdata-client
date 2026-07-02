@@ -28,7 +28,7 @@ public class Row {
         Chars = new List<Char>();
         ReadOnly = readOnly;
 
-        for (var i = 0; i < Display.COLS; i++) {
+        for (var i = 0; i < Display.Cols; i++) {
             var cell = new Char((char)0xe276, "white,", "black");
             Chars.Add(cell);
         }

@@ -22,8 +22,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Avalonia.Controls.Notifications;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TelstarClient.ViewModels;
 

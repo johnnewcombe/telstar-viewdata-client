@@ -19,9 +19,6 @@
 
 using Avalonia;
 using System;
-using System.Diagnostics;
-using Avalonia.Logging;
-using Microsoft.Extensions.Configuration;
 
 namespace TelstarClient;
 
@@ -29,6 +26,7 @@ sealed class Program
 {
     
     // Miscellaneous Issues
+    // TODO Keymapper class isn't used.
     // TODO Sort all build warnings
     // TODO Add support for serial ports
     // TODO Remove literals where possible.
@@ -43,8 +41,6 @@ sealed class Program
     // yet and stuff might break.
     [STAThread]
     public static void Main(string[] args) {
-//        Trace.Listeners.Add(new ConsoleTraceListener());
-//        Trace.Listeners.Add(new TextWriterTraceListener("telstar-client.log"));
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
@@ -53,5 +49,5 @@ sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .LogToTrace(LogEventLevel.Warning);
+            .LogToTrace();
 }

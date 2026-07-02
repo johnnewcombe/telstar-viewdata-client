@@ -1,18 +1,11 @@
 namespace TelstarClient.Forms;
 
-using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
 using System.Text;
-using TelstarClient.Display;
-using Tmds.DBus.Protocol;
-
-
+using Display;
 
 public class Connect : FormBase
 {
-    private int _currentField;
-    private Configuration.Connection _connection;
 
     public Connect(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
         connection)

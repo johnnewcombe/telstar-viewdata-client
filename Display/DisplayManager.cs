@@ -18,13 +18,7 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
-using Avalonia.Controls.Converters;
-using Avalonia.Logging;
-using TelstarClient.Extensions;
-using TelstarClient.Forms;
 using Char = TelstarClient.Models.Char;
 
 namespace TelstarClient.Display;
@@ -41,10 +35,7 @@ public partial class DisplayManager {
     private char _holdGraphicsCharacter;
     private readonly FontMapper _fontMapper;
     private readonly ColourMapper _colourMapper;
-    private string _name;
-
-    private Timer _stateTimer; // TODO use _stateTimer.Dispose() when exiting the display manager.
-
+    
     #endregion
 
     #region Public Variabled
@@ -66,7 +57,7 @@ public partial class DisplayManager {
         _cursor= new Cursor();
 
         if (enableFlash) {
-            _stateTimer = new Timer(Flash, null, 1000, 1000);
+            _ = new Timer(Flash, null, 1000, 1000);
         }
     }
 
@@ -189,7 +180,7 @@ public partial class DisplayManager {
                 _holdGraphicsCharacter = chr.Value;
             }
             else {
-                _holdGraphicsCharacter = Models.Display.SPC;
+                _holdGraphicsCharacter = Models.Display.Spc;
             }
         }
 
@@ -201,7 +192,7 @@ public partial class DisplayManager {
                 chr.Value = _holdGraphicsCharacter;
             }
             else {
-                chr.Value = Models.Display.SPC;
+                chr.Value = Models.Display.Spc;
             }
         }
 
@@ -227,13 +218,13 @@ public partial class DisplayManager {
 
     public void SetCursorPosition(int index) {
         
-        if (index < Models.Display.COLS) {
+        if (index < Models.Display.Cols) {
             _cursor.Row = 0;
             _cursor.Col = index;
         }
         else {
-            _cursor.Row = index / Models.Display.COLS;
-            _cursor.Col = index % Models.Display.COLS;
+            _cursor.Row = index / Models.Display.Cols;
+            _cursor.Col = index % Models.Display.Cols;
         }
         
     }
@@ -278,13 +269,13 @@ public partial class DisplayManager {
         }
 
         // if we are on the last row or the char is not marked as DH then do nothing
-        if (_cursor.Row >= Models.Display.ROWS - 1) {
+        if (_cursor.Row >= Models.Display.Rows - 1) {
             return;
         }
 
         // get the character below
         // TODO refactor this with chr.GetCharBelow()
-        var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.COLS + _cursor.Col];
+        var chrBelow = _display.Chars[(_cursor.Row + 1) * Models.Display.Cols + _cursor.Col];
 
         // DH graphic char
         if (!chr.Control && chr.Graphic && !chr.IsBlastThrough()) {
@@ -400,7 +391,7 @@ public partial class DisplayManager {
         if (chr.IsForegroundColourChange()) {
 
             var colour = _colourMapper.Map(chr.Value);
-            SetForeground(ref chr, colour, chr.IsGraphicColourChange());
+            SetForeground(colour, chr.IsGraphicColourChange());
             return;
         }
 
@@ -427,11 +418,11 @@ public partial class DisplayManager {
                 SetConceal(ref chr, true);
                 break;
             case Constants.Contiguous:
-                SetSeparatedMode(ref chr, false);
+                SetSeparatedMode(false);
                 chr.Separated = false;
                 break;
             case Constants.Separated:
-                SetSeparatedMode(ref chr, true);
+                SetSeparatedMode(true);
                 break;
             case Constants.NewBackground:
                 SetBackground(ref chr, chr.Foreground);
@@ -454,16 +445,20 @@ public partial class DisplayManager {
         }
     }
 
-    private Models.Display CreateDisplay() {
+    private static Models.Display CreateDisplay() {
 
-        var display = new Models.Display();
-        display.Chars = new List<Char>();
+        var display = new Models.Display
+        {
+            Chars = []
+        };
 
         // note that we are creating a 40*25 screen not a 40*24,
         // the last lie will be used for status info
-        for (var i = 0; i < (Models.Display.ROWS + 1) * Models.Display.COLS; i++) {
-            var chr = new Char(Models.Display.SPC, Constants.White, Constants.Black);
-            chr.Index = i;
+        for (var i = 0; i < (Models.Display.Rows + 1) * Models.Display.Cols; i++) {
+            var chr = new Char(Models.Display.Spc)
+            {
+                Index = i
+            };
             display.Chars.Add(chr);
         }
 

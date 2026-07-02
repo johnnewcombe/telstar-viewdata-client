@@ -17,6 +17,6 @@
         TextInput="Window_TextInput"
         >
 
-    <UniformGrid Margin="10,10,10,10" Name="display" Columns="40" Rows="25" Background="Black"></UniformGrid>
+    <UniformGrid Margin="10,10,10,10" Name="Display" Columns="40" Rows="25" Background="Black"></UniformGrid>
 
 </Window>

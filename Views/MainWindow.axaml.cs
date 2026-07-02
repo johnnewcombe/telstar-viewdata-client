@@ -19,18 +19,13 @@
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
-using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.ViewModels;
@@ -40,11 +35,12 @@ namespace TelstarClient.Views;
 
 public partial class MainWindow : Window
 {
-    private ILogger<MainWindow> logger =
+    private readonly ILogger<MainWindow> _logger =
         App.Host.Services.GetRequiredService<ILogger<MainWindow>>();
 
-    public MainWindowViewModel ViewModel { get; set; }
-    public bool KioskMode { get; set; }
+    private MainWindowViewModel ViewModel { get; }
+
+    private bool KioskMode { get; set; }
 
     public MainWindow()
     {
@@ -61,13 +57,13 @@ public partial class MainWindow : Window
         //this.Topmost = true;
 
         //initialise the display
-        display.Children.Clear();
+        Display.Children.Clear();
 
         // note that we create an extra row of labels for the status line
-        for (int i = 0; i < Models.Display.COLS * (Models.Display.ROWS + 1); i++)
+        for (int i = 0; i < Models.Display.Cols * (Models.Display.Rows + 1); i++)
         {
-            var g = InitCharacterLabel(Models.Display.SPC);
-            display.Children.Add(g);
+            var g = InitCharacterLabel(Models.Display.Spc);
+            Display.Children.Add(g);
         }
     }
 
@@ -83,17 +79,13 @@ public partial class MainWindow : Window
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to update the display");
+                    _logger.LogError(ex, "Failed to update the display");
                 }
 
                 break;
         }
     }
 
-    private void Window_FullScreen(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-    }
-    
     public void ToggleKioskMode()
     {
         if (KioskMode)
@@ -111,16 +103,15 @@ public partial class MainWindow : Window
             ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
             WindowState = WindowState.FullScreen;
             Topmost = true;
-            
         }
 
         // toggle the flag
         KioskMode = !KioskMode;
     }
-    
+
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        logger.LogDebug("Keypress:{Key}, Physical Key:{PhysicalKey}, Modifiers:{Modifiers}", e.Key,
+        _logger.LogDebug("Keypress:{Key}, Physical Key:{PhysicalKey}, Modifiers:{Modifiers}", e.Key,
             e.PhysicalKey, e.KeyModifiers);
         try
         {
@@ -128,13 +119,13 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,"{Message}", ex.Message);
+            _logger.LogError(ex, "{Message}", ex.Message);
         }
     }
 
     private void Window_TextInput(object sender, TextInputEventArgs e)
     {
-        logger.LogDebug("TextInput:{Text}",e.Text);
+        _logger.LogDebug("TextInput:{Text}", e.Text);
         try
         {
             ViewModel.TextHandler(e);
@@ -142,27 +133,9 @@ public partial class MainWindow : Window
 
         catch (Exception ex)
         {
-            logger.LogError(ex,"{Message}", ex.Message);
+            _logger.LogError(ex, "{Message}", ex.Message);
             throw;
         }
-    }
-
-    private void ConnectButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        //ViewModel.Connect();
-    }
-
-    private void DisconnectButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        //ViewModel.Disconnect();
-    }
-
-    private void RevealButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-    }
-
-    private void ConcealButton_OnClick(object? sender, RoutedEventArgs e)
-    {
     }
 
     private void UpdateCursor()
@@ -171,8 +144,8 @@ public partial class MainWindow : Window
         if (cursor is not null &&
             cursor.Visible) // TODO change to use .Visible property once cursor positioning is working
         {
-            var label = (Label)((Viewbox)display.Children[cursor.GetCursorIndex()]).Child;
-            label.Content = "_";
+            var label = (Label)((Viewbox)Display.Children[cursor.GetCursorIndex()]).Child;
+            if (label != null) label.Content = "_";
         }
     }
 
@@ -187,8 +160,10 @@ public partial class MainWindow : Window
 
         foreach (var c in data)
         {
-            var label = (Label)((Viewbox)display.Children[c.Index]).Child;
-
+            var label = (Label)((Viewbox)Display.Children[c.Index]).Child;
+            
+            if (label == null) continue;
+            
             if (!c.InVisible)
             {
                 label.Content = c.Value;
@@ -198,7 +173,7 @@ public partial class MainWindow : Window
             else
             {
                 label.Content = "";
-                label.Background = (IImmutableSolidColorBrush)new ImmutableSolidColorBrush(Colors.Black);
+                label.Background = new ImmutableSolidColorBrush(Colors.Black);
             }
         }
 
@@ -234,8 +209,4 @@ public partial class MainWindow : Window
         return viewBox;
     }
 
-    private void InputElement_OnTextInput(object sender, TextInputEventArgs e)
-    {
-        throw new NotImplementedException();
-    }
 }

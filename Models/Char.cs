@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using CommunityToolkit.Mvvm.ComponentModel;
 /*
     Copyright (c) 2025 John Newcombe
 
@@ -23,17 +21,12 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Models;
 
-public class Char {
-
-    public Char(char value, string foreground = Constants.White, string background = Constants.Black) {
-        Value = value;
-        Foreground = foreground;
-        Background = background;
-    }
-
+public class Char(char value, string foreground = Constants.White, string background = Constants.Black)
+{
     // NOTE, changing anything here MUST be reflected in the Extensions Class also.
-    public char Value { get; set; }
+    public char Value { get; set; } = value;
     public bool InVisible { get; set; }
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public bool Invalid { get; set; }
     public bool Control { get; set; }
     public bool Concealed { get; set; }
@@ -43,7 +36,6 @@ public class Char {
     public bool GraphicsHold { get; set; }
     public bool DoubleHeight { get; set; }
     public int Index { get; set; }
-    public string Foreground { get; set; }
-    public string Background { get; set; }
-
+    public string Foreground { get; set; } = foreground;
+    public string Background { get; set; } = background;
 }
