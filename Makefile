@@ -1,7 +1,7 @@
 VERSION := $(shell cat VERSION)
 APPNAME := TelstarClient
-APPBUNDLE-ARM := $(APPNAME)-arm64.app
-APPBUNDLE-X64 := $(APPNAME)-x64.app
+APPBUNDLE-ARM := $(APPNAME)-macos-arm64-$(VERSION).app
+APPBUNDLE-X64 := $(APPNAME)-macos-x64-$(VERSION).app
 
 build:
 	# This will fail if the version already exists, this is by design to prevent overwriting previos versions
@@ -42,10 +42,10 @@ linux-x64:
 	cp ./bin/Release/net9.0/linux-x64/publish/TelstarClient-linux-x64.zip ../releases/$(VERSION)
 
 win-arm64:
-	cd Assets && makensis -DVERSION=$(VERSION) -DOUTDIR=.. installer-win-arm64.nsi
-
+	cd Assets && makensis -DVERSION=$(VERSION) -DOUTDIR=../../releases/$(VERSION) installer-win-arm64.nsi
+	
 win-x64:
-	cd Assets && makensis -V4 -DVERSION=$(VERSION) -DOUTDIR=.. installer-win-x64.nsi
+	cd Assets && makensis -V4 -DVERSION=$(VERSION) -DOUTDIR=../../releases/$(VERSION) installer-win-x64.nsi
 
 macos-arm64:
 	mkdir -p $(APPBUNDLE-ARM)/Contents/MacOS
@@ -54,7 +54,7 @@ macos-arm64:
 	chmod +x $(APPBUNDLE-ARM)/Contents/MacOS/$(APPNAME)
 	cp Assets/icon.icns $(APPBUNDLE-ARM)/Contents/Resources/icon.icns
 	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > $(APPBUNDLE-ARM)/Contents/Info.plist
-	cp -r $(APPBUNDLE-ARM) ../releases/$(VERSION)/	
+	cp -r $(APPBUNDLE-ARM) ../releases/$(VERSION)/
 
 macos-x64:
 	mkdir -p $(APPBUNDLE-X64)/Contents/MacOS
@@ -65,11 +65,14 @@ macos-x64:
 	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > $(APPBUNDLE-X64)/Contents/Info.plist
 	cp -r $(APPBUNDLE-X64) ../releases/$(VERSION)/
 
-add-tag:
+ad-tag:
+	# triggers a remote build on GitHub and populated the GitHub Releases area on the GitHub website.
+	# this not related to the Releases directory in the local project directory.
 	git tag v$(VERSION)
 	git push origin v$(VERSION)
 
 update-tage:
+	# this will delete a tage and recreate it allowing a remote build to be re-invokked. See above.
 	git tag -d v$(VERSION)
 	git push origin :refs/tags/v$(VERSION)
 	$(MAKE) add-tag
