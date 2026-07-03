@@ -35,8 +35,8 @@ using Directory = TelstarClient.Forms.Directory;
 
 namespace TelstarClient.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase {
-
+public partial class MainWindowViewModel : ViewModelBase
+{
     private const string CONNECTED_STATUS = "CONNECTED";
     private const string DISCONNECTED_STATUS = "DISCONNECTED";
     private const string CONFIG_FILE = "config.json";
@@ -51,7 +51,8 @@ public partial class MainWindowViewModel : ViewModelBase {
     // used to keep track of what is being displayed to the user
     // the order is unimportant EXCEPT that 'Welcome' must be the
     // first entry.
-    private enum DisplayType {
+    private enum DisplayType
+    {
         Welcome,
         Directory,
         ConnectTcp,
@@ -65,7 +66,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     // this is separate from the user config.json
     //private IConfiguration _appSettings;
 
-    private ILogger<MainWindowViewModel> _logger = 
+    private ILogger<MainWindowViewModel> _logger =
         App.Host.Services.GetRequiredService<ILogger<MainWindowViewModel>>();
 
     private readonly string _appSupportDirectory =
@@ -87,30 +88,31 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// <summary>
     /// Constructor
     /// </summary>
-
     public MainWindowViewModel()
     {
         var configFile = _appSupportDirectory + CONFIG_FILE;
 
         _logger.LogInformation("Logging pipeline initialised");
         _logger.LogInformation("LogFile:{LogFile}", App.LogPath);
-        _logger.LogInformation("Config File:{Directory}{Config}",_appSupportDirectory,CONFIG_FILE);
-        _logger.LogDebug("Checking AppSupport directory:{Directory}",_appSupportDirectory);
-        
+        _logger.LogInformation("Config File:{Directory}{Config}", _appSupportDirectory, CONFIG_FILE);
+        _logger.LogDebug("Checking AppSupport directory:{Directory}", _appSupportDirectory);
+
         // create the app suport directory if it doesn't exist
-        if (!System.IO.Directory.Exists(_appSupportDirectory)) {
-            _logger.LogDebug("Creating AppSupport directory:{Directory}",_appSupportDirectory);
+        if (!System.IO.Directory.Exists(_appSupportDirectory))
+        {
+            _logger.LogDebug("Creating AppSupport directory:{Directory}", _appSupportDirectory);
             // create directory
             System.IO.Directory.CreateDirectory(_appSupportDirectory);
         }
+
         // check that the directory was created
         if (!System.IO.Directory.Exists(_appSupportDirectory))
         {
-            _logger.LogError("Failed to create AppSupport directory:{Directory}",_appSupportDirectory);
+            _logger.LogError("Failed to create AppSupport directory:{Directory}", _appSupportDirectory);
         }
         else
         {
-            _logger.LogDebug("AppSupport directory created:{Directory}",_appSupportDirectory);
+            _logger.LogDebug("AppSupport directory created:{Directory}", _appSupportDirectory);
         }
 
         // set up the alt display and show the welcome message
@@ -135,10 +137,10 @@ public partial class MainWindowViewModel : ViewModelBase {
         //_comms = new SerialClient();
         //_comms.OnConnectEvent += OnConnect;
         //_comms.OnDataReceivedEvent += OnReceived;
-
     }
 
-    private async Task DisplayWelcomeMessage() {
+    private async Task DisplayWelcomeMessage()
+    {
         await Task.Delay(100);
         UpdateConnectStatus();
         SetDisplay(DisplayType.Welcome);
@@ -151,30 +153,34 @@ public partial class MainWindowViewModel : ViewModelBase {
     private void ToggleKioskMode()
     {
         // get MainWindow
-        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
             _logger.LogDebug("MainWindow type is {Type}", desktop.MainWindow?.GetType().FullName);
             (desktop.MainWindow as Views.MainWindow)?.ToggleKioskMode();
         }
     }
 
-    private void DisplayDataChanged() {
+    private void DisplayDataChanged()
+    {
         // this method is called if the DiplayManager has updated the display internally
         // e.g. when flashing text (this is handled within the display manager itself)
         // this allows us to update the Display property of this view model
 
         // however we must only do this if we are displaying Viewdata screen
-        if (_displayType == DisplayType.Terminal) {
+        if (_displayType == DisplayType.Terminal)
+        {
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
     }
 
-    private void UpdateMainDisplay() {
+    private void UpdateMainDisplay()
+    {
         DisplayData = _displayManagerMain.Display.Chars;
         Cursor = _displayManagerMain.Cursor;
-        
     }
 
-    private void UpdateAltDisplay() {
+    private void UpdateAltDisplay()
+    {
         DisplayData = _displayManagerAlt.Display.Chars;
         Cursor = _displayManagerAlt.Cursor;
     }
@@ -182,17 +188,20 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// <summary>
     /// This called on the UI Tread via the dispatcher (see OnConnect event).
     /// </summary>
-    private void UpdateConnectStatus() {
-        
+    private void UpdateConnectStatus()
+    {
         string statusText;
 
-        try {
+        try
+        {
             // this function cannot have parameters so read from thread safe property
             // to get the current status.
-            if (ConnectStatus) {
+            if (ConnectStatus)
+            {
                 statusText = CONNECTED_STATUS;
             }
-            else {
+            else
+            {
                 statusText = DISCONNECTED_STATUS;
             }
 
@@ -200,20 +209,23 @@ public partial class MainWindowViewModel : ViewModelBase {
             _displayManagerMain.Display.SetStatusText(statusText);
             _displayManagerAlt.Display.SetStatusText(statusText);
 
-            if (_displayType == DisplayType.Terminal) {
+            if (_displayType == DisplayType.Terminal)
+            {
                 DisplayData = _displayManagerMain.Display.Chars;
                 Cursor = _displayManagerMain.Cursor;
             }
-            else {
+            else
+            {
                 DisplayData = _displayManagerAlt.Display.Chars;
                 Cursor = _displayManagerAlt.Cursor;
             }
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             // ensures that all exceptions are handled within the async body
             // not handling them with void async methods can cause the process
             // to crash
-            _logger.LogError(ex,"Failed to update the Connection Status");
+            _logger.LogError(ex, "Failed to update the Connection Status");
         }
     }
 
@@ -222,21 +234,21 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// the OnDataReceived event but on the UI Thread as a separate
     /// Task.
     /// </summary>
-    private void ProcessReceiveBuffer() {
-
+    private void ProcessReceiveBuffer()
+    {
         // get data from buffer and process for viewdata 
-        while (_comms.IsConnected() && _cyclicBuffer.Count > 0) {
-
-            if (_displayManagerMain.Write(_cyclicBuffer.Remove())) {
-
+        while (_comms.IsConnected() && _cyclicBuffer.Count > 0)
+        {
+            if (_displayManagerMain.Write(_cyclicBuffer.Remove()))
+            {
                 // if we have displayed the help page, don't update the view
                 // just yet
-                if (_displayType == DisplayType.Terminal) {
+                if (_displayType == DisplayType.Terminal)
+                {
                     DisplayData = _displayManagerMain.Display.Chars;
                 }
             }
         }
-
     }
 
     #endregion
@@ -246,24 +258,29 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// <summary>
     /// Display data to be displayed by the View.
     /// </summary>
-    public List<Char> DisplayData {
+    public List<Char> DisplayData
+    {
         get { return _displayData; }
-        set {
+        set
+        {
             _displayData = value;
             OnPropertyChanged();
         }
     }
-    
+
     /// <summary>
     /// The cursor position.
     /// </summary>
-    public Cursor Cursor {
+    public Cursor Cursor
+    {
         get { return _cursor; }
-        set {
-            _cursor = value; 
+        set
+        {
+            _cursor = value;
             OnPropertyChanged();
         }
-    }   
+    }
+
     #endregion
 
     #region Private Methods
@@ -275,50 +292,52 @@ public partial class MainWindowViewModel : ViewModelBase {
     /// </summary>
     /// <param name="displayType"></param>
     /// <param name="connection"></param>
-    private void SetDisplay(DisplayType displayType, Connection  connection = null) {
-
+    private void SetDisplay(DisplayType displayType, IConnection connection = null)
+    {
         // if we are using the alt display then clear it etc
-        if (displayType > 0) {
+        if (displayType > 0)
+        {
             _displayManagerAlt.Display.Clear();
             _displayManagerAlt.SetCursorPosition(0, 0);
         }
 
         // The screen can be in any one of these states. The client could
         // be online or offline when in any of these states.
-        switch (displayType) {
-
+        switch (displayType)
+        {
             case DisplayType.Terminal:
                 // nothing to do
                 break;
             case DisplayType.Welcome:
-                _displayManagerAlt.Write(new Welcome(_displayManagerAlt,connection).ToString());
+                _displayManagerAlt.Write(new Welcome(_displayManagerAlt, connection).ToString());
                 break;
             case DisplayType.Directory:
                 // pop the menu into the placeholder
-                _displayManagerAlt.Write(new Directory(_displayManagerAlt,connection).ToString().Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
+                _displayManagerAlt.Write(new Directory(_displayManagerAlt, connection).ToString()
+                    .Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
                 break;
             case DisplayType.ConnectTcp:
-                _currentForm = new ConnectTcp(_displayManagerAlt,connection);
+                _currentForm = new ConnectTcp(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.ConnectSerial:
-                _currentForm = new ConnectSerial(_displayManagerAlt,connection);
+                _currentForm = new ConnectSerial(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.EditConnection:
-                _currentForm = new EditConnection(_displayManagerAlt,connection);
+                _currentForm = new EditConnection(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
-                
+
                 // TODO use form GetCursor here and elsewhere
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;
             case DisplayType.Help:
-                _currentForm = new Help(_displayManagerAlt,connection);
+                _currentForm = new Help(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 break;
             default:
@@ -329,29 +348,31 @@ public partial class MainWindowViewModel : ViewModelBase {
         _previousDisplayType = _displayType;
         _displayType = displayType;
 
-        if (_displayType == DisplayType.Terminal) {
+        if (_displayType == DisplayType.Terminal)
+        {
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
-        else {
+        else
+        {
             Dispatcher.UIThread.Post(UpdateAltDisplay);
         }
     }
-    
-    private string GetDirectoryFromConfig() {
 
+    private string GetDirectoryFromConfig()
+    {
         // get the menu details from the config file
         var item = 0;
         var menuSb = new StringBuilder();
-        foreach (var connection in _settings.Config.Connections) {
+        foreach (var connection in _settings.Config.Connections)
+        {
             //if (connection.Name is not null) {
-                item++;
-                menuSb.Append($"   \e{Constants.AlphaWhite}{item} \e{Constants.AlphaCyan}{connection.Name}\r\n");
+            item++;
+            menuSb.Append($"   \e{Constants.AlphaWhite}{item} \e{Constants.AlphaCyan}{connection.Name}\r\n");
             //}
         }
 
         return menuSb.ToString();
     }
-    
-    #endregion
 
+    #endregion
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using TelstarClient.Configuration;
 using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
@@ -7,16 +8,27 @@ namespace TelstarClient.Forms;
 public class EditConnection : FormBase
 {
 
-    public EditConnection(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
+    public EditConnection(DisplayManager displayManager, IConnection connection) : base(displayManager,
         connection)
     {
+        var name=string.Empty;
+        var host = string.Empty;
+        var port = 0;
+        
+        if (connection is TcpConnection tcp)
+        {
+            name = tcp.Name;
+            host = tcp.Host ;
+            port = tcp.Port;
+        }
+        
         // create fields
         Fields = new List<Field>();
 
         // if connection is null then
-        Fields.Add(new Field("dirName", 6, 7, 20, connection.Name, FieldType.AlphaNumeric, false));
-        Fields.Add(new Field("host", 8, 7, 20, connection.Host, FieldType.AlphaNumeric, true));
-        Fields.Add(new Field("port", 10, 7, 20, connection.Port.ToString(), FieldType.Numeric, true));
+        Fields.Add(new Field("dirName", 6, 7, 20, name, FieldType.AlphaNumeric, false));
+        Fields.Add(new Field("host", 8, 7, 20, host, FieldType.AlphaNumeric, true));
+        Fields.Add(new Field("port", 10, 7, 20, port.ToString(), FieldType.Numeric, true));
     }
 
     public override string ToString()

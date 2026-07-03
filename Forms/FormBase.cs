@@ -5,7 +5,7 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
 
-public abstract class FormBase(DisplayManager displayManager, Connection connection)
+public abstract class FormBase(DisplayManager displayManager, IConnection connection)
     : IForm
 {
     private int _currentField;
@@ -85,7 +85,7 @@ public abstract class FormBase(DisplayManager displayManager, Connection connect
         return true;
     }
 
-    public Connection Connection { get; } = connection;
+    public IConnection Connection { get; } = connection;
 
     public Field GetCurrentField()
     {

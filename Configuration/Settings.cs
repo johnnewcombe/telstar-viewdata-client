@@ -56,21 +56,48 @@ public class Settings {
     }
 }
 
+// TODO find a way for the Connection to work for both Tcp and Serial as this is
+//  passed into connectTcp and ConnectSerial and is used to populate the Connection fields.
+//  Ber in mind that this object is purely a data object used for seiings.
+//  could we have...
+//   List of args?
+//   A dictionary of fields?
+//   Additional Fields for Serial
+
 public class ConfigSections {
 
-    public List<Connection> Connections { get; set; }
+    public List<TcpConnection> Connections { get; set; }
+    public SerialConnection SerialConnection { get; set; } = new SerialConnection();
 
     public ConfigSections() {
-        Connections = new List<Connection>();
+        Connections = new List<TcpConnection>();
         for (var i = 0; i < 9; i++) {
-            Connections.Add(new Connection());
+            Connections.Add(new TcpConnection());
         }
+        
     }
 }
 
-public class Connection {
+public class TcpConnection : IConnection{
 
-    public string Name { get; set; }
-    public string Host { get; set; }
+    public string Name { get; set; } = "";
+    public string Host { get; set; } = "";
     public int Port { get; set; }
+    public bool Parity { get; set; } = false;
+    public string InitString { get; set; } = "";
+
+}
+
+public class SerialConnection : IConnection
+{
+    public string Device { get; set; } = "";
+    public int BaudRate { get; set; } = 9600;
+    public bool Parity { get; set; } = false;
+    public string InitString { get; set; }
+}
+
+public interface IConnection
+{
+    bool Parity { get; set; }
+    string InitString { get; set; }
 }

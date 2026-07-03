@@ -2,38 +2,62 @@
   "Connections" : [ {
     "Name" : "Telstar CURRER",
     "Host" : "glasstty.com",
-    "Port" : 6502
+    "Port" : 6502,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "Telstar ELLIS",
     "Host" : "glasstty.com",
-    "Port" : 6503
+    "Port" : 6503,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "NxTel",
     "Host" : "nx.nxtel.org",
-    "Port" : 23280
+    "Port" : 23280,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "Tetrachloromethane",
     "Host" : "fish.ccl4.org",
-    "Port" : 23
+    "Port" : 23,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "End of the Line BBS",
     "Host" : "endofthelinebbs.com",
-    "Port" : 6502
+    "Port" : 6502,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "TeeFax",
     "Host" : "pegasus.matrixnetwork.co.uk",
-    "Port" : 6502
+    "Port" : 6502,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "",
     "Host" : "",
-    "Port" : 0
+    "Port" : 0,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "",
     "Host" : "",
-    "Port" : 0
+    "Port" : 0,
+    "Parity" : false,
+    "InitString" : ""
   }, {
     "Name" : "",
     "Host" : "",
-    "Port" : 0
-  } ]
+    "Port" : 0,
+    "Parity" : false,
+    "InitString" : ""
+  } ] ,
+  "SerialConnection" : {
+    "Device" : "",
+    "BaudRate" : 9600,
+    "Parity" : false,
+    "InitString" : ""
+  }
 }

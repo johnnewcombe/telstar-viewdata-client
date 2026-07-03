@@ -6,7 +6,7 @@ namespace TelstarClient.Forms;
 
 public class Welcome : FormBase {
 
-    public Welcome(DisplayManager displayManager, Configuration.Connection connection):base(displayManager, connection)
+    public Welcome(DisplayManager displayManager, Configuration.IConnection connection):base(displayManager, connection)
     {
     }
     

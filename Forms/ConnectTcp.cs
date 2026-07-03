@@ -1,3 +1,5 @@
+using TelstarClient.Configuration;
+
 namespace TelstarClient.Forms;
 
 using System.Collections.Generic;
@@ -7,10 +9,10 @@ using Display;
 public class ConnectTcp : FormBase
 {
 
-    public ConnectTcp(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
+    public ConnectTcp(DisplayManager displayManager, IConnection connection) : base(displayManager,
         connection)
     {
-        
+   
         // create fields
         Fields = new List<Field>();
         Fields.Add(new Field("host", 6, 7, 20, string.Empty, FieldType.AlphaNumeric, true));

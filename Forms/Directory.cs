@@ -5,7 +5,7 @@ namespace TelstarClient.Forms;
 
 public class Directory : FormBase {
 
-    public Directory(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
+    public Directory(DisplayManager displayManager, Configuration.IConnection connection) : base(displayManager,
         connection)
     {
         

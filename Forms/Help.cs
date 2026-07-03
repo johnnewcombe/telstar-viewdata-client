@@ -6,7 +6,7 @@ namespace TelstarClient.Forms;
 
 public class Help : FormBase {
     
-    public Help(DisplayManager displayManager, Configuration.Connection connection):base(displayManager, connection)
+    public Help(DisplayManager displayManager, Configuration.IConnection connection):base(displayManager, connection)
     {
     }
     
@@ -30,7 +30,7 @@ public class Help : FormBase {
         menu.Append(Converters.ConvertFromMarkup("[W]Alt F[C]Full Screen\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[W]Alt X[C]Disconnect  "));
         menu.Append(Converters.ConvertFromMarkup("[W]Alt Q[C]Quit\r\n\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[9]Press any key to Return\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[9]Press escape to Return\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[13]Version " + version + "\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[8][C](c) John Newcombe 2026\r\n\n"));

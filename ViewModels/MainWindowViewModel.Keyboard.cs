@@ -22,6 +22,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Microsoft.Extensions.Logging;
+using TelstarClient.Configuration;
 using TelstarClient.Display;
 
 namespace TelstarClient.ViewModels;
@@ -36,7 +37,7 @@ public partial class MainWindowViewModel
     {
         // NOTE That this function does not run on the UI thread
         _logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
-        Configuration.Connection con;
+        IConnection con;
 
         // The screen can be in any one of 'DisplayType' states. Also,
         // the client could be online or offline when in any of these states.
@@ -44,7 +45,6 @@ public partial class MainWindowViewModel
         // generic operations only, Form specific operations are below
         switch (asciiValue)
         {
-
             case 0x86: // full screen
                 ToggleKioskMode();
                 return;
@@ -54,12 +54,13 @@ public partial class MainWindowViewModel
                 return;
             case 0x88: // alt+h show help menus
                 SetDisplay(DisplayType.Help);
-                return;    
+                return;
             case 0x90: // alt+q
                 Disconnect();
                 Shutdown();
                 return;
         }
+
         // TODO consider moving more generic operations out of the swich below e.g.Disconnect, Help, Exit etc. 
         switch (_displayType)
         {
@@ -105,7 +106,8 @@ public partial class MainWindowViewModel
                 switch (asciiValue)
                 {
                     case 0x53 or 0x73: // serial connection (there's only one serial connection)
-                        SetDisplay(DisplayType.ConnectSerial);
+                        con = _settings.Config.SerialConnection;
+                        SetDisplay(DisplayType.ConnectSerial, con);
                         break;
                     // TODO maybe use char.IsDigit
                     // validate number Connect)
@@ -125,11 +127,15 @@ public partial class MainWindowViewModel
                             // index-1 as menu is '1' based and collection is '0' based
                             con = _settings.Config.Connections[index - 1];
 
-                            if (!string.IsNullOrEmpty(con.Name))
+                            if (con is TcpConnection tcp)
                             {
-                                Connect(con.Host, con.Port,false);
-                                SetDisplay(DisplayType.Terminal);
+                                if (!string.IsNullOrEmpty(tcp.Name))
+                                {
+                                    Connect(tcp.Host, tcp.Port, false);
+                                    SetDisplay(DisplayType.Terminal);
+                                }
                             }
+                                
                         }
 
                         break;
@@ -147,7 +153,6 @@ public partial class MainWindowViewModel
                         }
 
                         break;
-                    
                 }
 
                 break;
@@ -159,7 +164,6 @@ public partial class MainWindowViewModel
                     case 0x1B:
                         SetDisplay(_previousDisplayType);
                         return;
-
                 }
 
                 // connect or ignore
@@ -192,16 +196,16 @@ public partial class MainWindowViewModel
                 }
 
                 break;
-            
+
             case DisplayType.ConnectSerial:
-                
+
                 switch (asciiValue)
                 {
                     case 0x1B:
                         SetDisplay(_previousDisplayType);
                         return;
                 }
-                
+
                 if (!_currentForm.ProcessFormKey(asciiValue))
                 {
                     if (_currentForm is not null)
@@ -220,6 +224,12 @@ public partial class MainWindowViewModel
                             if (field is not null)
                                 int.TryParse(field.Value, out baud);
 
+                            // update settings directly
+                            _settings.Config.SerialConnection.Device = device;
+                            _settings.Config.SerialConnection.BaudRate = baud;
+                            _settings.Save();
+
+                            // connect
                             Connect(device, baud, true);
                             SetDisplay(DisplayType.Terminal);
                         }
@@ -231,7 +241,7 @@ public partial class MainWindowViewModel
                 }
 
                 break;
-            
+
             case DisplayType.EditConnection:
 
                 switch (asciiValue)
@@ -240,7 +250,7 @@ public partial class MainWindowViewModel
                         SetDisplay(_previousDisplayType);
                         return;
                 }
-                
+
                 if (!_currentForm.ProcessFormKey(asciiValue))
                 {
                     // save connection
@@ -265,11 +275,15 @@ public partial class MainWindowViewModel
                         // if the form is valid
                         if (_currentForm.IsValid() && _currentForm.Connection is not null)
                         {
-                            // save
-                            _currentForm.Connection.Name = name;
-                            _currentForm.Connection.Host = host;
-                            _currentForm.Connection.Port = port;
-                            _settings.Save();
+                            if (_currentForm.Connection is TcpConnection tcp)
+                            {
+                                tcp.Name = name;
+                                tcp.Host = host;
+                                tcp.Port = port;
+
+                                // save, the form holds the current connection within settings
+                                _settings.Save();
+                            }
                         }
                         else
                         {
@@ -277,10 +291,20 @@ public partial class MainWindowViewModel
                             // error, not saved
                             if (_currentForm.Connection != null)
                             {
-                                _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
-                                    _currentForm.Connection.Name,
-                                    _currentForm.Connection.Host,
-                                    _currentForm.Connection.Port);
+                                if (_currentForm.Connection is TcpConnection tcp)
+                                {
+                                    tcp.Name = name;
+                                    tcp.Host = host;
+                                    tcp.Port = port;
+
+                                    // save, the form holds the current connection within settings
+                                    _settings.Save();
+
+                                    _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
+                                        tcp.Name,
+                                        tcp.Host,
+                                        tcp.Port);
+                                }
                             }
                             else
                             {
@@ -297,12 +321,20 @@ public partial class MainWindowViewModel
                     // updte the display as something was processed by _currentForm.ProcessFormKey
                     DisplayData = _displayManagerAlt.Display.Chars;
                 }
-                
+
                 break;
 
             case DisplayType.Help:
-                // any key returns
-                SetDisplay(_previousDisplayType);
+                
+                // TODO fix me as sometimes the previous display is Help,
+                //  this can happen if help is selected when help is showing.
+                //  this could be the same for all forms.
+                switch (asciiValue)
+                {
+                    case 0x1B:
+                        SetDisplay(_previousDisplayType);
+                        return;
+                }
                 break;
         }
     }

@@ -12,7 +12,7 @@ public interface ICommsClient
 
     Parity Parity { get; set; }
 
-    void Connect(string connectionString, int port);
+    void Connect(string arg1, int arg2);
     bool IsConnected();
     bool Write(string data);
     bool Write(byte data);

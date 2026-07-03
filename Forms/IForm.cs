@@ -5,11 +5,10 @@ public interface IForm {
     //public List<Field> Fields { set; get; }
     public Field GetCurrentField();
     public Field GetFieldById(string id);
-    //public bool Next();
-    //public bool Previous();
+
     public int GetCursor();
     public bool IsValid();
     public bool ProcessFormKey(int asciiValue);
-    Configuration.Connection Connection { get; }
+    Configuration.IConnection Connection { get; }
 }
 
