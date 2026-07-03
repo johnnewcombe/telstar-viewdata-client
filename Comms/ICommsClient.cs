@@ -1,3 +1,5 @@
+using System.IO.Ports;
+
 namespace TelstarClient.Comms;
 
 public delegate void DataReceivedEventHandler(string data);
@@ -7,6 +9,8 @@ public interface ICommsClient
 {
     event DataReceivedEventHandler OnDataReceivedEvent;
     event OnConnectEventHandler OnConnectEvent;
+
+    Parity Parity { get; set; }
 
     void Connect(string connectionString, int port);
     bool IsConnected();

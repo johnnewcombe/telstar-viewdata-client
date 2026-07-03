@@ -21,6 +21,7 @@ using System;
 using System.Threading;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
+using TelstarClient.Comms;
 using TelstarClient.Display;
 
 namespace TelstarClient.ViewModels;
@@ -50,31 +51,38 @@ public partial class MainWindowViewModel {
     /// <summary>
     /// Note that this could be called for serial and tcp connections
     /// </summary>
-    /// <param name="param1">This will be the ip address or hostname
+    /// <param name="arg1">This will be the ip address or hostname
     /// for TCP connections and serial device for serial connections.</param>
-    /// <param name="param2">This will be the tcp port number for TCP
+    /// <param name="arg2">This will be the tcp port number for TCP
     /// connections or baud rate for serial connections</param>
-    public void Connect(string param1, int param2) {
+    /// <param name="serial"></param>
+    public void Connect(string arg1, int arg2, bool serial) {
         try {
 
-            // open the tcp client
+            // open the comms client
+            if (serial)
+            {          
+                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1,arg2);
+                _comms = new SerialClient();
+            }
+            else
+            {
+                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1,arg2);
+                _comms = new TcpClient();
+            }
+
+            _comms.OnConnectEvent += OnConnect;
+            _comms.OnDataReceivedEvent += OnReceived;
+            _comms.Connect(arg1, arg2);
+
             _cyclicBuffer.Clear();
-            if (true) // if true then tcp
-            {
-                _logger.LogInformation("Connecting to {Ip}:{Port}", param1,param2);
-                _comms.Connect(param1, param2);
-            }
-            else // serial
-            {
-                _logger.LogInformation("Connecting to {Ip} at {Port} baud", param1,param2);
-                _comms.Connect(param1, param2);
-            }
+
             Dispatcher.UIThread.Post(UpdateMainDisplay);
             
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
-            _logger.LogError(ex, "Failed to connect to {Ip}:{Port}", param1,param2);
+            _logger.LogError(ex, "Failed to connect to {Ip}:{Port}", arg1,arg2);
         }
     }
 

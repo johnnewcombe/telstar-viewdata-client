@@ -54,7 +54,8 @@ public partial class MainWindowViewModel : ViewModelBase {
     private enum DisplayType {
         Welcome,
         Directory,
-        Connect,
+        ConnectTcp,
+        ConnectSerial,
         Terminal,
         Help,
         EditConnection,
@@ -81,7 +82,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private readonly DisplayManager _displayManagerMain;
     private readonly DisplayManager _displayManagerAlt;
     private readonly CyclicBuffer _cyclicBuffer;
-    private readonly ICommsClient _comms;
+    private ICommsClient _comms;
 
     /// <summary>
     /// Constructor
@@ -130,10 +131,10 @@ public partial class MainWindowViewModel : ViewModelBase {
 
         // TODO Decide how this will be implemented
         //  perhaps menu key 0 could be serial and the key C used for manual connections?
-        _comms = new TcpClient();
+        //_comms = new TcpClient();
         //_comms = new SerialClient();
-        _comms.OnConnectEvent += OnConnect;
-        _comms.OnDataReceivedEvent += OnReceived;
+        //_comms.OnConnectEvent += OnConnect;
+        //_comms.OnDataReceivedEvent += OnReceived;
 
     }
 
@@ -296,8 +297,14 @@ public partial class MainWindowViewModel : ViewModelBase {
                 // pop the menu into the placeholder
                 _displayManagerAlt.Write(new Directory(_displayManagerAlt,connection).ToString().Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
                 break;
-            case DisplayType.Connect:
-                _currentForm = new Connect(_displayManagerAlt,connection);
+            case DisplayType.ConnectTcp:
+                _currentForm = new ConnectTcp(_displayManagerAlt,connection);
+                _displayManagerAlt.Write(_currentForm.ToString());
+                _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
+                DisplayData = _displayManagerAlt.Display.Chars;
+                break;
+            case DisplayType.ConnectSerial:
+                _currentForm = new ConnectSerial(_displayManagerAlt,connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 DisplayData = _displayManagerAlt.Display.Chars;

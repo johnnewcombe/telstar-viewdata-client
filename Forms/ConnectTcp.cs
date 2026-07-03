@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Text;
 using Display;
 
-public class Connect : FormBase
+public class ConnectTcp : FormBase
 {
 
-    public Connect(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
+    public ConnectTcp(DisplayManager displayManager, Configuration.Connection connection) : base(displayManager,
         connection)
     {
         
@@ -22,7 +22,7 @@ public class Connect : FormBase
     {
         var menu = new StringBuilder();
         menu.Append(Converters.ConvertFromMarkup("\r\n[_+]")); // cursor on
-        menu.Append(Converters.ConvertFromMarkup("[14][D]CONNECT\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[12][D]CONNECT TCP\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[C]HOST:[W]\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[C]PORT:[W]\r\n\n"));

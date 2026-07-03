@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.IO.Ports;
 
 /*
    MIT License
@@ -43,6 +44,12 @@ namespace TelstarClient.Comms
 
         #region Properties
 
+        public Parity Parity
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+
         // Connection Parameters
         private IPAddress _ipAddress;
         private int _port;
@@ -63,10 +70,7 @@ namespace TelstarClient.Comms
         {
         }
 
-        public IPAddress IpAddrss
-        {
-            get { return _ipAddress; }
-        }
+        public IPAddress IpAddrss => _ipAddress;
 
         public int Port
         {
@@ -133,6 +137,8 @@ namespace TelstarClient.Comms
         /// <returns>Success status as Boolean Value</returns>
         public bool Write(String data)
         {
+            // TODO: Implement Parity in code, based on the Parity Property
+            
             // Check Connection
             if (IsConnected())
             {

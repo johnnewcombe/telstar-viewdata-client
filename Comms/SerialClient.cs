@@ -27,6 +27,8 @@ public class SerialClient : ICommsClient
 {
     private SerialPort _serialPort;
 
+    public Parity Parity { get; set; } = Parity.None;
+
     public event DataReceivedEventHandler OnDataReceivedEvent;
     public event OnConnectEventHandler OnConnectEvent;
 
@@ -41,6 +43,7 @@ public class SerialClient : ICommsClient
             }
 
             _serialPort = new SerialPort(deviceName, baudRate);
+            _serialPort.Parity = this.Parity;
             _serialPort.DataReceived += SerialPort_DataReceived;
             _serialPort.Open();
             OnConnectEvent?.Invoke(true);

@@ -44,6 +44,7 @@ public partial class MainWindowViewModel
         // generic operations only, Form specific operations are below
         switch (asciiValue)
         {
+
             case 0x86: // full screen
                 ToggleKioskMode();
                 return;
@@ -103,6 +104,9 @@ public partial class MainWindowViewModel
 
                 switch (asciiValue)
                 {
+                    case 0x53 or 0x73: // serial connection (there's only one serial connection)
+                        SetDisplay(DisplayType.ConnectSerial);
+                        break;
                     // TODO maybe use char.IsDigit
                     // validate number Connect)
                     case >= 0x30 and <= 0x39:
@@ -113,7 +117,7 @@ public partial class MainWindowViewModel
                         // manual dialling?
                         if (index == 0)
                         {
-                            SetDisplay(DisplayType.Connect);
+                            SetDisplay(DisplayType.ConnectTcp);
                         }
                         else if (index - 1 < _settings.Config.Connections.Count)
                         {
@@ -123,7 +127,7 @@ public partial class MainWindowViewModel
 
                             if (!string.IsNullOrEmpty(con.Name))
                             {
-                                Connect(con.Host, con.Port);
+                                Connect(con.Host, con.Port,false);
                                 SetDisplay(DisplayType.Terminal);
                             }
                         }
@@ -148,7 +152,7 @@ public partial class MainWindowViewModel
 
                 break;
 
-            case DisplayType.Connect:
+            case DisplayType.ConnectTcp:
 
                 switch (asciiValue)
                 {
@@ -177,7 +181,7 @@ public partial class MainWindowViewModel
                             if (field is not null)
                                 int.TryParse(field.Value, out port);
 
-                            Connect(host, port);
+                            Connect(host, port, false);
                             SetDisplay(DisplayType.Terminal);
                         }
                     }
@@ -188,7 +192,46 @@ public partial class MainWindowViewModel
                 }
 
                 break;
+            
+            case DisplayType.ConnectSerial:
+                
+                switch (asciiValue)
+                {
+                    case 0x1B:
+                        SetDisplay(_previousDisplayType);
+                        return;
+                }
+                
+                if (!_currentForm.ProcessFormKey(asciiValue))
+                {
+                    if (_currentForm is not null)
+                    {
+                        if (_currentForm.IsValid())
+                        {
+                            // get the values
+                            Forms.Field field;
+                            var baud = 0;
+                            var device = string.Empty;
 
+                            field = _currentForm.GetFieldById("device");
+                            if (field is not null)
+                                device = field.Value;
+                            field = _currentForm.GetFieldById("baud");
+                            if (field is not null)
+                                int.TryParse(field.Value, out baud);
+
+                            Connect(device, baud, true);
+                            SetDisplay(DisplayType.Terminal);
+                        }
+                    }
+                }
+                else
+                {
+                    DisplayData = _displayManagerAlt.Display.Chars;
+                }
+
+                break;
+            
             case DisplayType.EditConnection:
 
                 switch (asciiValue)
@@ -321,20 +364,21 @@ public partial class MainWindowViewModel
             Key.F when ctrl => 6,
             Key.G when ctrl => 7,
             Key.H when ctrl => 8,
-            Key.J when ctrl => 9,
-            Key.K when ctrl => 10,
-            Key.L when ctrl => 11,
-            Key.M when ctrl => 12,
-            Key.N when ctrl => 13,
-            Key.O when ctrl => 14,
-            Key.P when ctrl => 15,
-            Key.Q when ctrl => 16,
-            Key.R when ctrl => 17,
-            Key.S when ctrl => 18,
-            Key.T when ctrl => 19,
-            Key.U when ctrl => 20,
-            Key.V when ctrl => 21,
-            Key.W when ctrl => 22,
+            Key.I when ctrl => 9,
+            Key.J when ctrl => 10,
+            Key.K when ctrl => 11,
+            Key.L when ctrl => 12,
+            Key.M when ctrl => 13,
+            Key.N when ctrl => 14,
+            Key.O when ctrl => 15,
+            Key.P when ctrl => 16,
+            Key.Q when ctrl => 17,
+            Key.R when ctrl => 18,
+            Key.S when ctrl => 19,
+            Key.T when ctrl => 10,
+            Key.U when ctrl => 21,
+            Key.V when ctrl => 22,
+            Key.W when ctrl => 23,
             Key.X when ctrl => 24,
             Key.Y when ctrl => 25,
             Key.Z when ctrl => 26,
