@@ -27,7 +27,7 @@ namespace TelstarClient.ViewModels;
 
 public partial class MainWindowViewModel {
 
-    #region TCP Client Control and Events
+    #region Comms Client Control and Events
 
     private Lock _lock = new();
     private bool _connectStatus;
@@ -47,19 +47,34 @@ public partial class MainWindowViewModel {
         }
     }
 
-    public void Connect(string ip, int port) {
+    /// <summary>
+    /// Note that this could be called for serial and tcp connections
+    /// </summary>
+    /// <param name="param1">This will be the ip address or hostname
+    /// for TCP connections and serial device for serial connections.</param>
+    /// <param name="param2">This will be the tcp port number for TCP
+    /// connections or baud rate for serial connections</param>
+    public void Connect(string param1, int param2) {
         try {
 
             // open the tcp client
             _cyclicBuffer.Clear();
-            _logger.LogInformation("Connecting to {Ip}:{Port}", ip,port);
-            _comms.Connect(ip, port);
+            if (true) // if true then tcp
+            {
+                _logger.LogInformation("Connecting to {Ip}:{Port}", param1,param2);
+                _comms.Connect(param1, param2);
+            }
+            else // serial
+            {
+                _logger.LogInformation("Connecting to {Ip} at {Port} baud", param1,param2);
+                _comms.Connect(param1, param2);
+            }
             Dispatcher.UIThread.Post(UpdateMainDisplay);
             
         }
         catch (Exception ex) {
             // Catch errors in Connection and receive Callbacks
-            _logger.LogError(ex, "Failed to connect to {Ip}:{Port}", ip,port);
+            _logger.LogError(ex, "Failed to connect to {Ip}:{Port}", param1,param2);
         }
     }
 

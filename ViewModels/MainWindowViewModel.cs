@@ -128,7 +128,10 @@ public partial class MainWindowViewModel : ViewModelBase {
         _settings = new Settings(configFile);
         _cyclicBuffer = new CyclicBuffer(2048);
 
+        // TODO Decide how this will be implemented
+        //  perhaps menu key 0 could be serial and the key C used for manual connections?
         _comms = new TcpClient();
+        //_comms = new SerialClient();
         _comms.OnConnectEvent += OnConnect;
         _comms.OnDataReceivedEvent += OnReceived;
 

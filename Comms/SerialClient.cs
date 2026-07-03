@@ -18,46 +18,106 @@
 */
 
 
+using System;
+using System.IO.Ports;
+
 namespace TelstarClient.Comms;
 
 public class SerialClient : ICommsClient
 {
+    private SerialPort _serialPort;
+
     public event DataReceivedEventHandler OnDataReceivedEvent;
     public event OnConnectEventHandler OnConnectEvent;
 
-    public void Connect(string connectionString, int port)
+    public void Connect(string deviceName, int baudRate)
     {
-        // Placeholder implementation
-        OnConnectEvent?.Invoke(true);
+        try
+        {
+            if (_serialPort != null && _serialPort.IsOpen)
+            {
+                _serialPort.Close();
+                _serialPort.Dispose();
+            }
+
+            _serialPort = new SerialPort(deviceName, baudRate);
+            _serialPort.DataReceived += SerialPort_DataReceived;
+            _serialPort.Open();
+            OnConnectEvent?.Invoke(true);
+        }
+        catch (Exception)
+        {
+            OnConnectEvent?.Invoke(false);
+        }
+    }
+
+    private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+    {
+        if (OnDataReceivedEvent != null)
+        {
+            // Read available data
+            string data = _serialPort.ReadExisting();
+            OnDataReceivedEvent.Invoke(data);
+        }
     }
 
     public bool IsConnected()
     {
-        return false;
+        return _serialPort != null && _serialPort.IsOpen;
     }
 
     public bool Write(string data)
     {
-        return true;
+        if (IsConnected())
+        {
+            _serialPort.Write(data);
+            return true;
+        }
+        return false;
     }
 
     public bool Write(byte data)
     {
-        return true;
+        if (IsConnected())
+        {
+            _serialPort.Write(new byte[] { data }, 0, 1);
+            return true;
+        }
+        return false;
     }
 
     public bool Write(char data)
     {
-        return true;
+        if (IsConnected())
+        {
+            _serialPort.Write(data.ToString());
+            return true;
+        }
+        return false;
     }
 
     public bool Write(byte[] data)
     {
-        return true;
+        if (IsConnected())
+        {
+            _serialPort.Write(data, 0, data.Length);
+            return true;
+        }
+        return false;
     }
 
     public void Disconnect()
     {
-        OnConnectEvent?.Invoke(false);
+        if (_serialPort != null)
+        {
+            _serialPort.DataReceived -= SerialPort_DataReceived;
+            if (_serialPort.IsOpen)
+            {
+                _serialPort.Close();
+            }
+            _serialPort.Dispose();
+            _serialPort = null;
+            OnConnectEvent?.Invoke(false);
+        }
     }
 }
