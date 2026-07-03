@@ -20,7 +20,44 @@
 
 namespace TelstarClient.Comms;
 
-public class SerialClient
+public class SerialClient : ICommsClient
 {
-    
+    public event DataReceivedEventHandler OnDataReceivedEvent;
+    public event OnConnectEventHandler OnConnectEvent;
+
+    public void Connect(string connectionString, int port)
+    {
+        // Placeholder implementation
+        OnConnectEvent?.Invoke(true);
+    }
+
+    public bool IsConnected()
+    {
+        return false;
+    }
+
+    public bool Write(string data)
+    {
+        return true;
+    }
+
+    public bool Write(byte data)
+    {
+        return true;
+    }
+
+    public bool Write(char data)
+    {
+        return true;
+    }
+
+    public bool Write(byte[] data)
+    {
+        return true;
+    }
+
+    public void Disconnect()
+    {
+        OnConnectEvent?.Invoke(false);
+    }
 }

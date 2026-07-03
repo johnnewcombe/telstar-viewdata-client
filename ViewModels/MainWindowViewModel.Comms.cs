@@ -53,7 +53,7 @@ public partial class MainWindowViewModel {
             // open the tcp client
             _cyclicBuffer.Clear();
             _logger.LogInformation("Connecting to {Ip}:{Port}", ip,port);
-            _tcp.Connect(ip, port);
+            _comms.Connect(ip, port);
             Dispatcher.UIThread.Post(UpdateMainDisplay);
             
         }
@@ -67,8 +67,8 @@ public partial class MainWindowViewModel {
 
         _logger.LogInformation("Disconnecting TCP connection");
 
-        if (_tcp is not null) {
-            _tcp.Disconnect();
+        if (_comms is not null) {
+            _comms.Disconnect();
             
             // set the thread safe property
             ConnectStatus = false;

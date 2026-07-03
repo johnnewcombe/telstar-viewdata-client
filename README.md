@@ -16,13 +16,6 @@ It can be downloaded from the [releases section](https://github.com/johnnewcombe
 
 ![alt text](./Assets/ScreenshotAll.png)
 
-## Outstanding Development:
-
-The following is a list of features that are planned for future release.
-
-* Bug fixes, there are a few known issues especially around the viewdata display and cursor control.
-* Direct support for serial devices.
-
 ## Installation
 
 ### MacOS Installation
@@ -89,3 +82,9 @@ Run the downloaded setup program.
 * macOS → ~/Library/Application Support/TelstarClient
 * Linux → ~/.config/TelstarClient/logs
 
+## Outstanding Development:
+
+The following is a list of features that are planned for future release.
+
+* Bug fixes, there are several known issues especially around the viewdata display and cursor control.
+* Direct support for serial devices.

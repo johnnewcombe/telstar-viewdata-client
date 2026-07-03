@@ -81,7 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private readonly DisplayManager _displayManagerMain;
     private readonly DisplayManager _displayManagerAlt;
     private readonly CyclicBuffer _cyclicBuffer;
-    private readonly TcpClient _tcp;
+    private readonly ICommsClient _comms;
 
     /// <summary>
     /// Constructor
@@ -128,9 +128,9 @@ public partial class MainWindowViewModel : ViewModelBase {
         _settings = new Settings(configFile);
         _cyclicBuffer = new CyclicBuffer(2048);
 
-        _tcp = new TcpClient();
-        _tcp.OnConnectEvent += OnConnect;
-        _tcp.OnDataReceivedEvent += OnReceived;
+        _comms = new TcpClient();
+        _comms.OnConnectEvent += OnConnect;
+        _comms.OnDataReceivedEvent += OnReceived;
 
     }
 
@@ -221,7 +221,7 @@ public partial class MainWindowViewModel : ViewModelBase {
     private void ProcessReceiveBuffer() {
 
         // get data from buffer and process for viewdata 
-        while (_tcp.IsConnected() && _cyclicBuffer.Count > 0) {
+        while (_comms.IsConnected() && _cyclicBuffer.Count > 0) {
 
             if (_displayManagerMain.Write(_cyclicBuffer.Remove())) {
 

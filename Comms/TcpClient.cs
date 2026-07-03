@@ -30,26 +30,13 @@ using System.Text;
 
 namespace TelstarClient.Comms
 {
-    public class TcpClient
+    public class TcpClient : ICommsClient
     {
         // *** Event Handlers *** //
 
         #region Delegates
 
-        /// <summary>
-        /// Notify the Received Data
-        /// </summary>
-        /// <param name="data">Received Data</param>
-        public delegate void DataReceivedEventHandler(string data);
-
         public event DataReceivedEventHandler OnDataReceivedEvent;
-
-        /// <summary>
-        /// Notify the Connection Status of Socket
-        /// </summary>
-        /// <param name="status">Connection Status</param>
-        public delegate void OnConnectEventHandler(bool status);
-
         public event OnConnectEventHandler OnConnectEvent;
 
         #endregion
