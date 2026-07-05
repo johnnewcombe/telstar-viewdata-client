@@ -11495,4 +11495,8 @@
     <ItemGroup>
       <None Remove="log4net.config" />
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ViewdataDisplay\ViewdataDisplay.csproj" />
+    </ItemGroup>
 </Project>
