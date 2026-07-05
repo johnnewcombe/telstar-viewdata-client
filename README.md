@@ -78,9 +78,18 @@ Run the downloaded setup program.
 
 ## Log Files
 
-* Windows → %APPDATA%
-* macOS → ~/Library/Application Support/TelstarClient
-* Linux → ~/.config/TelstarClient/logs
+C:\Users\johnn\AppData\Roaming\TelstarClient\logs
+
+* Linux = ~/.config/TelstarClient/logs
+* macOS = ~/Library/Application Support/TelstarClient
+* Windows = %APPDATA%/TelstarClient/logs
+
+When using Windows, %APPDATA% can be determined by executing the following command...
+
+```text
+echo %APPDATA%
+```
+
 
 ## Outstanding Development:
 

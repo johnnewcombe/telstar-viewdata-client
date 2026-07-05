@@ -27,7 +27,7 @@ public class EditConnection : FormBase
 
         // if connection is null then
         Fields.Add(new Field("dirName", 6, 7, 20, name, FieldType.AlphaNumeric, false));
-        Fields.Add(new Field("host", 8, 7, 20, host, FieldType.AlphaNumeric, true));
+        Fields.Add(new Field("host", 8, 7, 32, host, FieldType.AlphaNumeric, true));
         Fields.Add(new Field("port", 10, 7, 20, port.ToString(), FieldType.Numeric, true));
     }
 

@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.IO.Ports;
+using Microsoft.Extensions.Logging;
 
 /*
    MIT License
@@ -86,7 +87,16 @@ namespace TelstarClient.Comms
         {
             try
             {
-                _ipAddress = (Dns.GetHostEntry(ip)).AddressList[0];
+                if (IPAddress.TryParse(ip, out IPAddress parsedAddress))
+                {
+                    // it's already an IP address, use it directly
+                    _ipAddress = parsedAddress;
+                }
+                else
+                {
+                    // it's a hostname, resolve it
+                    _ipAddress = Dns.GetHostEntry(ip).AddressList[0];
+                }
 
                 // Close the socket if open
                 if (_socket != null && _socket.Connected)
@@ -109,10 +119,11 @@ namespace TelstarClient.Comms
                 AsyncCallback onconnect = OnConnect;
                 _socket.BeginConnect(epServer, onconnect, _socket);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 OnConnectEvent(false);
-                //throw new Exception($"Socket Connection Failed. Message : {ex}");
+                throw new Exception("Connection Failed.",ex);
+
             }
         }
 

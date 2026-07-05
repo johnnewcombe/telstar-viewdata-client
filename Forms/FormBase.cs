@@ -53,9 +53,13 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
             }
         }
 
+        if (GetCurrentField().Value.Length >= GetCurrentField().Length)
+        {
+            return true;
+        }
+
         // are we terminating the field?
-        if (asciiValue is 0x0d or 0x09 ||
-            GetCurrentField().Value.Length >= GetCurrentField().Length)
+        if (asciiValue is 0x0d or 0x09)// || GetCurrentField().Value.Length >= GetCurrentField().Length)
         {
             if (Next())
             {
