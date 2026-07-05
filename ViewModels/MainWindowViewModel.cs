@@ -314,7 +314,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case DisplayType.Directory:
                 // pop the menu into the placeholder
                 _displayManagerAlt.Write(new Directory(_displayManagerAlt, connection).ToString()
-                    .Replace(Constants.PlaceHolder, GetDirectoryFromConfig()));
+                    .Replace(Display.Constants.PlaceHolder, GetDirectoryFromConfig()));
                 break;
             case DisplayType.ConnectTcp:
                 _currentForm = new ConnectTcp(_displayManagerAlt, connection);
@@ -365,7 +365,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             //if (connection.Name is not null) {
             item++;
-            menuSb.Append($"   \e{Constants.AlphaWhite}{item} \e{Constants.AlphaCyan}{connection.Name}\r\n");
+            menuSb.Append($"   \e{Display.Constants.AlphaWhite}{item} \e{Display.Constants.AlphaCyan}{connection.Name}\r\n");
             //}
         }
 

@@ -18,16 +18,16 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
         {
             //var currentField = _currentForm.GetCurrentField();
             // escape 
-            case 0x1B:
+            case Constants.ESC:
                 //_currentForm = null;
                 return false;
             // backspace
-            case 0x08 when GetCurrentField().Value.Length > 0:
+            case Constants.BACK when GetCurrentField().Value.Length > 0:
                 // remove the char from the display by setting the cursor to the current position
                 // and then writing a space character
                 displayManager.SetCursorPosition(GetCurrentField().Value.Length - 1
                                                  + GetCurrentField().StartIndex);
-                displayManager.Write((char)0x20);
+                displayManager.Write((char)Constants.SPACE);
 
 
                 // remove the char from the value property of the field this reduces he value
@@ -41,7 +41,7 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
 
                 return true;
             // shift tab
-            case 0x89:
+            case Constants.SHIFT_TAB:
             {
                 if (Previous())
                 {
@@ -59,7 +59,7 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
         }
 
         // are we terminating the field?
-        if (asciiValue is 0x0d or 0x09)// || GetCurrentField().Value.Length >= GetCurrentField().Length)
+        if (asciiValue is Constants.CR or Constants.TAB)// || GetCurrentField().Value.Length >= GetCurrentField().Length)
         {
             if (Next())
             {
@@ -72,7 +72,7 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
             return false;
         }
 
-        if (asciiValue >= 0x20 && asciiValue < 0x80)
+        if (asciiValue >= Constants.SPACE && asciiValue <= Constants.DEL) // printables
         {
             if (GetCurrentField().Type is FieldType.Alpha && !char.IsAsciiLetterOrDigit((char)asciiValue))
                 return true;

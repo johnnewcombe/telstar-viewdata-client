@@ -45,7 +45,10 @@ public class EditConnection : FormBase
             .Replace("[PLACEHOLDER]", Fields[1].Value));
         menu.Append(Converters.ConvertFromMarkup("[C]PORT:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[2].Value));
-        menu.Append(Converters.ConvertFromMarkup("\n[9][C]Press[W]Escape[C]to Return"));
+        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[10][C]Press[W]Alt-S[C]to Save\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Alt-D[C]to Delete\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Escape[C]to Return"));
 
         return menu.ToString();
     }

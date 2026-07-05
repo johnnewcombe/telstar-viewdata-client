@@ -27,6 +27,9 @@ using TelstarClient.Display;
 
 namespace TelstarClient.ViewModels;
 
+
+
+
 public partial class MainWindowViewModel
 {
     /// <summary>
@@ -51,21 +54,14 @@ public partial class MainWindowViewModel
         // generic operations only, Form specific operations are below
         switch (asciiValue)
         {
-            case 0x86: // full screen
+            case Constants.ALT_F: // full screen
                 ToggleKioskMode();
                 return;
-            case 0x98: // alt+x disconnect
+            case Constants.ALT_X: // alt+x disconnect
                 Disconnect();
                 SetDisplay(DisplayType.Directory);
                 return;
-            case 0x88: // alt+h show help menus
-                if (_displayType != DisplayType.Help)
-                {
-                    SetDisplay(DisplayType.Help);
-                }
-
-                return;
-            case 0x90: // alt+q
+            case Constants.ALT_Q: // alt+q
                 Disconnect();
                 Shutdown();
                 return;
@@ -79,15 +75,18 @@ public partial class MainWindowViewModel
                 // looking for alt key combinations (same as ctrl codes but with high bit set)
                 switch (asciiValue)
                 {
-                    case 0x83: // conceal
+                    case Constants.ALT_C: // conceal
                         _displayManagerMain.Display.ToggleConceal();
                         break;
-                    case 0x0d: // return
-                        asciiValue = 0x5F;
+                    case Constants.CR: // return
+                        asciiValue = Constants.HASH;
                         break;
-                    case 0x04: // ctrl+D sends CR for modems etc.
-                        asciiValue = 0x0D;
+                    case Constants.CTRL_D: // ctrl+D sends CR for modems etc.
+                        asciiValue = Constants.CR;
                         break;
+                    case Constants.ALT_H: // alt+h show help menus
+                        SetDisplay(DisplayType.Help);
+                        return;
                 }
 
                 // send to remote end
@@ -115,16 +114,19 @@ public partial class MainWindowViewModel
 
                 switch (asciiValue)
                 {
-                    case 0x53 or 0x73: // serial connection (there's only one serial connection)
+                    case Constants.ALT_H: // alt+h show help menus
+                        SetDisplay(DisplayType.Help);
+                        return;
+                    case (byte)'S' or (byte)'s': // serial connection (there's only one serial connection)
                         con = _settings.Config.SerialConnection;
                         SetDisplay(DisplayType.ConnectSerial, con);
                         break;
                     // TODO maybe use char.IsDigit
                     // validate number Connect)
-                    case >= 0x30 and <= 0x39:
+                    case >= (byte)'0' and <= (byte)'9':
 
                         // convert to index
-                        index = asciiValue - 0x30;
+                        index = asciiValue - (byte)'0';
 
                         // manual dialling?
                         if (index == 0)
@@ -150,8 +152,8 @@ public partial class MainWindowViewModel
                         break;
 
                     // validate alt+number (Edit)
-                    case >= 0xB0 and <= 0xB9:
-                        index = asciiValue - 0xB0;
+                    case >= Constants.ALT_0 and <= Constants.ALT_9:
+                        index = asciiValue - Constants.ALT_0;
 
                         if (index - 1 < _settings.Config.Connections.Count)
                         {
@@ -170,7 +172,7 @@ public partial class MainWindowViewModel
 
                 switch (asciiValue)
                 {
-                    case 0x1B:
+                    case Constants.ESC:
                         SetDisplay(_previousDisplayType);
                         return;
                 }
@@ -210,7 +212,7 @@ public partial class MainWindowViewModel
 
                 switch (asciiValue)
                 {
-                    case 0x1B:
+                    case Constants.ESC:
                         SetDisplay(_previousDisplayType);
                         return;
                 }
@@ -256,12 +258,30 @@ public partial class MainWindowViewModel
 
                 switch (asciiValue)
                 {
-                    case 0x1B:
+                    case Constants.ESC:
                         SetDisplay(_previousDisplayType);
                         return;
+                    case Constants.ALT_D: // delete entry
+
+                        if (_currentForm.Connection is not null)
+                        {
+                            if (_currentForm.Connection is TcpConnection tcp)
+                            {
+                                tcp.Name = string.Empty;
+                                tcp.Host = string.Empty;
+                                tcp.Port = 0;
+                            }
+                            _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
+                            _settings.Save();
+                            UpdateConnectStatus();
+                            DisplayData = _displayManagerAlt.Display.Chars;
+                            //DisplayEditor returns false when complete or canceled
+                            SetDisplay(_previousDisplayType);
+                        }
+                        break;
                 }
 
-                if (!_currentForm.ProcessFormKey(asciiValue))
+                if (!_currentForm.ProcessFormKey(asciiValue) || asciiValue == Constants.ALT_S)
                 {
                     // save connection
                     if (_currentForm is not null)
@@ -289,7 +309,10 @@ public partial class MainWindowViewModel
                                 tcp.Port = port;
 
                                 // save, the form holds the current connection within settings
+                                _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
                                 _settings.Save();
+                                UpdateConnectStatus();
+                                DisplayData = _displayManagerAlt.Display.Chars;
                             }
                         }
                         else
@@ -302,11 +325,15 @@ public partial class MainWindowViewModel
                                     name,
                                     host,
                                     port);
+                                _displayManagerAlt.Display.SetStatusText("INVALID",Display.Constants.Red);
+                                DisplayData = _displayManagerAlt.Display.Chars;     
+                                return;
                             }
                             else
                             {
                                 _logger.LogError("Connection invalid and not saved, the forms connection is null");
                             }
+                            
                         }
                     }
 
@@ -328,13 +355,17 @@ public partial class MainWindowViewModel
                 //  this could be the same for all forms.
                 switch (asciiValue)
                 {
-                    case 0x1B:
+                    case Constants.ESC:
                         SetDisplay(_previousDisplayType);
                         return;
                 }
 
                 break;
         }
+        
+        UpdateConnectStatus();
+        DisplayData = _displayManagerAlt.Display.Chars;
+        
     }
 
     public void TextHandler(TextInputEventArgs args)
@@ -369,74 +400,57 @@ public partial class MainWindowViewModel
         var alt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
+        if (alt)
+        {
+            if (e.Key >= Key.D1 && e.Key <= Key.D9)
+            {
+                return (byte)(e.Key - Key.D1 + Constants.ALT_1);
+            }
+
+            return e.Key switch
+            {
+                Key.C => Constants.ALT_C,  // TODO shouldn't this be D3 (lowercase 'c' || 0x80)
+                Key.D => Constants.ALT_D,
+                Key.F => Constants.ALT_F,
+                Key.H => Constants.ALT_H,
+                Key.Q => Constants.ALT_Q,
+                Key.R => Constants.ALT_R,
+                Key.S => Constants.ALT_S,
+                Key.X => Constants.ALT_X,
+                _ => null
+            };
+        }
+
+        if (ctrl)
+        {
+            if (e.Key >= Key.A && e.Key <= Key.Z)
+            {
+                return e.Key == Key.T ? (byte)10 : (byte)(e.Key - Key.A + 1);
+            }
+            return null;
+        }
+
         return e.Key switch
         {
             // Navigation / editing keys
-            Key.Enter or Key.Return => 13,
-            Key.Escape => 27,
-            Key.Back => 8,
-            Key.Tab when shift => 0x89, // TAB with msb set.
-            Key.Tab => 9,
-            Key.Delete => 127,
+            Key.Enter => Constants.CR,
+            Key.Escape => Constants.ESC,
+            Key.Back => Constants.LEFT,
+            Key.Tab => shift ? (byte)Constants.SHIFT_TAB : (byte)Constants.RIGHT,
+            Key.Delete => Constants.DEL,
 
-            // Arrow keys
-            Key.Left => 0x08,
-            Key.Right => 0x09,
-            Key.Down => 0x0A,
-            Key.Up => 0x0B,
+            // Arrow keys (standard ASCII codes)
+            Key.Left => Constants.LEFT,
+            Key.Right => Constants.RIGHT,
+            Key.Down => Constants.DOWN,
+            Key.Up => Constants.UP,
 
-            // platform and keyboard agnostic (hopefully!)
-            Key.A when ctrl => 1,
-            Key.B when ctrl => 2,
-            Key.C when ctrl => 3,
-            Key.D when ctrl => 4,
-            Key.E when ctrl => 5,
-            Key.F when ctrl => 6,
-            Key.G when ctrl => 7,
-            Key.H when ctrl => 8,
-            Key.I when ctrl => 9,
-            Key.J when ctrl => 10,
-            Key.K when ctrl => 11,
-            Key.L when ctrl => 12,
-            Key.M when ctrl => 13,
-            Key.N when ctrl => 14,
-            Key.O when ctrl => 15,
-            Key.P when ctrl => 16,
-            Key.Q when ctrl => 17,
-            Key.R when ctrl => 18,
-            Key.S when ctrl => 19,
-            Key.T when ctrl => 10,
-            Key.U when ctrl => 21,
-            Key.V when ctrl => 22,
-            Key.W when ctrl => 23,
-            Key.X when ctrl => 24,
-            Key.Y when ctrl => 25,
-            Key.Z when ctrl => 26,
-
-            // Alt+letter combinations used within the app
-            // same as normal codes but with high bit set
-            Key.C when alt => 0x83, // conceal
-            Key.F when alt => 0x86,
-            Key.H when alt => 0x88, // help/menus
-            Key.Q when alt => 0x90, // quit
-            Key.R when alt => 0x92, // reveal
-            Key.X when alt => 0x98, // escape/exit
-            Key.D1 when alt => 0xb1, // Alt+1...
-            Key.D2 when alt => 0xb2, // ... etc
-            Key.D3 when alt => 0xb3,
-            Key.D4 when alt => 0xb4,
-            Key.D5 when alt => 0xb5,
-            Key.D6 when alt => 0xb6,
-            Key.D7 when alt => 0xb7,
-            Key.D8 when alt => 0xb8,
-            Key.D9 when alt => 0xb9,
-
-            // Pure modifier keys — nothing to send
+            // Modifier keys that shouldn't produce a key code
             Key.LeftShift or Key.RightShift or
-                Key.LeftCtrl or Key.RightCtrl or
-                Key.LeftAlt or Key.RightAlt or
-                Key.Capital or Key.NumLock or
-                Key.Scroll => null,
+            Key.LeftCtrl or Key.RightCtrl or
+            Key.LeftAlt or Key.RightAlt or
+            Key.Capital or Key.NumLock or
+            Key.Scroll => null,
 
             _ => null
         };

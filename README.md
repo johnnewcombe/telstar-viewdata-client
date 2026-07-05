@@ -2,7 +2,7 @@
 
 This repository contains an experimental cross platform Viewdata Terminal.
 
-This is a work in progress but as of v0.0.18 is usable albeit with a few compromises.
+This is a work in progress but as of v0.0.19 is usable albeit with a few compromises.
 
 It currently works on the following platforms
 
@@ -10,7 +10,7 @@ It currently works on the following platforms
 * MacOS (intel/Apple Silicon)
 * Windows (x64/arm64)
 
-It can be downloaded from the [releases section](https://github.com/johnnewcombe/telstar-client-avalonia/releases)  of this repository.
+It can be downloaded from the [releases section](https://github.com/johnnewcombe/telstar-viewdata-client/releases)  of this repository.
 
 ## Screen Shots
 

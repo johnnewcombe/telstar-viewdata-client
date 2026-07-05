@@ -16,11 +16,13 @@ public class Directory : FormBase {
         var menu = new StringBuilder();
         //menu.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
         menu.Append(Converters.ConvertFromMarkup("\r\n[_-]")); // cursor off
-        menu.Append(Converters.ConvertFromMarkup("[14][W][D]DIRECTORY\r\n\n\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[14][W][D]DIRECTORY\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
         menu.Append(Converters.ConvertFromMarkup("[PLACEHOLDER]"));
-        menu.Append(Converters.ConvertFromMarkup("\r\n\n[4][C]Select[W]0[C]for Manual Connect"));
-        menu.Append(Converters.ConvertFromMarkup("\r\n\n[7][C]Select[W]Alt 1-9[C]to Edit"));
-        menu.Append(Converters.ConvertFromMarkup("\r\n\n[5][C]Select[W]S[C]for Serial Modem"));
+        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[4][C]Select[W]0[C]for Manual Connect\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[7][C]Select[W]Alt 1-9[C]to Edit\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[5][C]Select[W]S[C]for Serial Modem"));
         return menu.ToString();
     }
 

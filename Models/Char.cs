@@ -21,7 +21,7 @@ using TelstarClient.Display;
 
 namespace TelstarClient.Models;
 
-public class Char(char value, string foreground = Constants.White, string background = Constants.Black)
+public class Char(char value, string foreground = TelstarClient.Display.Constants.White, string background = TelstarClient.Display.Constants.Black)
 {
     // NOTE, changing anything here MUST be reflected in the Extensions Class also.
     public char Value { get; set; } = value;
