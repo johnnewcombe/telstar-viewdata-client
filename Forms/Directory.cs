@@ -20,9 +20,9 @@ public class Directory : FormBase {
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
         menu.Append(Converters.ConvertFromMarkup("[PLACEHOLDER]"));
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[4][C]Select[W]0[C]for Manual Connect\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[7][C]Select[W]Alt 1-9[C]to Edit\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[5][C]Select[W]S[C]for Serial Modem"));
+        menu.Append(Converters.ConvertFromMarkup("[8]0[C]for Manual Connection\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[8]S[C]for Serial Connection\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[4]Alt 1-9[C]to Edit  [W]Alt-H[C]for Help"));
         return menu.ToString();
     }
 

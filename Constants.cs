@@ -5,14 +5,14 @@ public class Constants
     public const int CTRL_D = 0x04;
     public const int SHIFT_TAB = 0x89;
     
-    public const int ALT_C = 0x83; // TODO shouldn't this be D3 (lowercase 'c' || 0x80)
-    public const int ALT_D = 0x84;
-    public const int ALT_F = 0x86;
-    public const int ALT_H = 0x88;
-    public const int ALT_Q = 0x90;
-    public const int ALT_R = 0x92;
-    public const int ALT_S = 0x93;
-    public const int ALT_X = 0x98;
+    public const int ALT_C = 0xE3;
+    public const int ALT_D = 0xE4;
+    public const int ALT_F = 0xE6;
+    public const int ALT_H = 0xE8;
+    public const int ALT_Q = 0xF1;
+    public const int ALT_R = 0xF2;
+    public const int ALT_S = 0xF3;
+    public const int ALT_X = 0xF8;
 
     public const int ALT_0 = 0xB0;
     public const int ALT_1 = 0xB1;

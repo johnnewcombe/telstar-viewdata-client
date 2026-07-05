@@ -92,7 +92,10 @@ public partial class MainWindowViewModel
         switch (asciiValue)
         {
             case Constants.ALT_C: // conceal
-                _displayManagerMain.Display.ToggleConceal();
+                _displayManagerMain.Display.Conceal();
+                break;
+            case Constants.ALT_R: // reveal
+                _displayManagerMain.Display.Reveal();
                 break;
             case Constants.CR: // return
                 asciiValue = Constants.HASH;
@@ -118,9 +121,11 @@ public partial class MainWindowViewModel
 
     private void HandleWelcomeKey(byte asciiValue)
     {
+        // pointless switch statement for future use and to remove ReSharper warnings
         switch (asciiValue)
         {
-            
+            case >0:
+                break;
         }
 
         // if we get a key press of any kind whilst looking at the welcome page
@@ -280,9 +285,9 @@ public partial class MainWindowViewModel
 
     private void HandleEditConnectionKey(byte asciiValue)
     {
-        int port = 0;
-        string host = string.Empty;
-        string name = string.Empty;
+        var port = 0;
+        var host = string.Empty;
+        var name = string.Empty;
 
         switch (asciiValue)
         {
@@ -489,7 +494,7 @@ public partial class MainWindowViewModel
     }
 }
 
-// TODO Create an external Keymap file that is read in on startup
+// TODO Create an external Keymap file that is read in at startup based on the following keyboard key table
 /* Keyboard Key Table
 
 None 0 Represents no key.

@@ -11495,8 +11495,4 @@
     <ItemGroup>
       <None Remove="log4net.config" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Logging\" />
-    </ItemGroup>
 </Project>

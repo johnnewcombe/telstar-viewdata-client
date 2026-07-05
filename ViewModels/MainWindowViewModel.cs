@@ -185,29 +185,14 @@ public partial class MainWindowViewModel : ViewModelBase
         Cursor = _displayManagerAlt.Cursor;
     }
 
-    /// <summary>
-    /// This called on the UI Tread via the dispatcher (see OnConnect event).
-    /// </summary>
-    private void UpdateConnectStatus()
+    private void DisplayStatusMessage(string message)
     {
-        string statusText;
-
         try
         {
-            // this function cannot have parameters so read from thread safe property
-            // to get the current status.
-            if (ConnectStatus)
-            {
-                statusText = CONNECTED_STATUS;
-            }
-            else
-            {
-                statusText = DISCONNECTED_STATUS;
-            }
-
+            
             // update both displays
-            _displayManagerMain.Display.SetStatusText(statusText);
-            _displayManagerAlt.Display.SetStatusText(statusText);
+            _displayManagerMain.Display.SetStatusText(message);
+            _displayManagerAlt.Display.SetStatusText(message);
 
             if (_displayType == DisplayType.Terminal)
             {
@@ -227,6 +212,26 @@ public partial class MainWindowViewModel : ViewModelBase
             // to crash
             _logger.LogError(ex, "Failed to update the Connection Status");
         }
+    }
+
+    /// <summary>
+    /// This called on the UI Tread via the dispatcher (see OnConnect event).
+    /// </summary>
+    private void UpdateConnectStatus()
+    {
+        string statusText;
+
+            // this function cannot have parameters so read from thread safe property
+            // to get the current status.
+            if (ConnectStatus)
+            {
+                DisplayStatusMessage(CONNECTED_STATUS);
+            }
+            else
+            {
+                DisplayStatusMessage(DISCONNECTED_STATUS);
+            }
+
     }
 
     /// <summary>

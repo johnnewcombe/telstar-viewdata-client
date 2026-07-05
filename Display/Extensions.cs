@@ -131,6 +131,27 @@ public static class Extensions {
         }
     }
 
+    public static void Conceal(this Models.Display display)
+    {
+        for (var i = 0; i < Models.Display.Rows * Models.Display.Cols; i++)
+        {
+            var c = display.Chars[i];
+            // TODO lock ??
+            if (!c.Concealed)
+                c.InVisible = true;
+        }
+    }
+    public static void Reveal(this Models.Display display)
+    {
+        for (var i = 0; i < Models.Display.Rows * Models.Display.Cols; i++)
+        {
+            var c = display.Chars[i];
+            // TODO lock ??
+            if (!c.Concealed)
+                c.InVisible = false;
+        }
+    }
+
     public static void ToggleConceal(this Models.Display display) {
         for (var i = 0; i < Models.Display.Rows * Models.Display.Cols; i++) {
             var c = display.Chars[i];
