@@ -331,8 +331,6 @@ public partial class MainWindowViewModel : ViewModelBase
             case DisplayType.EditConnection:
                 _currentForm = new EditConnection(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
-
-                // TODO use form GetCursor here and elsewhere
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 DisplayData = _displayManagerAlt.Display.Chars;
                 break;

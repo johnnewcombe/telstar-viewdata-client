@@ -48,12 +48,15 @@ public partial class MainWindowViewModel
             case 0x86: // full screen
                 ToggleKioskMode();
                 return;
-            case 0x98: // ' alt+x disconnect
+            case 0x98: // alt+x disconnect
                 Disconnect();
                 SetDisplay(DisplayType.Directory);
                 return;
             case 0x88: // alt+h show help menus
-                SetDisplay(DisplayType.Help);
+                if (_displayType != DisplayType.Help)
+                {
+                    SetDisplay(DisplayType.Help);
+                }
                 return;
             case 0x90: // alt+q
                 Disconnect();
