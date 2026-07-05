@@ -38,18 +38,8 @@ public partial class MainWindowViewModel
     /// <param name="asciiValue"></param>
     public void ProcessKey(byte asciiValue)
     {
-        var port = 0;
-        var host = string.Empty;
-        var name = string.Empty;
-        var baud = 0;
-        var device = string.Empty;
-
         // NOTE That this function does not run on the UI thread
         _logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
-        IConnection con;
-
-        // The screen can be in any one of 'DisplayType' states. Also,
-        // the client could be online or offline when in any of these states.
 
         // generic operations only, Form specific operations are below
         switch (asciiValue)
@@ -67,305 +57,335 @@ public partial class MainWindowViewModel
                 return;
         }
 
-        // TODO consider moving more generic operations out of the swich below e.g.Disconnect, Help, Exit etc. 
         switch (_displayType)
         {
             case DisplayType.Terminal:
-
-                // looking for alt key combinations (same as ctrl codes but with high bit set)
-                switch (asciiValue)
-                {
-                    case Constants.ALT_C: // conceal
-                        _displayManagerMain.Display.ToggleConceal();
-                        break;
-                    case Constants.CR: // return
-                        asciiValue = Constants.HASH;
-                        break;
-                    case Constants.CTRL_D: // ctrl+D sends CR for modems etc.
-                        asciiValue = Constants.CR;
-                        break;
-                    case Constants.ALT_H: // alt+h show help menus
-                        SetDisplay(DisplayType.Help);
-                        return;
-                }
-
-                // send to remote end
-                if (!_comms.Write(asciiValue))
-                {
-                    _logger.LogError("Failed to send character to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
-                }
-                else
-                {
-                    _logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
-                }
-
+                HandleTerminalKey(asciiValue);
                 break;
-
             case DisplayType.Welcome:
-
-                // if we get a key press of any kind whilst looking at the welcome page
-                // then load the menu
-                SetDisplay(DisplayType.Directory);
+                HandleWelcomeKey(asciiValue);
                 break;
-
             case DisplayType.Directory:
-
-                int index;
-
-                switch (asciiValue)
-                {
-                    case Constants.ALT_H: // alt+h show help menus
-                        SetDisplay(DisplayType.Help);
-                        return;
-                    case (byte)'S' or (byte)'s': // serial connection (there's only one serial connection)
-                        con = _settings.Config.SerialConnection;
-                        SetDisplay(DisplayType.ConnectSerial, con);
-                        break;
-                    // TODO maybe use char.IsDigit
-                    // validate number Connect)
-                    case >= (byte)'0' and <= (byte)'9':
-
-                        // convert to index
-                        index = asciiValue - (byte)'0';
-
-                        // manual dialling?
-                        if (index == 0)
-                        {
-                            SetDisplay(DisplayType.ConnectTcp);
-                        }
-                        else if (index - 1 < _settings.Config.Connections.Count)
-                        {
-                            // user has selected a connection
-                            // index-1 as menu is '1' based and collection is '0' based
-                            con = _settings.Config.Connections[index - 1];
-
-                            if (con is TcpConnection tcp)
-                            {
-                                if (!string.IsNullOrEmpty(tcp.Name))
-                                {
-                                    Connect(tcp.Host, tcp.Port, false);
-                                    SetDisplay(DisplayType.Terminal);
-                                }
-                            }
-                        }
-
-                        break;
-
-                    // validate alt+number (Edit)
-                    case >= Constants.ALT_0 and <= Constants.ALT_9:
-                        index = asciiValue - Constants.ALT_0;
-
-                        if (index - 1 < _settings.Config.Connections.Count)
-                        {
-                            // user has selected a connection
-                            // index-1 as menu is '1' based and collection is '0' based
-                            con = _settings.Config.Connections[index - 1];
-                            SetDisplay(DisplayType.EditConnection, con);
-                        }
-
-                        break;
-                }
-
+                HandleDirectoryKey(asciiValue);
                 break;
-
             case DisplayType.ConnectTcp:
-
-                switch (asciiValue)
-                {
-                    case Constants.ESC:
-                        SetDisplay(_previousDisplayType);
-                        return;
-                }
-
-                // connect or ignore
-                if (!_currentForm.ProcessFormKey(asciiValue))
-                {
-                    if (_currentForm is not null)
-                    {
-                        if (_currentForm.IsValid())
-                        {
-                            // get the values
-                            var field = _currentForm.GetFieldById("host");
-                            if (field is not null)
-                                host = field.Value;
-                            field = _currentForm.GetFieldById("port");
-                            if (field is not null)
-                                int.TryParse(field.Value, out port);
-
-                            Connect(host, port, false);
-                            SetDisplay(DisplayType.Terminal);
-                        }
-                        else
-                        {
-                            _logger.LogError("Form is invalid: {Host}, {Port}", host, port);
-                        }
-                    }
-                }
-                else
-                {
-                    DisplayData = _displayManagerAlt.Display.Chars;
-                }
-
+                HandleConnectTcpKey(asciiValue);
                 break;
-
             case DisplayType.ConnectSerial:
+                HandleConnectSerialKey(asciiValue);
+                break;
+            case DisplayType.EditConnection:
+                HandleEditConnectionKey(asciiValue);
+                break;
+            case DisplayType.Help:
+                HandleHelpKey(asciiValue);
+                break;
+        }
 
-                switch (asciiValue)
+        UpdateConnectStatus();
+        DisplayData = _displayManagerAlt.Display.Chars;
+    }
+
+    private void HandleTerminalKey(byte asciiValue)
+    {
+        // looking for alt key combinations (same as ctrl codes but with high bit set)
+        switch (asciiValue)
+        {
+            case Constants.ALT_C: // conceal
+                _displayManagerMain.Display.ToggleConceal();
+                break;
+            case Constants.CR: // return
+                asciiValue = Constants.HASH;
+                break;
+            case Constants.CTRL_D: // ctrl+D sends CR for modems etc.
+                asciiValue = Constants.CR;
+                break;
+            case Constants.ALT_H: // alt+h show help menus
+                SetDisplay(DisplayType.Help);
+                return;
+        }
+
+        // send to remote end
+        if (!_comms.Write(asciiValue))
+        {
+            _logger.LogError("Failed to send character to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
+        }
+        else
+        {
+            _logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
+        }
+    }
+
+    private void HandleWelcomeKey(byte asciiValue)
+    {
+        switch (asciiValue)
+        {
+            
+        }
+
+        // if we get a key press of any kind whilst looking at the welcome page
+        // then load the menu
+        SetDisplay(DisplayType.Directory);
+    }
+
+    private void HandleDirectoryKey(byte asciiValue)
+    {
+        IConnection con;
+        int index;
+
+        switch (asciiValue)
+        {
+            case Constants.ALT_H: // alt+h show help menus
+                SetDisplay(DisplayType.Help);
+                return;
+            case (byte)'S' or (byte)'s': // serial connection (there's only one serial connection)
+                con = _settings.Config.SerialConnection;
+                SetDisplay(DisplayType.ConnectSerial, con);
+                break;
+            // TODO maybe use char.IsDigit
+            // validate number Connect)
+            case >= (byte)'0' and <= (byte)'9':
+
+                // convert to index
+                index = asciiValue - (byte)'0';
+
+                // manual dialling?
+                if (index == 0)
                 {
-                    case Constants.ESC:
-                        SetDisplay(_previousDisplayType);
-                        return;
+                    SetDisplay(DisplayType.ConnectTcp);
                 }
-
-                if (!_currentForm.ProcessFormKey(asciiValue))
+                else if (index - 1 < _settings.Config.Connections.Count)
                 {
-                    if (_currentForm is not null)
+                    // user has selected a connection
+                    // index-1 as menu is '1' based and collection is '0' based
+                    con = _settings.Config.Connections[index - 1];
+
+                    if (con is TcpConnection tcp)
                     {
-                        if (_currentForm.IsValid())
+                        if (!string.IsNullOrEmpty(tcp.Name))
                         {
-                            // get the values
-
-                            var field = _currentForm.GetFieldById("device");
-                            if (field is not null)
-                                device = field.Value;
-                            field = _currentForm.GetFieldById("baud");
-                            if (field is not null)
-                                int.TryParse(field.Value, out baud);
-
-                            // update settings directly
-                            _settings.Config.SerialConnection.Device = device;
-                            _settings.Config.SerialConnection.BaudRate = baud;
-                            _settings.Save();
-
-                            // connect
-                            Connect(device, baud, true);
+                            Connect(tcp.Host, tcp.Port, false);
                             SetDisplay(DisplayType.Terminal);
                         }
-                        else
-                        {
-                            _logger.LogError("Form is invalid: {Device}, {Baud}", device, baud);
-                        }
                     }
-                }
-                else
-                {
-                    DisplayData = _displayManagerAlt.Display.Chars;
                 }
 
                 break;
 
-            case DisplayType.EditConnection:
+            // validate alt+number (Edit)
+            case >= Constants.ALT_0 and <= Constants.ALT_9:
+                index = asciiValue - Constants.ALT_0;
 
-                switch (asciiValue)
+                if (index - 1 < _settings.Config.Connections.Count)
                 {
-                    case Constants.ESC:
-                        SetDisplay(_previousDisplayType);
-                        return;
-                    case Constants.ALT_D: // delete entry
-
-                        if (_currentForm.Connection is not null)
-                        {
-                            if (_currentForm.Connection is TcpConnection tcp)
-                            {
-                                tcp.Name = string.Empty;
-                                tcp.Host = string.Empty;
-                                tcp.Port = 0;
-                            }
-                            _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
-                            _settings.Save();
-                            UpdateConnectStatus();
-                            DisplayData = _displayManagerAlt.Display.Chars;
-                            //DisplayEditor returns false when complete or canceled
-                            SetDisplay(_previousDisplayType);
-                        }
-                        break;
-                }
-
-                if (!_currentForm.ProcessFormKey(asciiValue) || asciiValue == Constants.ALT_S)
-                {
-                    // save connection
-                    if (_currentForm is not null)
-                    {
-                        // get the values
-                        Forms.Field field;
-
-                        field = _currentForm.GetFieldById("dirName");
-                        if (field is not null)
-                            name = field.Value;
-                        field = _currentForm.GetFieldById("host");
-                        if (field is not null)
-                            host = field.Value;
-                        field = _currentForm.GetFieldById("port");
-                        if (field is not null)
-                            int.TryParse(field.Value, out port);
-
-                        // if the form is valid
-                        if (_currentForm.IsValid() && _currentForm.Connection is not null)
-                        {
-                            if (_currentForm.Connection is TcpConnection tcp)
-                            {
-                                tcp.Name = name;
-                                tcp.Host = host;
-                                tcp.Port = port;
-
-                                // save, the form holds the current connection within settings
-                                _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
-                                _settings.Save();
-                                UpdateConnectStatus();
-                                DisplayData = _displayManagerAlt.Display.Chars;
-                            }
-                        }
-                        else
-                        {
-                            // TODO work out a way to display errors
-                            // error, not saved
-                            if (_currentForm.Connection != null)
-                            {
-                                _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
-                                    name,
-                                    host,
-                                    port);
-                                _displayManagerAlt.Display.SetStatusText("INVALID",Display.Constants.Red);
-                                DisplayData = _displayManagerAlt.Display.Chars;     
-                                return;
-                            }
-                            else
-                            {
-                                _logger.LogError("Connection invalid and not saved, the forms connection is null");
-                            }
-                            
-                        }
-                    }
-
-                    //DisplayEditor returns false when complete or canceled
-                    SetDisplay(_previousDisplayType);
-                }
-                else
-                {
-                    // updte the display as something was processed by _currentForm.ProcessFormKey
-                    DisplayData = _displayManagerAlt.Display.Chars;
-                }
-
-                break;
-
-            case DisplayType.Help:
-
-                // TODO fix me as sometimes the previous display is Help,
-                //  this can happen if help is selected when help is showing.
-                //  this could be the same for all forms.
-                switch (asciiValue)
-                {
-                    case Constants.ESC:
-                        SetDisplay(_previousDisplayType);
-                        return;
+                    // user has selected a connection
+                    // index-1 as menu is '1' based and collection is '0' based
+                    con = _settings.Config.Connections[index - 1];
+                    SetDisplay(DisplayType.EditConnection, con);
                 }
 
                 break;
         }
-        
-        UpdateConnectStatus();
-        DisplayData = _displayManagerAlt.Display.Chars;
-        
+    }
+
+    private void HandleConnectTcpKey(byte asciiValue)
+    {
+        int port = 0;
+        string host = string.Empty;
+
+        switch (asciiValue)
+        {
+            case Constants.ESC:
+                SetDisplay(_previousDisplayType);
+                return;
+        }
+
+        // connect or ignore
+        if (!_currentForm.ProcessFormKey(asciiValue))
+        {
+            if (_currentForm is not null)
+            {
+                if (_currentForm.IsValid())
+                {
+                    // get the values
+                    var field = _currentForm.GetFieldById("host");
+                    if (field is not null)
+                        host = field.Value;
+                    field = _currentForm.GetFieldById("port");
+                    if (field is not null)
+                        int.TryParse(field.Value, out port);
+
+                    Connect(host, port, false);
+                    SetDisplay(DisplayType.Terminal);
+                }
+                else
+                {
+                    _logger.LogError("Form is invalid: {Host}, {Port}", host, port);
+                }
+            }
+        }
+        else
+        {
+            DisplayData = _displayManagerAlt.Display.Chars;
+        }
+    }
+
+    private void HandleConnectSerialKey(byte asciiValue)
+    {
+        int baud = 0;
+        string device = string.Empty;
+
+        switch (asciiValue)
+        {
+            case Constants.ESC:
+                SetDisplay(_previousDisplayType);
+                return;
+        }
+
+        if (!_currentForm.ProcessFormKey(asciiValue))
+        {
+            if (_currentForm is not null)
+            {
+                if (_currentForm.IsValid())
+                {
+                    // get the values
+
+                    var field = _currentForm.GetFieldById("device");
+                    if (field is not null)
+                        device = field.Value;
+                    field = _currentForm.GetFieldById("baud");
+                    if (field is not null)
+                        int.TryParse(field.Value, out baud);
+
+                    // update settings directly
+                    _settings.Config.SerialConnection.Device = device;
+                    _settings.Config.SerialConnection.BaudRate = baud;
+                    _settings.Save();
+
+                    // connect
+                    Connect(device, baud, true);
+                    SetDisplay(DisplayType.Terminal);
+                }
+                else
+                {
+                    _logger.LogError("Form is invalid: {Device}, {Baud}", device, baud);
+                }
+            }
+        }
+        else
+        {
+            DisplayData = _displayManagerAlt.Display.Chars;
+        }
+    }
+
+    private void HandleEditConnectionKey(byte asciiValue)
+    {
+        int port = 0;
+        string host = string.Empty;
+        string name = string.Empty;
+
+        switch (asciiValue)
+        {
+            case Constants.ESC:
+                SetDisplay(_previousDisplayType);
+                return;
+            case Constants.ALT_D: // delete entry
+
+                if (_currentForm.Connection is not null)
+                {
+                    if (_currentForm.Connection is TcpConnection tcp)
+                    {
+                        tcp.Name = string.Empty;
+                        tcp.Host = string.Empty;
+                        tcp.Port = 0;
+                    }
+                    _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
+                    _settings.Save();
+                    UpdateConnectStatus();
+                    DisplayData = _displayManagerAlt.Display.Chars;
+                    //DisplayEditor returns false when complete or canceled
+                    SetDisplay(_previousDisplayType);
+                }
+                break;
+        }
+
+        if (!_currentForm.ProcessFormKey(asciiValue) || asciiValue == Constants.ALT_S)
+        {
+            // save connection
+            if (_currentForm is not null)
+            {
+                // get the values
+                Forms.Field field;
+
+                field = _currentForm.GetFieldById("dirName");
+                if (field is not null)
+                    name = field.Value;
+                field = _currentForm.GetFieldById("host");
+                if (field is not null)
+                    host = field.Value;
+                field = _currentForm.GetFieldById("port");
+                if (field is not null)
+                    int.TryParse(field.Value, out port);
+
+                // if the form is valid
+                if (_currentForm.IsValid() && _currentForm.Connection is not null)
+                {
+                    if (_currentForm.Connection is TcpConnection tcp)
+                    {
+                        tcp.Name = name;
+                        tcp.Host = host;
+                        tcp.Port = port;
+
+                        // save, the form holds the current connection within settings
+                        _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
+                        _settings.Save();
+                        UpdateConnectStatus();
+                        DisplayData = _displayManagerAlt.Display.Chars;
+                    }
+                }
+                else
+                {
+                    // TODO work out a way to display errors
+                    // error, not saved
+                    if (_currentForm.Connection != null)
+                    {
+                        _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
+                            name,
+                            host,
+                            port);
+                        _displayManagerAlt.Display.SetStatusText("INVALID",Display.Constants.Red);
+                        DisplayData = _displayManagerAlt.Display.Chars;
+                        return;
+                    }
+                    else
+                    {
+                        _logger.LogError("Connection invalid and not saved, the forms connection is null");
+                    }
+
+                }
+            }
+
+            //DisplayEditor returns false when complete or canceled
+            SetDisplay(_previousDisplayType);
+        }
+        else
+        {
+            // updte the display as something was processed by _currentForm.ProcessFormKey
+            DisplayData = _displayManagerAlt.Display.Chars;
+        }
+    }
+
+    private void HandleHelpKey(byte asciiValue)
+    {
+        // TODO fix me as sometimes the previous display is Help,
+        //  this can happen if help is selected when help is showing.
+        //  this could be the same for all forms.
+        switch (asciiValue)
+        {
+            case Constants.ESC:
+                SetDisplay(_previousDisplayType);
+                return;
+        }
     }
 
     public void TextHandler(TextInputEventArgs args)
@@ -373,7 +393,7 @@ public partial class MainWindowViewModel
         // e.Text is already fully composed by the OS — Shift+8 gives "*", etc.
         if (args.Text is { Length: > 0 })
         {
-            char c = args.Text[0];
+            var c = args.Text[0];
             if (c >= 0 && c <= 127)
             {
                 ProcessKey((byte)c);
@@ -385,7 +405,7 @@ public partial class MainWindowViewModel
     public void KeyHandler(KeyEventArgs args)
     {
         // Only handle keys that OnTextInput will NEVER fire for
-        byte? ascii = GetAsciiKey(args);
+        var ascii = GetAsciiKey(args);
         if (ascii is not null)
         {
             ProcessKey(ascii.Value);
