@@ -35,6 +35,12 @@ public partial class MainWindowViewModel
     /// <param name="asciiValue"></param>
     public void ProcessKey(byte asciiValue)
     {
+        var port = 0;
+        var host = string.Empty;
+        var name = string.Empty;
+        var baud = 0;
+        var device = string.Empty;
+
         // NOTE That this function does not run on the UI thread
         _logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
         IConnection con;
@@ -57,6 +63,7 @@ public partial class MainWindowViewModel
                 {
                     SetDisplay(DisplayType.Help);
                 }
+
                 return;
             case 0x90: // alt+q
                 Disconnect();
@@ -138,7 +145,6 @@ public partial class MainWindowViewModel
                                     SetDisplay(DisplayType.Terminal);
                                 }
                             }
-                                
                         }
 
                         break;
@@ -177,11 +183,7 @@ public partial class MainWindowViewModel
                         if (_currentForm.IsValid())
                         {
                             // get the values
-                            Forms.Field field;
-                            var port = 0;
-                            var host = string.Empty;
-
-                            field = _currentForm.GetFieldById("host");
+                            var field = _currentForm.GetFieldById("host");
                             if (field is not null)
                                 host = field.Value;
                             field = _currentForm.GetFieldById("port");
@@ -190,6 +192,10 @@ public partial class MainWindowViewModel
 
                             Connect(host, port, false);
                             SetDisplay(DisplayType.Terminal);
+                        }
+                        else
+                        {
+                            _logger.LogError("Form is invalid: {Host}, {Port}", host, port);
                         }
                     }
                 }
@@ -216,11 +222,8 @@ public partial class MainWindowViewModel
                         if (_currentForm.IsValid())
                         {
                             // get the values
-                            Forms.Field field;
-                            var baud = 0;
-                            var device = string.Empty;
 
-                            field = _currentForm.GetFieldById("device");
+                            var field = _currentForm.GetFieldById("device");
                             if (field is not null)
                                 device = field.Value;
                             field = _currentForm.GetFieldById("baud");
@@ -235,6 +238,10 @@ public partial class MainWindowViewModel
                             // connect
                             Connect(device, baud, true);
                             SetDisplay(DisplayType.Terminal);
+                        }
+                        else
+                        {
+                            _logger.LogError("Form is invalid: {Device}, {Baud}", device, baud);
                         }
                     }
                 }
@@ -261,9 +268,6 @@ public partial class MainWindowViewModel
                     {
                         // get the values
                         Forms.Field field;
-                        var port = 0;
-                        var name = string.Empty;
-                        var host = string.Empty;
 
                         field = _currentForm.GetFieldById("dirName");
                         if (field is not null)
@@ -294,20 +298,10 @@ public partial class MainWindowViewModel
                             // error, not saved
                             if (_currentForm.Connection != null)
                             {
-                                if (_currentForm.Connection is TcpConnection tcp)
-                                {
-                                    tcp.Name = name;
-                                    tcp.Host = host;
-                                    tcp.Port = port;
-
-                                    // save, the form holds the current connection within settings
-                                    _settings.Save();
-
-                                    _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
-                                        tcp.Name,
-                                        tcp.Host,
-                                        tcp.Port);
-                                }
+                                _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
+                                    name,
+                                    host,
+                                    port);
                             }
                             else
                             {
@@ -328,7 +322,7 @@ public partial class MainWindowViewModel
                 break;
 
             case DisplayType.Help:
-                
+
                 // TODO fix me as sometimes the previous display is Help,
                 //  this can happen if help is selected when help is showing.
                 //  this could be the same for all forms.
@@ -338,6 +332,7 @@ public partial class MainWindowViewModel
                         SetDisplay(_previousDisplayType);
                         return;
                 }
+
                 break;
         }
     }
