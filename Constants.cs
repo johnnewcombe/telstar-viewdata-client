@@ -19,7 +19,8 @@ public class Constants
     public const int ALT_9 = 0xB9;
     
     public const int ESC = 0x1B;
-    public const int CR = 0x13;
+    public const int CR = 0x0D;
+    public const int LF = 0x0A;
     public const int HASH = 0x5F;
     public const int DEL = 0x7F;
 

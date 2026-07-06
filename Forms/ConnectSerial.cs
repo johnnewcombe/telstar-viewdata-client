@@ -37,6 +37,7 @@ public class ConnectSerial : FormBase
             .Replace("[PLACEHOLDER]", Fields[0].Value);
         menu.Append(Converters.ConvertFromMarkup("[C]    BAUD RATE:[W][PLACEHOLDER]\r\n\n"))
             .Replace("[PLACEHOLDER]", Fields[1].Value);
+        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Alt-C[C]to Connect\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Escape[C]to Return"));
         //menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
         return menu.ToString();

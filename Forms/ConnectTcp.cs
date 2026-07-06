@@ -28,6 +28,7 @@ public class ConnectTcp : FormBase
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[C]HOST:[W]\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[C]PORT:[W]\r\n\n"));
+        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Alt-C[C]to Connect\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Escape[C]to Return"));
         //menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
         return menu.ToString();

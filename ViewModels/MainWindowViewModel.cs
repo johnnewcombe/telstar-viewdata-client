@@ -139,6 +139,11 @@ public partial class MainWindowViewModel : ViewModelBase
         //_comms.OnDataReceivedEvent += OnReceived;
     }
 
+    /// <summary>
+    /// Display the Welcome message and update the connected status.
+    /// note this is an asynchronous method with a delay such that
+    /// it completes AFTER the constructor has completed.
+    /// </summary>
     private async Task DisplayWelcomeMessage()
     {
         await Task.Delay(100);
@@ -150,6 +155,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     #region Data Processing and Notification
 
+    /// <summary>
+    /// Toggles Full Screen (Kiosk) mode. 
+    /// </summary>
     private void ToggleKioskMode()
     {
         // get MainWindow
@@ -160,11 +168,15 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// This method is called by the _displayManagerMain.OnDisplayDataChangedEvent if the
+    /// Display Manager has updated the display internally
+    /// </summary>
     private void DisplayDataChanged()
     {
-        // this method is called if the DiplayManager has updated the display internally
-        // e.g. when flashing text (this is handled within the display manager itself)
-        // this allows us to update the Display property of this view model
+        // this method is called by the _displayManagerMain.OnDisplayDataChangedEvent
+        // if the Display Manager has updated the display internally
+        // this allows us to update the viewDisplay property of this view model
 
         // however we must only do this if we are displaying Viewdata screen
         if (_displayType == DisplayType.Terminal)
@@ -173,34 +185,49 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Updates the main display, this is the display that handles terminal data.
+    /// </summary>
     private void UpdateMainDisplay()
     {
         DisplayData = _displayManagerMain.Display.Chars;
         Cursor = _displayManagerMain.Cursor;
     }
 
+    /// <summary>
+    /// Updates the alt display, this is the display that handles connection, help
+    /// and other internal screens.
+    /// </summary>
     private void UpdateAltDisplay()
     {
         DisplayData = _displayManagerAlt.Display.Chars;
         Cursor = _displayManagerAlt.Cursor;
     }
-
-    private void DisplayStatusMessage(string message)
+    
+    /// <summary>
+    /// Helper method to update the status display. It handles both main and alt displays
+    /// and updates the cursor etc.
+    /// </summary>
+    /// <param name="message"></param>
+    private void DisplayStatusMessage(string message,string foregroundColour = ViewdataDisplay.Constants.Green, 
+        string backgroundColour = ViewdataDisplay.Constants.Black)
     {
         try
         {
-            
             // update both displays
-            _displayManagerMain.Display.SetStatusText(message);
-            _displayManagerAlt.Display.SetStatusText(message);
+            _displayManagerMain.Display.SetStatusText(message, foregroundColour, backgroundColour);
+            _displayManagerAlt.Display.SetStatusText(message,foregroundColour, backgroundColour);
 
+            // but only display one
             if (_displayType == DisplayType.Terminal)
             {
+                _logger.LogInformation("Displaying status message to main display:{message}", message);
                 DisplayData = _displayManagerMain.Display.Chars;
                 Cursor = _displayManagerMain.Cursor;
             }
             else
             {
+                _logger.LogInformation("Displaying status message to alternate display:{message}", message);
                 DisplayData = _displayManagerAlt.Display.Chars;
                 Cursor = _displayManagerAlt.Cursor;
             }
@@ -215,23 +242,21 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// This called on the UI Tread via the dispatcher (see OnConnect event).
+    /// This should be called on the UI Thread or via the dispatcher (see OnConnect event).
     /// </summary>
     private void UpdateConnectStatus()
     {
-        string statusText;
 
-            // this function cannot have parameters so read from thread safe property
-            // to get the current status.
-            if (ConnectStatus)
-            {
-                DisplayStatusMessage(CONNECTED_STATUS);
-            }
-            else
-            {
-                DisplayStatusMessage(DISCONNECTED_STATUS);
-            }
-
+        // this function cannot have parameters so read from thread safe property
+        // to get the current status.
+        if (ConnectStatus)
+        {
+            DisplayStatusMessage(CONNECTED_STATUS);
+        }
+        else
+        {
+            DisplayStatusMessage(DISCONNECTED_STATUS);
+        }
     }
 
     /// <summary>
@@ -370,7 +395,8 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             //if (connection.Name is not null) {
             item++;
-            menuSb.Append($"   \e{ViewdataDisplay.Constants.AlphaWhite}{item} \e{ViewdataDisplay.Constants.AlphaCyan}{connection.Name}\r\n");
+            menuSb.Append(
+                $"   \e{ViewdataDisplay.Constants.AlphaWhite}{item} \e{ViewdataDisplay.Constants.AlphaCyan}{connection.Name}\r\n");
             //}
         }
 

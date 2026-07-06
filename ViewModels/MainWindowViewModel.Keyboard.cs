@@ -28,15 +28,44 @@ using ViewdataDisplay;
 namespace TelstarClient.ViewModels;
 
 
-
-
 public partial class MainWindowViewModel
 {
+    #region Public Methods
+
+    public void TextHandler(TextInputEventArgs args)
+    {
+        // e.Text is already fully composed by the OS — Shift+8 gives "*", etc.
+        if (args.Text is { Length: > 0 })
+        {
+            var c = args.Text[0];
+            if (c >= 0 && c <= 127)
+            {
+                ProcessKey((byte)c);
+                args.Handled = false;
+            }
+        }
+    }
+
+    public void KeyHandler(KeyEventArgs args)
+    {
+        // Only handle keys that OnTextInput will NEVER fire for
+        var ascii = GetAsciiKey(args);
+        if (ascii is not null)
+        {
+            ProcessKey(ascii.Value);
+            args.Handled = true;
+        }
+    }
+
+    #endregion
+
+    #region Private Methods
+    
     /// <summary>
     /// Handles keyboard activity passed from the View.
     /// </summary>
     /// <param name="asciiValue"></param>
-    public void ProcessKey(byte asciiValue)
+    private void ProcessKey(byte asciiValue)
     {
         // NOTE That this function does not run on the UI thread
         _logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
@@ -57,36 +86,47 @@ public partial class MainWindowViewModel
                 return;
         }
 
+        var result = false;
+
         switch (_displayType)
         {
             case DisplayType.Terminal:
-                HandleTerminalKey(asciiValue);
+                result = HandleTerminalKey(asciiValue);
                 break;
             case DisplayType.Welcome:
-                HandleWelcomeKey(asciiValue);
+                result = HandleWelcomeKey(asciiValue);
                 break;
             case DisplayType.Directory:
-                HandleDirectoryKey(asciiValue);
+                result = HandleDirectoryKey(asciiValue);
                 break;
             case DisplayType.ConnectTcp:
-                HandleConnectTcpKey(asciiValue);
+                result = HandleConnectTcpKey(asciiValue);
                 break;
             case DisplayType.ConnectSerial:
-                HandleConnectSerialKey(asciiValue);
+                result = HandleConnectSerialKey(asciiValue);
                 break;
             case DisplayType.EditConnection:
-                HandleEditConnectionKey(asciiValue);
+                result = HandleEditConnectionKey(asciiValue);
                 break;
             case DisplayType.Help:
-                HandleHelpKey(asciiValue);
+                result = HandleHelpKey(asciiValue);
                 break;
         }
 
-        UpdateConnectStatus();
+        if (!result)
+        {
+            UpdateConnectStatus();
+        }
+        
         DisplayData = _displayManagerAlt.Display.Chars;
     }
 
-    private void HandleTerminalKey(byte asciiValue)
+    /// <summary>
+    /// Key handler returns true the status has been updated.
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private bool HandleTerminalKey(byte asciiValue)
     {
         // looking for alt key combinations (same as ctrl codes but with high bit set)
         switch (asciiValue)
@@ -105,10 +145,10 @@ public partial class MainWindowViewModel
                 break;
             case Constants.ALT_H: // alt+h show help menus
                 SetDisplay(DisplayType.Help);
-                return;
+                return false;
         }
 
-        // send to remote end
+        // send value to remote end
         if (!_comms.Write(asciiValue))
         {
             _logger.LogError("Failed to send character to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
@@ -117,9 +157,15 @@ public partial class MainWindowViewModel
         {
             _logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
         }
-    }
 
-    private void HandleWelcomeKey(byte asciiValue)
+        return false;
+    }
+    /// <summary>
+    /// Key handler, returns true the status has been updated.
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private bool HandleWelcomeKey(byte asciiValue)
     {
         // pointless switch statement for future use and to remove ReSharper warnings
         switch (asciiValue)
@@ -131,9 +177,14 @@ public partial class MainWindowViewModel
         // if we get a key press of any kind whilst looking at the welcome page
         // then load the menu
         SetDisplay(DisplayType.Directory);
+        return false;
     }
-
-    private void HandleDirectoryKey(byte asciiValue)
+    /// <summary>
+    /// Key handler, returns true the status has been updated.
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private bool HandleDirectoryKey(byte asciiValue)
     {
         IConnection con;
         int index;
@@ -142,7 +193,7 @@ public partial class MainWindowViewModel
         {
             case Constants.ALT_H: // alt+h show help menus
                 SetDisplay(DisplayType.Help);
-                return;
+                break;
             case (byte)'S' or (byte)'s': // serial connection (there's only one serial connection)
                 con = _settings.Config.SerialConnection;
                 SetDisplay(DisplayType.ConnectSerial, con);
@@ -191,9 +242,15 @@ public partial class MainWindowViewModel
 
                 break;
         }
-    }
 
-    private void HandleConnectTcpKey(byte asciiValue)
+        return false;
+    }
+    /// <summary>
+    /// Key handler, returns true the status has been updated.
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private bool HandleConnectTcpKey(byte asciiValue)
     {
         int port = 0;
         string host = string.Empty;
@@ -202,11 +259,11 @@ public partial class MainWindowViewModel
         {
             case Constants.ESC:
                 SetDisplay(_previousDisplayType);
-                return;
+                return false;
         }
 
         // connect or ignore
-        if (!_currentForm.ProcessFormKey(asciiValue))
+        if (!_currentForm.ProcessFormKey(asciiValue) || asciiValue == Constants.ALT_C)
         {
             if (_currentForm is not null)
             {
@@ -226,6 +283,9 @@ public partial class MainWindowViewModel
                 else
                 {
                     _logger.LogError("Form is invalid: {Host}, {Port}", host, port);
+                    // update the status
+                    DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
+                    return true;
                 }
             }
         }
@@ -233,9 +293,15 @@ public partial class MainWindowViewModel
         {
             DisplayData = _displayManagerAlt.Display.Chars;
         }
-    }
 
-    private void HandleConnectSerialKey(byte asciiValue)
+        return false;
+    }
+    /// <summary>
+    /// Key handler, returns true the status has been updated.
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private bool HandleConnectSerialKey(byte asciiValue)
     {
         int baud = 0;
         string device = string.Empty;
@@ -244,10 +310,10 @@ public partial class MainWindowViewModel
         {
             case Constants.ESC:
                 SetDisplay(_previousDisplayType);
-                return;
+                return false;
         }
 
-        if (!_currentForm.ProcessFormKey(asciiValue))
+        if (!_currentForm.ProcessFormKey(asciiValue) || asciiValue == Constants.ALT_C)
         {
             if (_currentForm is not null)
             {
@@ -274,6 +340,11 @@ public partial class MainWindowViewModel
                 else
                 {
                     _logger.LogError("Form is invalid: {Device}, {Baud}", device, baud);
+                                            
+                    // display error message on the status bar
+                    DisplayStatusMessage("INVALID DATA",ViewdataDisplay.Constants.Red);
+                    return true;
+
                 }
             }
         }
@@ -281,9 +352,15 @@ public partial class MainWindowViewModel
         {
             DisplayData = _displayManagerAlt.Display.Chars;
         }
-    }
 
-    private void HandleEditConnectionKey(byte asciiValue)
+        return false;
+    }
+    /// <summary>
+    /// Key handler, returns true the status has been updated.
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private bool HandleEditConnectionKey(byte asciiValue)
     {
         var port = 0;
         var host = string.Empty;
@@ -293,7 +370,7 @@ public partial class MainWindowViewModel
         {
             case Constants.ESC:
                 SetDisplay(_previousDisplayType);
-                return;
+                return false;
             case Constants.ALT_D: // delete entry
 
                 if (_currentForm.Connection is not null)
@@ -306,23 +383,23 @@ public partial class MainWindowViewModel
                     }
                     _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
                     _settings.Save();
-                    UpdateConnectStatus();
-                    DisplayData = _displayManagerAlt.Display.Chars;
+
                     //DisplayEditor returns false when complete or canceled
                     SetDisplay(_previousDisplayType);
                 }
                 break;
         }
 
+        // process the key, the ProcessFormKey returns false when complete so if
+        // false or save has been selected then save the current connection
         if (!_currentForm.ProcessFormKey(asciiValue) || asciiValue == Constants.ALT_S)
         {
             // save connection
             if (_currentForm is not null)
             {
-                // get the values
-                Forms.Field field;
+                // get the values from the fields
 
-                field = _currentForm.GetFieldById("dirName");
+                var field = _currentForm.GetFieldById("dirName");
                 if (field is not null)
                     name = field.Value;
                 field = _currentForm.GetFieldById("host");
@@ -332,7 +409,7 @@ public partial class MainWindowViewModel
                 if (field is not null)
                     int.TryParse(field.Value, out port);
 
-                // if the form is valid
+                // if the form is valid get the current connection from the form and update and save it
                 if (_currentForm.IsValid() && _currentForm.Connection is not null)
                 {
                     if (_currentForm.Connection is TcpConnection tcp)
@@ -348,19 +425,15 @@ public partial class MainWindowViewModel
                         DisplayData = _displayManagerAlt.Display.Chars;
                     }
                 }
-                else
+                else  // connection is either null or invalid
                 {
-                    // TODO work out a way to display errors
-                    // error, not saved
                     if (_currentForm.Connection != null)
                     {
-                        _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}",
-                            name,
-                            host,
-                            port);
-                        _displayManagerAlt.Display.SetStatusText("INVALID",ViewdataDisplay.Constants.Red);
-                        DisplayData = _displayManagerAlt.Display.Chars;
-                        return;
+                        _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}", name, host, port);
+                        
+                        // display error message on the status bar
+                        DisplayStatusMessage("INVALID DATA",ViewdataDisplay.Constants.Red);
+                        return true;
                     }
                     else
                     {
@@ -375,12 +448,21 @@ public partial class MainWindowViewModel
         }
         else
         {
-            // updte the display as something was processed by _currentForm.ProcessFormKey
-            DisplayData = _displayManagerAlt.Display.Chars;
+            // TODO is this DisplayData assignment needed?
+            // not complete or save invoked so simply update the display
+            // update the display as something was processed by _currentForm.ProcessFormKey
+            //DisplayData = _displayManagerAlt.Display.Chars;
         }
+
+        return false;
     }
 
-    private void HandleHelpKey(byte asciiValue)
+    /// <summary>
+    /// Key handler, returns true the status has been updated.
+    /// </summary>
+    /// <param name="asciiValue"></param>
+    /// <returns></returns>
+    private bool HandleHelpKey(byte asciiValue)
     {
         // TODO fix me as sometimes the previous display is Help,
         //  this can happen if help is selected when help is showing.
@@ -389,35 +471,11 @@ public partial class MainWindowViewModel
         {
             case Constants.ESC:
                 SetDisplay(_previousDisplayType);
-                return;
+                break;
         }
+        return false;
     }
-
-    public void TextHandler(TextInputEventArgs args)
-    {
-        // e.Text is already fully composed by the OS — Shift+8 gives "*", etc.
-        if (args.Text is { Length: > 0 })
-        {
-            var c = args.Text[0];
-            if (c >= 0 && c <= 127)
-            {
-                ProcessKey((byte)c);
-                args.Handled = true;
-            }
-        }
-    }
-
-    public void KeyHandler(KeyEventArgs args)
-    {
-        // Only handle keys that OnTextInput will NEVER fire for
-        var ascii = GetAsciiKey(args);
-        if (ascii is not null)
-        {
-            ProcessKey(ascii.Value);
-            args.Handled = true;
-        }
-    }
-
+    
 
     private static byte? GetAsciiKey(KeyEventArgs e)
     {
@@ -492,6 +550,8 @@ public partial class MainWindowViewModel
             Environment.Exit(0);
         }
     }
+
+    #endregion
 }
 
 // TODO Create an external Keymap file that is read in at startup based on the following keyboard key table
