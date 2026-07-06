@@ -48,22 +48,20 @@ win-x64:
 	cd Assets && makensis -V4 -DVERSION=$(VERSION) -DOUTDIR=../../releases/$(VERSION) installer-win-x64.nsi
 
 macos-arm64:
-	mkdir -p $(APPBUNDLE-ARM)/Contents/MacOS
-	mkdir -p $(APPBUNDLE-ARM)/Contents/Resources
-	cp ./bin/Release/net9.0/osx-arm64/publish/* $(APPBUNDLE-ARM)/Contents/MacOS/
-	chmod +x $(APPBUNDLE-ARM)/Contents/MacOS/$(APPNAME)
-	cp Assets/icon.icns $(APPBUNDLE-ARM)/Contents/Resources/icon.icns
-	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > $(APPBUNDLE-ARM)/Contents/Info.plist
-	cp -r $(APPBUNDLE-ARM) ../releases/$(VERSION)/
+	mkdir -p ../releases/$(VERSION)/$(APPBUNDLE-ARM)/Contents/MacOS
+	mkdir -p ../releases/$(VERSION)/$(APPBUNDLE-ARM)/Contents/Resources
+	cp ./bin/Release/net9.0/osx-arm64/publish/* ../releases/$(VERSION)/$(APPBUNDLE-ARM)/Contents/MacOS/
+	chmod +x ../releases/$(VERSION)/$(APPBUNDLE-ARM)/Contents/MacOS/$(APPNAME)
+	cp Assets/icon.icns ../releases/$(VERSION)/$(APPBUNDLE-ARM)/Contents/Resources/icon.icns
+	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > ../releases/$(VERSION)/$(APPBUNDLE-ARM)/Contents/Info.plist
 
 macos-x64:
-	mkdir -p $(APPBUNDLE-X64)/Contents/MacOS
-	mkdir -p $(APPBUNDLE-X64)/Contents/Resources
-	cp ./bin/Release/net9.0/osx-x64/publish/* $(APPBUNDLE-X64)/Contents/MacOS/
-	chmod +x $(APPBUNDLE-X64)/Contents/MacOS/$(APPNAME)
-	cp Assets/icon.icns $(APPBUNDLE-X64)/Contents/Resources/icon.icns
-	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > $(APPBUNDLE-X64)/Contents/Info.plist
-	cp -r $(APPBUNDLE-X64) ../releases/$(VERSION)/
+	mkdir -p ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/MacOS
+	mkdir -p ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/Resources
+	cp ./bin/Release/net9.0/osx-x64/publish/* ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/MacOS/
+	chmod +x ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/MacOS/$(APPNAME)
+	cp Assets/icon.icns ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/Resources/icon.icns
+	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/Info.plist
 
 add-tag:
 	# triggers a remote build on GitHub and populated the GitHub Releases area on the GitHub website.
