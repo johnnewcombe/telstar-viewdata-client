@@ -28,10 +28,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
-using TelstarClient.Display;
+using ViewdataDisplay;
 using TelstarClient.Forms;
-using Char = TelstarClient.Models.Char;
 using Directory = TelstarClient.Forms.Directory;
+using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 
@@ -77,7 +77,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private IForm _currentForm;
     private DisplayType _displayType;
     private DisplayType _previousDisplayType;
-    private List<Char> _displayData;
+    private List<ViewdataDisplay.Char> _displayData;
     private Cursor _cursor;
     private readonly Settings _settings;
     private readonly DisplayManager _displayManagerMain;
@@ -263,7 +263,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// Display data to be displayed by the View.
     /// </summary>
-    public List<Char> DisplayData
+    public List<ViewdataDisplay.Char> DisplayData
     {
         get { return _displayData; }
         set
@@ -319,7 +319,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case DisplayType.Directory:
                 // pop the menu into the placeholder
                 _displayManagerAlt.Write(new Directory(_displayManagerAlt, connection).ToString()
-                    .Replace(Display.Constants.PlaceHolder, GetDirectoryFromConfig()));
+                    .Replace(ViewdataDisplay.Constants.PlaceHolder, GetDirectoryFromConfig()));
                 break;
             case DisplayType.ConnectTcp:
                 _currentForm = new ConnectTcp(_displayManagerAlt, connection);
@@ -370,7 +370,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             //if (connection.Name is not null) {
             item++;
-            menuSb.Append($"   \e{Display.Constants.AlphaWhite}{item} \e{Display.Constants.AlphaCyan}{connection.Name}\r\n");
+            menuSb.Append($"   \e{ViewdataDisplay.Constants.AlphaWhite}{item} \e{ViewdataDisplay.Constants.AlphaCyan}{connection.Name}\r\n");
             //}
         }
 

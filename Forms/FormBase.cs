@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using TelstarClient.Configuration;
-using TelstarClient.Display;
 
 namespace TelstarClient.Forms;
+using ViewdataDisplay;
 
 public abstract class FormBase(DisplayManager displayManager, IConnection connection)
     : IForm
@@ -18,16 +18,16 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
         {
             //var currentField = _currentForm.GetCurrentField();
             // escape 
-            case Constants.ESC:
+            case TelstarClient.Constants.ESC:
                 //_currentForm = null;
                 return false;
             // backspace
-            case Constants.BACK when GetCurrentField().Value.Length > 0:
+            case TelstarClient.Constants.BACK when GetCurrentField().Value.Length > 0:
                 // remove the char from the display by setting the cursor to the current position
                 // and then writing a space character
                 displayManager.SetCursorPosition(GetCurrentField().Value.Length - 1
                                                  + GetCurrentField().StartIndex);
-                displayManager.Write((char)Constants.SPACE);
+                displayManager.Write((char)TelstarClient.Constants.SPACE);
 
 
                 // remove the char from the value property of the field this reduces he value
@@ -41,7 +41,7 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
 
                 return true;
             // shift tab
-            case Constants.SHIFT_TAB:
+            case TelstarClient.Constants.SHIFT_TAB:
             {
                 if (Previous())
                 {
@@ -59,7 +59,7 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
         }
 
         // are we terminating the field?
-        if (asciiValue is Constants.CR or Constants.TAB)// || GetCurrentField().Value.Length >= GetCurrentField().Length)
+        if (asciiValue is Constants.CR or TelstarClient.Constants.TAB)// || GetCurrentField().Value.Length >= GetCurrentField().Length)
         {
             if (Next())
             {
@@ -72,7 +72,7 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
             return false;
         }
 
-        if (asciiValue >= Constants.SPACE && asciiValue <= Constants.DEL) // printables
+        if (asciiValue >= TelstarClient.Constants.SPACE && asciiValue <= TelstarClient.Constants.DEL) // printables
         {
             if (GetCurrentField().Type is FieldType.Alpha && !char.IsAsciiLetterOrDigit((char)asciiValue))
                 return true;
@@ -131,6 +131,7 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
     {
         // TODO: must check the values in each field to ensure they are valid for the field type
         //   and that all required fields are present.
+        // TODO Need to indicate the field it failed on
         foreach (var field in Fields)
         {
             if (!field.IsValid())

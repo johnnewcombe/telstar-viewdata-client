@@ -60,9 +60,9 @@ public partial class MainWindow : Window
         Display.Children.Clear();
 
         // note that we create an extra row of labels for the status line
-        for (int i = 0; i < Models.Display.Cols * (Models.Display.Rows + 1); i++)
+        for (int i = 0; i < ViewdataDisplay.Display.Cols * (ViewdataDisplay.Display.Rows + 1); i++)
         {
-            var g = InitCharacterLabel(Models.Display.Spc);
+            var g = InitCharacterLabel(ViewdataDisplay.Display.Spc);
             Display.Children.Add(g);
         }
     }

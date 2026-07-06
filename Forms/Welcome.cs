@@ -1,5 +1,5 @@
 using System.Text;
-using TelstarClient.Display;
+using ViewdataDisplay;
 // ReSharper disable VariableLengthStringHexEscapeSequence
 
 namespace TelstarClient.Forms;

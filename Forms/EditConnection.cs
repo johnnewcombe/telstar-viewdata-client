@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using TelstarClient.Configuration;
-using TelstarClient.Display;
+using ViewdataDisplay;
 
 namespace TelstarClient.Forms;
 
@@ -33,7 +33,6 @@ public class EditConnection : FormBase
 
     public override string ToString()
     {
-        // TODO Values of fileds will need to be included here
 
         var menu = new StringBuilder();
         menu.Append(Converters.ConvertFromMarkup("\r\n[_+]")); // cursor on

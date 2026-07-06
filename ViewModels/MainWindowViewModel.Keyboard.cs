@@ -23,7 +23,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Configuration;
-using TelstarClient.Display;
+using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 
@@ -358,7 +358,7 @@ public partial class MainWindowViewModel
                             name,
                             host,
                             port);
-                        _displayManagerAlt.Display.SetStatusText("INVALID",Display.Constants.Red);
+                        _displayManagerAlt.Display.SetStatusText("INVALID",ViewdataDisplay.Constants.Red);
                         DisplayData = _displayManagerAlt.Display.Chars;
                         return;
                     }

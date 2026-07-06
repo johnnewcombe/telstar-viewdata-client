@@ -4,7 +4,8 @@ namespace TelstarClient.Forms;
 
 using System.Collections.Generic;
 using System.Text;
-using Display;
+using ViewdataDisplay;
+
 
 public class ConnectSerial : FormBase
 {

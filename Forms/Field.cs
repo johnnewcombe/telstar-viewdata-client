@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using ViewdataDisplay;
 
 namespace TelstarClient.Forms;
 
@@ -25,7 +26,7 @@ public class Field
     public Field(string id, int row, int col, int length, string value, FieldType type, bool required)
     {
         Id = id;
-        StartIndex = row*Models.Display.Cols + col;
+        StartIndex = row*Display.Cols + col;
         Length = length;
         Value = value;
         Type = type;
@@ -63,13 +64,12 @@ public class Field
         // Check type
         switch (Type)
         {
-            // TODO add different types for host, etc. so that validation can be better
-            //  add a better way to indicate that a field is invalid rather than not
-            //  reporting it etc.
+            // TODO Consider different types for host,email,filenames etc. so that validation can be better.
             case FieldType.Alpha:
-                return Value.All(c => char.IsBetween(c,(char)0x20,(char)0x7f));
+                return Value.All(c => char.IsBetween(c,(char)Constants.SPACE,(char)Constants.DEL));
+            // TODO How is this different to the above except for DEL
             case FieldType.AlphaNumeric:
-                return Value.All(c => c > 0x20 && c <=0x7f);
+                return Value.All(c => c > Constants.SPACE && c <=Constants.DEL);
 //                return Value.All(c => char.IsLetterOrDigit(c) || c == '.' || c == ' ');
             case FieldType.Numeric:
                 return Value.All(char.IsDigit);

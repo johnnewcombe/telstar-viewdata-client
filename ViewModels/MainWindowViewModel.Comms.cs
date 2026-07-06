@@ -22,7 +22,7 @@ using System.Threading;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
-using TelstarClient.Display;
+using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 

@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
-using TelstarClient.Display;
+using ViewdataDisplay;
+
 
 namespace TelstarClient.Forms;
 
