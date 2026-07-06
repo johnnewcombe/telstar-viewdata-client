@@ -1,8 +1,10 @@
 # Telstar Viewdata Client
 
-This repository contains an experimental cross platform Viewdata Terminal.
+This repository contains an experimental cross platform Viewdata Terminal with full screen (no chrome) option
+serial port modem support and TCP connectivity. 
+.
 
-This is a work in progress but as of v0.0.19 is usable albeit with a few compromises.
+This is a work in progress but as of v0.0.20 is usable albeit with a few compromises.
 
 It currently works on the following platforms
 

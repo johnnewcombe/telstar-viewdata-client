@@ -31,7 +31,6 @@ using TelstarClient.Configuration;
 using ViewdataDisplay;
 using TelstarClient.Forms;
 using Directory = TelstarClient.Forms.Directory;
-using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 
