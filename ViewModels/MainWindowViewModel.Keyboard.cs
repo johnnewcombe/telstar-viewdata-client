@@ -125,7 +125,7 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
-    /// Key handler returns true the status has been updated.
+    /// Key handler returns true if the status has been updated.
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
@@ -149,6 +149,11 @@ public partial class MainWindowViewModel
             case Constants.ALT_H: // alt+h show help menus
                 SetDisplay(DisplayType.Help);
                 return false;
+            case (byte)ViewdataDisplay.Constants.CurOn:
+                return true;
+            case (byte)ViewdataDisplay.Constants.CurOff:
+                return true; 
+                
         }
 
         // send value to remote end
