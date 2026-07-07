@@ -117,8 +117,11 @@ public partial class MainWindowViewModel
         {
             UpdateConnectStatus();
         }
-        
-        DisplayData = _displayManagerAlt.Display.Chars;
+
+        // update the appropriate display man
+        DisplayData = _displayType == DisplayType.Terminal ? 
+            _displayManagerMain.Display.Chars : 
+            _displayManagerAlt.Display.Chars;
     }
 
     /// <summary>
