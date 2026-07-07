@@ -202,12 +202,14 @@ public partial class MainWindowViewModel : ViewModelBase
         DisplayData = _displayManagerAlt.Display.Chars;
         Cursor = _displayManagerAlt.Cursor;
     }
-    
+
     /// <summary>
     /// Helper method to update the status display. It handles both main and alt displays
     /// and updates the cursor etc.
     /// </summary>
     /// <param name="message"></param>
+    /// <param name="foregroundColour"></param>
+    /// <param name="backgroundColour"></param>
     private void DisplayStatusMessage(string message,string foregroundColour = ViewdataDisplay.Constants.Green, 
         string backgroundColour = ViewdataDisplay.Constants.Black)
     {
