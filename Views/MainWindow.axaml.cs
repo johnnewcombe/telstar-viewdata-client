@@ -177,26 +177,21 @@ public partial class MainWindow : Window
              * of zero, even though Background is correctly applied — there's just nothing left
              * to paint it on.
              
-             * The pattern used below is that in order to set a character to be invisible a
-             * genuine character is specified e.g. a full stop and then the forground and
-             * background colours are set to black.
+             * The pattern used below is that in order to set a character to be invisible the
+             * empty graphic character is specified. Another approach would be to use any printable
+             * character and set the forground colour to equl the background colour.
              */
             if (c.InVisible)
             {
                 // see note above
-                label.Content = ".";
-                label.Foreground = new ImmutableSolidColorBrush(Colors.Black);
+                label.Content = '\xE200';
                 label.Background =  new ImmutableSolidColorBrush(Colors.Black);
             }
             else if (c.InvisibleForeground)
             {
                 // see note above
-                // for this we set a character to a full stop but set its foreground colour
-                // to be the same as its background colour
-                label.Content = "."; // non-breaking space
-                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+                label.Content = '\xE200'; // full graphic character
                 label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
-                //label.Background = new ImmutableSolidColorBrush(Colors.Red);
             }
             else
             {
