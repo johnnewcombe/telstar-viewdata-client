@@ -47,7 +47,7 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         ViewModel = new MainWindowViewModel();
-        ViewModel.PropertyChanged += this.PropertyChangedEventHandler;
+        ViewModel.PropertyChanged += PropertyChangedEventHandler;
 
         // TODO implement this somehow
         // remove title bar and chrome etc. e.g. if Kiosk mode
@@ -164,16 +164,47 @@ public partial class MainWindow : Window
             
             if (label == null) continue;
             
-            if (!c.InVisible)
+            
+            
+            
+            /*
+             * Avalonia's default Label template wraps its content in a ContentPresenter inside
+             * a Border (the Border.Background is what you're setting). The Border sizes itself
+             * based on the measured size of its content. Most text-rendering engines — Avalonia's
+             * included — collapse or zero-out the measured advance width for a string that's
+             * whitespace-only, because trailing/leading whitespace gets trimmed during text
+             * shaping. So the Label ends up with an effective width (and sometimes height)
+             * of zero, even though Background is correctly applied — there's just nothing left
+             * to paint it on.
+             
+             * The pattern used below is that in order to set a character to be invisible a
+             * genuine character is specified e.g. a full stop and then the forground and
+             * background colours are set to black.
+             */
+            if (c.InVisible)
             {
-                label.Content = c.Value;
-                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
+                // see note above
+                label.Content = ".";
+                label.Foreground = new ImmutableSolidColorBrush(Colors.Black);
+                label.Background =  new ImmutableSolidColorBrush(Colors.Black);
+            }
+            else if (c.InvisibleForeground)
+            {
+                // see note above
+                // for this we set a character to a full stop but set its foreground colour
+                // to be the same as its background colour
+                label.Content = "."; // non-breaking space
+                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
                 label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+                //label.Background = new ImmutableSolidColorBrush(Colors.Red);
             }
             else
             {
-                label.Content = "";
-                label.Background = new ImmutableSolidColorBrush(Colors.Black);
+                // display the character
+                label.Content = c.Value;
+                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
+                label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+                
             }
         }
 

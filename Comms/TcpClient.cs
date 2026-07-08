@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.IO.Ports;
-using Microsoft.Extensions.Logging;
 
 /*
    MIT License
@@ -119,10 +118,10 @@ namespace TelstarClient.Comms
                 AsyncCallback onconnect = OnConnect;
                 _socket.BeginConnect(epServer, onconnect, _socket);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 OnConnectEvent(false);
-                throw new Exception("Connection Failed.",ex);
+                throw;
 
             }
         }
@@ -159,10 +158,10 @@ namespace TelstarClient.Comms
                     _socket.Send(byteDateLine, byteDateLine.Length, 0);
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Dispose();
-                    throw new Exception($"Data Writing Operation Failed: {ex}");
+                    throw;
                 }
             }
             else
@@ -211,7 +210,7 @@ namespace TelstarClient.Comms
                 catch (Exception)
                 {
                     Dispose();
-                    throw new Exception("Data Writing Operation Failed.");
+                    throw;
                 }
             }
             else
@@ -286,10 +285,10 @@ namespace TelstarClient.Comms
                 AsyncCallback receiveData = OnReceivedData;
                 socket.BeginReceive(_readerBuffer, 0, _readerBuffer.Length, SocketFlags.None, receiveData, socket);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Dispose();
-                throw new Exception($"Receive Callback Setup Failed: {ex}");
+                throw;
             }
         }
 
@@ -326,10 +325,10 @@ namespace TelstarClient.Comms
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Dispose();
-                    throw new Exception($"Receive Operation Failed: {ex}");
+                    throw;
                 }
             }
         }

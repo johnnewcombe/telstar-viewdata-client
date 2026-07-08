@@ -97,6 +97,6 @@ echo %APPDATA%
 
 The following is a list of features that are planned for future release.
 
-* Bug fixes, there are several known issues especially around the viewdata display, conceal, flash and cursor control.
+* Bug fixes, there are several known issues especially around the viewdata display, flash and cursor control.
 * Better connection handling for both TCP and serial connections.
 * Add support for 7bit even parity on serial and TCP connections.

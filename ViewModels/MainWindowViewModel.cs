@@ -272,8 +272,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             if (_displayManagerMain.Write(_cyclicBuffer.Remove()))
             {
-                // if we have displayed the help page, don't update the view
-                // just yet
+                // only update the view for terminal display
                 if (_displayType == DisplayType.Terminal)
                 {
                     DisplayData = _displayManagerMain.Display.Chars;
