@@ -49,13 +49,6 @@ public partial class MainWindow : Window
         ViewModel = new MainWindowViewModel();
         ViewModel.PropertyChanged += PropertyChangedEventHandler;
 
-        // TODO implement this somehow
-        // remove title bar and chrome etc. e.g. if Kiosk mode
-        //ExtendClientAreaToDecorationsHint = true;
-        //ExtendClientAreaChromeHints = ExtendClientAreaChromeHints. NoChrome;
-        //WindowState = WindowState.FullScreen;
-        //this.Topmost = true;
-
         //initialise the display
         Display.Children.Clear();
 
@@ -142,7 +135,7 @@ public partial class MainWindow : Window
     {
         var cursor = ViewModel.Cursor;
         if (cursor is not null &&
-            cursor.Visible) // TODO change to use .Visible property once cursor positioning is working
+            cursor.Visible)
         {
             var label = (Label)((Viewbox)Display.Children[cursor.GetCursorIndex()]).Child;
             if (label != null) label.Content = "_";

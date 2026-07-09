@@ -56,13 +56,6 @@ public class Settings {
     }
 }
 
-// TODO find a way for the Connection to work for both Tcp and Serial as this is
-//  passed into connectTcp and ConnectSerial and is used to populate the Connection fields.
-//  Ber in mind that this object is purely a data object used for seiings.
-//  could we have...
-//   List of args?
-//   A dictionary of fields?
-//   Additional Fields for Serial
 
 public class ConfigSections {
 

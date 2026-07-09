@@ -129,8 +129,6 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
 
     public bool IsValid()
     {
-        // TODO: must check the values in each field to ensure they are valid for the field type
-        //   and that all required fields are present.
         // TODO Need to indicate the field it failed on
         foreach (var field in Fields)
         {

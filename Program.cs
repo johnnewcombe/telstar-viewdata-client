@@ -26,15 +26,11 @@ sealed class Program
 {
     
     // Miscellaneous Issues
-    // TODO Keymapper class isn't used.
-    // TODO Sort all build warnings
-    // TODO Add support for serial ports
-    // TODO Remove literals where possible.
     // TODO Consider an option to start up in kiosk mode via cmd line.
-    // TODO Sort the many TODOs in the code.
     // TODO Cursor appers on screen after a disconnect
     // TODO if a frame is downloaded that tuns the cursor on this only gets shown on the next (Flash) update.
-
+    // TODO Sort Parity for Serial and TCP
+    // 
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized

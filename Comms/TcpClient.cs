@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.IO.Ports;
+using System.Threading.Tasks;
 
 /*
    MIT License
@@ -31,8 +32,9 @@ using System.IO.Ports;
 
 namespace TelstarClient.Comms
 {
-    public class TcpClient : ICommsClient
+    public class TcpClient : ICommsClient, IDisposable
     {
+        private bool _disposed;
         // *** Event Handlers *** //
 
         #region Delegates
@@ -56,7 +58,8 @@ namespace TelstarClient.Comms
 
 
         // Socket Parameters
-        private Socket _socket;
+        private System.Net.Sockets.TcpClient _tcpClient;
+        private NetworkStream _stream;
         private readonly byte[] _readerBuffer = new byte[1024];
 
         #endregion
@@ -84,45 +87,47 @@ namespace TelstarClient.Comms
         /// <param name="port">Server Port</param>
         public void Connect(string ip, int port)
         {
+            Task.Run(async () => await ConnectAsync(ip, port));
+        }
+
+        private async Task ConnectAsync(string ip, int port)
+        {
             try
             {
                 if (IPAddress.TryParse(ip, out IPAddress parsedAddress))
                 {
-                    // it's already an IP address, use it directly
                     _ipAddress = parsedAddress;
                 }
                 else
                 {
-                    // it's a hostname, resolve it
-                    _ipAddress = Dns.GetHostEntry(ip).AddressList[0];
+                    var addresses = await Dns.GetHostAddressesAsync(ip);
+                    _ipAddress = addresses[0];
                 }
 
-                // Close the socket if open
-                if (_socket != null && _socket.Connected)
+                // Close the client if open
+                if (_tcpClient != null)
                 {
-                    _socket.Shutdown(SocketShutdown.Both);
-                    System.Threading.Thread.Sleep(10);
-                    _socket.Close();
+                    _stream?.Dispose();
+                    _tcpClient.Close();
+                    _tcpClient.Dispose();
+                    _tcpClient = null;
                 }
 
-                // Create the socket object
-                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                // Create the client object
+                _tcpClient = new System.Net.Sockets.TcpClient();
+                await _tcpClient.ConnectAsync(_ipAddress, port);
+                _stream = _tcpClient.GetStream();
+                _port = port;
 
-                // Define the Server address and port
-                IPEndPoint epServer = new IPEndPoint(_ipAddress, port);
+                OnConnectEvent?.Invoke(true);
 
-                // Connect to server non-Blocking method
-                _socket.Blocking = false;
-
-                // create and pass a callback for when it connects.
-                AsyncCallback onconnect = OnConnect;
-                _socket.BeginConnect(epServer, onconnect, _socket);
+                // Start receiving
+                _ = ReceiveLoopAsync();
             }
             catch (Exception)
             {
-                OnConnectEvent(false);
+                OnConnectEvent?.Invoke(false);
                 throw;
-
             }
         }
 
@@ -132,12 +137,7 @@ namespace TelstarClient.Comms
         /// <returns>True or False based on status</returns>
         public bool IsConnected()
         {
-            if (_socket != null)
-            {
-                return _socket.Connected;
-            }
-
-            return false;
+            return _tcpClient?.Client?.Connected ?? false;
         }
 
         /// <summary>
@@ -145,17 +145,14 @@ namespace TelstarClient.Comms
         /// </summary>
         /// <param name="data">Data to be written</param>
         /// <returns>Success status as Boolean Value</returns>
-        public bool Write(String data)
+        public bool Write(string data)
         {
-            // TODO: Implement Parity in code, based on the Parity Property
-            
-            // Check Connection
             if (IsConnected())
             {
                 try
                 {
-                    Byte[] byteDateLine = Encoding.ASCII.GetBytes(data.ToCharArray());
-                    _socket.Send(byteDateLine, byteDateLine.Length, 0);
+                    byte[] byteDateLine = Encoding.ASCII.GetBytes(data);
+                    _stream.Write(byteDateLine, 0, byteDateLine.Length);
                     return true;
                 }
                 catch (Exception)
@@ -199,12 +196,11 @@ namespace TelstarClient.Comms
         /// <returns>Success status as Boolean Value</returns>
         public bool Write(byte[] data)
         {
-            // Check Connection
             if (IsConnected())
             {
                 try
                 {
-                    _socket.Send(data, data.Length, 0);
+                    _stream.Write(data, 0, data.Length);
                     return true;
                 }
                 catch (Exception)
@@ -224,11 +220,26 @@ namespace TelstarClient.Comms
         /// </summary>
         public void Dispose()
         {
-            if (_socket != null && _socket.Connected)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
             {
-                OnConnectEvent(false);
-                _socket.Shutdown(SocketShutdown.Both);
-                _socket.Close();
+                if (disposing)
+                {
+                    if (_tcpClient != null)
+                    {
+                        _stream?.Dispose();
+                        _tcpClient.Close();
+                        _tcpClient.Dispose();
+                        _tcpClient = null;
+                        OnConnectEvent?.Invoke(false);
+                    }
+                }
+                _disposed = true;
             }
         }
 
@@ -239,97 +250,36 @@ namespace TelstarClient.Comms
         {
             _ipAddress = null;
             _port = 0;
-            
-            if (_socket != null && _socket.Connected)
-            {
-                OnConnectEvent(false);
-                _socket.Shutdown(SocketShutdown.Both);
-                _socket.Close();
-            }
+            Dispose();
         }
 
         #endregion
 
         #region Private Methods
 
-        // Setup Callbacks if Socket is Connected
-        private void OnConnect(IAsyncResult ar)
-        {
-            Socket socket = (Socket)ar.AsyncState;
-
-            try
-            {
-                if (socket != null && socket.Connected)
-                {
-                    SetupRecieveCallback(socket);
-                    OnConnectEvent(true);
-                }
-                else
-                {
-                    OnConnectEvent(false);
-                }
-            } 
-            catch (Exception)
-            {
-                OnConnectEvent(false);
-                _socket.Shutdown(SocketShutdown.Both);
-                _socket.Close();
-            }
-        }
-
-        // Setup Receive Callback for Async Listening
-        private void SetupRecieveCallback(Socket socket)
+        private async Task ReceiveLoopAsync()
         {
             try
             {
-                AsyncCallback receiveData = OnReceivedData;
-                socket.BeginReceive(_readerBuffer, 0, _readerBuffer.Length, SocketFlags.None, receiveData, socket);
+                while (_tcpClient != null && _tcpClient.Client != null && _tcpClient.Client.Connected && _stream != null)
+                {
+                    int nBytesRec = await _stream.ReadAsync(_readerBuffer, 0, _readerBuffer.Length);
+                    if (nBytesRec > 0)
+                    {
+                        string sRecieved = Encoding.ASCII.GetString(_readerBuffer, 0, nBytesRec);
+                        OnDataReceivedEvent?.Invoke(sRecieved);
+                    }
+                    else
+                    {
+                        // Connection closed
+                        Dispose();
+                        break;
+                    }
+                }
             }
             catch (Exception)
             {
                 Dispose();
-                throw;
-            }
-        }
-
-        // Receive data from TCP
-        private void OnReceivedData(IAsyncResult ar)
-        {
-            Socket socket = (Socket)ar.AsyncState;
-
-            if (IsConnected())
-            {
-                try
-                {
-                    // Check data is available
-                    if (socket != null)
-                    {
-                        int nBytesRec = socket.EndReceive(ar);
-                        if (nBytesRec > 0)
-                        {
-                            string sRecieved = "";
-                            for (int i = 0; i < nBytesRec; i++)
-                            {
-                                sRecieved += (char)_readerBuffer[i];
-                            }
-
-                            // Fire Data Recieved Event
-                            OnDataReceivedEvent(sRecieved);
-
-                            // If the Connection is Still Usable Re-establish the Callback
-                            SetupRecieveCallback(socket);
-                        }
-                        else
-                        {
-                            Dispose();
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    Dispose();
-                    throw;
-                }
             }
         }
 
