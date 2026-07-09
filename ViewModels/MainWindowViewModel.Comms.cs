@@ -1,6 +1,6 @@
 /*
     Copyright (c) 2025 John Newcombe
-   
+
     This file is part of the Software known as GlassTTY Viewdata Client.
 
     GlassTTY Viewdata Client is free software: you can redistribute
@@ -26,8 +26,8 @@ using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 
-public partial class MainWindowViewModel {
-
+public partial class MainWindowViewModel
+{
     #region Comms Client Control and Events
 
     private Lock _lock = new();
@@ -37,12 +37,15 @@ public partial class MainWindowViewModel {
     /// Thread safe property to allow the connected status to be read
     /// from multiple threads
     /// </summary>
-    public bool ConnectStatus {
-        get {
+    public bool ConnectStatus
+    {
+        get
+        {
             lock (_lock)
                 return _connectStatus;
         }
-        set {
+        set
+        {
             lock (_lock)
                 _connectStatus = value;
         }
@@ -56,18 +59,19 @@ public partial class MainWindowViewModel {
     /// <param name="arg2">This will be the tcp port number for TCP
     /// connections or baud rate for serial connections</param>
     /// <param name="serial"></param>
-    public void Connect(string arg1, int arg2, bool serial) {
-        try {
-
+    public void Connect(string arg1, int arg2, bool serial)
+    {
+        try
+        {
             // open the comms client
             if (serial)
-            {          
-                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1,arg2);
+            {
+                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1, arg2);
                 _comms = new SerialClient();
             }
             else
             {
-                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1,arg2);
+                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1, arg2);
                 _comms = new TcpClient();
             }
 
@@ -78,21 +82,22 @@ public partial class MainWindowViewModel {
             _cyclicBuffer.Clear();
 
             Dispatcher.UIThread.Post(UpdateMainDisplay);
-            
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             // Catch errors in Connection and receive Callbacks
-            _logger.LogError(ex, "Failed to connect to {Ip}:{Port}", arg1,arg2);
+            _logger.LogError(ex, "Failed to connect to {Ip}:{Port}", arg1, arg2);
         }
     }
 
-    public void Disconnect() {
+    private void Disconnect()
+    {
+        _logger.LogInformation("Disconnecting");
 
-        _logger.LogInformation("Disconnecting TCP connection");
-
-        if (_comms is not null) {
+        if (_comms is not null)
+        {
             _comms.Disconnect();
-            
+
             // set the thread safe property
             ConnectStatus = false;
 
@@ -100,27 +105,29 @@ public partial class MainWindowViewModel {
             _displayManagerMain.Display.Clear();
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
+        _logger.LogInformation("Disconnected");
     }
 
     // Connection Status Listener
-    private void OnConnect(bool status) {
-
+    private void OnConnect(bool status)
+    {
         _logger.LogInformation("Connected:{Status}", status);
 
         // set the thread safe property
         ConnectStatus = status;
-        
+
         // switch to UI thread
         Dispatcher.UIThread.Post(UpdateConnectStatus);
     }
-
-
+    
     // Data Received Listener
-    private void OnReceived(string data) {
-
+    private void OnReceived(string data)
+    {
         // add data to the cyclic buffer, this is thread safe
-        foreach (var c in data) {
+        foreach (var c in data)
+        {
             _cyclicBuffer.Add(c);
+            _logger.LogDebug("Character received from server:{Hex:X2}h,{Decimal}d", (byte)c, (byte)c);
         }
 
         // at this point we are not on the UI thread but one created by the TCPClient
@@ -130,5 +137,4 @@ public partial class MainWindowViewModel {
     }
 
     #endregion
-
 }

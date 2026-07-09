@@ -143,7 +143,7 @@ public partial class MainWindowViewModel
             case Constants.CR: // return
                 asciiValue = Constants.HASH;
                 break;
-            case Constants.CTRL_D: // ctrl+D sends CR for modems etc.
+            case Constants.ALT_M: // alt+D sends CR for modems etc.
                 asciiValue = Constants.CR;
                 break;
             case Constants.ALT_H: // alt+h show help menus
@@ -504,6 +504,7 @@ public partial class MainWindowViewModel
                 Key.D => Constants.ALT_D,
                 Key.F => Constants.ALT_F,
                 Key.H => Constants.ALT_H,
+                Key.M => Constants.ALT_M,
                 Key.Q => Constants.ALT_Q,
                 Key.R => Constants.ALT_R,
                 Key.S => Constants.ALT_S,

@@ -9,6 +9,7 @@ public class Constants
     public const int ALT_D = 0xE4;
     public const int ALT_F = 0xE6;
     public const int ALT_H = 0xE8;
+    public const int ALT_M = 0xED;
     public const int ALT_Q = 0xF1;
     public const int ALT_R = 0xF2;
     public const int ALT_S = 0xF3;

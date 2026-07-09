@@ -89,6 +89,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     public MainWindowViewModel()
     {
+        
         var configFile = _appSupportDirectory + CONFIG_FILE;
 
         _logger.LogInformation("Logging pipeline initialised");

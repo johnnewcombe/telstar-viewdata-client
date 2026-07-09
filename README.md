@@ -20,6 +20,19 @@ It can be downloaded from the [releases section](https://github.com/johnnewcombe
 
 ## Installation
 
+### Linux
+
+Download the appropriate zip from releases:
+
+- `TelstarClient-linux-arm64-<version>.zip` — arm64
+- `TelstarClient-linux-x64-<version>.zip` — x64
+
+```bash
+$ ./install.sh
+```
+You will be presented with an option to install for all users or for the current user.
+A suitable uninstall script will then be created allowing the program to be uninstalled.
+
 ### MacOS Installation
 
 Download the appropriate zip from releases:
@@ -55,19 +68,6 @@ If you have Xcode command line tools installed:
 codesign --force --deep --sign - /Applications/TelstarClient.app
 ```
 Then double-click as normal.
-
-### Linux
-
-Download the appropriate zip from releases:
-
-- `TelstarClient-linux-arm64-<version>.zip` — arm64
-- `TelstarClient-linux-x64-<version>.zip` — x64
-
-```bash
-$ ./install.sh
-```
-You will be presented with an option to install for all users or for the current user.
-A suitable uninstall script will then be created allowing the program to be uninstalled.
 
 ### Windows
 
