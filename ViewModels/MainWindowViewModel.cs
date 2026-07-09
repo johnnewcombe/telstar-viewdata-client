@@ -24,7 +24,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
 using TelstarClient.Configuration;
@@ -60,13 +59,11 @@ public partial class MainWindowViewModel : ViewModelBase
         Help,
         EditConnection,
     }
+    
 
-    // this is used to access the appSettings.json file
-    // this is separate from the user config.json
-    //private IConfiguration _appSettings;
-
-    private ILogger<MainWindowViewModel> _logger =
-        App.Host.Services.GetRequiredService<ILogger<MainWindowViewModel>>();
+    private ILogger<MainWindowViewModel> _logger;
+    private ICommsClient _commsClient;
+    private readonly CommsClientFactory _commsClientFactory;
 
     private readonly string _appSupportDirectory =
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
@@ -82,14 +79,18 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly DisplayManager _displayManagerMain;
     private readonly DisplayManager _displayManagerAlt;
     private readonly CyclicBuffer _cyclicBuffer;
-    private ICommsClient _comms;
+
 
     /// <summary>
     /// Constructor
     /// </summary>
-    public MainWindowViewModel()
+    public MainWindowViewModel(CommsClientFactory commsClientFactory, ILogger<MainWindowViewModel> logger)
     {
-        
+        _logger = logger;
+
+        _commsClientFactory = commsClientFactory;
+        _commsClient = _commsClientFactory.Create(CommsClientType.Tcp); // default
+
         var configFile = _appSupportDirectory + CONFIG_FILE;
 
         _logger.LogInformation("Logging pipeline initialised");
@@ -132,7 +133,12 @@ public partial class MainWindowViewModel : ViewModelBase
         _cyclicBuffer = new CyclicBuffer(2048);
         
     }
-
+    public void Dispose()
+    {
+        _logger.LogInformation("Disposing MainWindowViewModel");
+        _commsClient.Dispose();
+        // dispose anything else owned here
+    }
     /// <summary>
     /// Display the Welcome message and update the connected status.
     /// note this is an asynchronous method with a delay such that
@@ -161,7 +167,12 @@ public partial class MainWindowViewModel : ViewModelBase
             (desktop.MainWindow as Views.MainWindow)?.ToggleKioskMode();
         }
     }
-
+    public void SwitchCommsClient(CommsClientType type)
+    {
+        _commsClient.Dispose();
+        _commsClient = _commsClientFactory.Create(type);
+    }
+    
     /// <summary>
     /// This method is called by the _displayManagerMain.OnDisplayDataChangedEvent if the
     /// Display Manager has updated the display internally
@@ -263,7 +274,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ProcessReceiveBuffer()
     {
         // get data from buffer and process for viewdata 
-        while (_comms.IsConnected() && _cyclicBuffer.Count > 0)
+        while (_commsClient.IsConnected() && _cyclicBuffer.Count > 0)
         {
             if (_displayManagerMain.Write(_cyclicBuffer.Remove()))
             {
@@ -399,4 +410,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     #endregion
+    
+    
 }

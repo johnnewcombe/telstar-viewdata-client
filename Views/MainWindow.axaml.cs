@@ -38,7 +38,7 @@ public partial class MainWindow : Window
     private readonly ILogger<MainWindow> _logger =
         App.Host.Services.GetRequiredService<ILogger<MainWindow>>();
 
-    private MainWindowViewModel ViewModel { get; }
+    private MainWindowViewModel ViewModel { get; set; }
 
     private bool KioskMode { get; set; }
 
@@ -46,8 +46,14 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        ViewModel = new MainWindowViewModel();
-        ViewModel.PropertyChanged += PropertyChangedEventHandler;
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                ViewModel = viewModel;
+                ViewModel.PropertyChanged += PropertyChangedEventHandler;
+            }
+        };
 
         //initialise the display
         Display.Children.Clear();

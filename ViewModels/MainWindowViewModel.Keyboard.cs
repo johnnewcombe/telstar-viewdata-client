@@ -157,7 +157,7 @@ public partial class MainWindowViewModel
         }
 
         // send value to remote end
-        if (!_comms.Write(asciiValue))
+        if (!_commsClient.Write(asciiValue))
         {
             _logger.LogError("Failed to send character to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
         }

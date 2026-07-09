@@ -1,9 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.IO.Ports;
-using System.Threading.Tasks;
+﻿
 
 /*
    MIT License
@@ -29,13 +24,22 @@ using System.Threading.Tasks;
    SOFTWARE.
 
  */
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.IO.Ports;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace TelstarClient.Comms
 {
     public class TcpClient : ICommsClient, IDisposable
     {
         private bool _disposed;
+
         // *** Event Handlers *** //
+        private readonly ILogger<TcpClient> _logger;
 
         #region Delegates
 
@@ -69,8 +73,9 @@ namespace TelstarClient.Comms
         /// <summary>
         /// Create a TCP asynchronous client. This client is connect to the server and port with passed parameters.
         /// </summary>
-        public TcpClient()
+        public TcpClient(ILogger<TcpClient> logger)
         {
+            _logger = logger;
         }
 
         public IPAddress IpAddrss => _ipAddress;
@@ -124,9 +129,11 @@ namespace TelstarClient.Comms
                 // Start receiving
                 _ = ReceiveLoopAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 OnConnectEvent?.Invoke(false);
+                _logger.LogError("Error connecting to TCP server:{Error}", ex.Message
+                );
                 throw;
             }
         }
@@ -137,7 +144,7 @@ namespace TelstarClient.Comms
         /// <returns>True or False based on status</returns>
         public bool IsConnected()
         {
-            return _tcpClient?.Client?.Connected ?? false;
+            return _tcpClient?.Client.Connected ?? false;
         }
 
         /// <summary>
@@ -157,14 +164,13 @@ namespace TelstarClient.Comms
                 }
                 catch (Exception)
                 {
+                    _logger.LogError("Error writing to socket:{Data}", data);
                     Dispose();
                     throw;
                 }
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
@@ -209,17 +215,61 @@ namespace TelstarClient.Comms
                     throw;
                 }
             }
-            else
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// Disconnect the socket
+        /// </summary>
+        public void Disconnect()
+        {
+            _ipAddress = null;
+            _port = 0;
+            _logger.LogInformation("Disconnecting");
+            Dispose();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private async Task ReceiveLoopAsync()
+        {
+            try
             {
-                return false;
+                while (_tcpClient != null && _tcpClient.Client.Connected && _stream != null)
+                {
+                    int nBytesRec = await _stream.ReadAsync(_readerBuffer, 0, _readerBuffer.Length);
+                    if (nBytesRec > 0)
+                    {
+                        string sRecieved = Encoding.ASCII.GetString(_readerBuffer, 0, nBytesRec);
+                        OnDataReceivedEvent?.Invoke(sRecieved);
+                    }
+                    else
+                    {
+                        // Connection closed
+                        Dispose();
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error in receive loop:{Error}", ex.Message);
+                Dispose();
             }
         }
 
+        #endregion
+        
         /// <summary>
         /// Close the Socket Connection
         /// </summary>
         public void Dispose()
         {
+            _logger.LogInformation("Connection closing");
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -239,50 +289,11 @@ namespace TelstarClient.Comms
                         OnConnectEvent?.Invoke(false);
                     }
                 }
+
                 _disposed = true;
             }
         }
 
-        /// <summary>
-        /// Disconnect the socket
-        /// </summary>
-        public void Disconnect()
-        {
-            _ipAddress = null;
-            _port = 0;
-            Dispose();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private async Task ReceiveLoopAsync()
-        {
-            try
-            {
-                while (_tcpClient != null && _tcpClient.Client != null && _tcpClient.Client.Connected && _stream != null)
-                {
-                    int nBytesRec = await _stream.ReadAsync(_readerBuffer, 0, _readerBuffer.Length);
-                    if (nBytesRec > 0)
-                    {
-                        string sRecieved = Encoding.ASCII.GetString(_readerBuffer, 0, nBytesRec);
-                        OnDataReceivedEvent?.Invoke(sRecieved);
-                    }
-                    else
-                    {
-                        // Connection closed
-                        Dispose();
-                        break;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                Dispose();
-            }
-        }
-
-        #endregion
     }
+    
 }

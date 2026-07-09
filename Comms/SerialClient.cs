@@ -20,18 +20,27 @@
 
 using System;
 using System.IO.Ports;
+using Microsoft.Extensions.Logging;
 
 namespace TelstarClient.Comms;
 
 public class SerialClient : ICommsClient
 {
+    private bool _disposed;
+    
     private SerialPort _serialPort;
 
     public Parity Parity { get; set; } = Parity.None;
-
+    
+    private readonly ILogger<SerialClient> _logger;
     public event DataReceivedEventHandler OnDataReceivedEvent;
     public event OnConnectEventHandler OnConnectEvent;
 
+    public SerialClient(ILogger<SerialClient> logger)
+    { 
+        _logger = logger;
+    }
+    
     public void Connect(string deviceName, int baudRate)
     {
         try
@@ -48,9 +57,11 @@ public class SerialClient : ICommsClient
             _serialPort.Open();
             OnConnectEvent?.Invoke(true);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             OnConnectEvent?.Invoke(false);
+            _logger.LogError("Error connecting to Serial device:{Error}", ex.Message);
+
         }
     }
 
@@ -71,11 +82,21 @@ public class SerialClient : ICommsClient
 
     public bool Write(string data)
     {
-        if (IsConnected())
+        try
         {
-            _serialPort.Write(data);
-            return true;
+            if (IsConnected())
+            {
+                _serialPort.Write(data);
+                return true;
+            }
         }
+        catch (Exception)
+        {
+            _logger.LogError("Error writing to device:{Data}", data);
+            Dispose();
+            throw;
+        }
+        
         return false;
     }
 
@@ -83,7 +104,7 @@ public class SerialClient : ICommsClient
     {
         if (IsConnected())
         {
-            _serialPort.Write(new byte[] { data }, 0, 1);
+            _serialPort.Write(new[] { data }, 0, 1);
             return true;
         }
         return false;
@@ -93,9 +114,18 @@ public class SerialClient : ICommsClient
     {
         if (IsConnected())
         {
-            _serialPort.Write(data.ToString());
-            return true;
+            try
+            {
+                _serialPort.Write(data.ToString());
+                return true;
+            }
+            catch (Exception)
+            {
+                Dispose();
+                throw;
+            }
         }
+        
         return false;
     }
 
@@ -121,6 +151,35 @@ public class SerialClient : ICommsClient
             _serialPort.Dispose();
             _serialPort = null;
             OnConnectEvent?.Invoke(false);
+        }
+
+        _logger.LogInformation("Disconnecting");
+        Dispose();
+    }
+
+    public void Dispose()
+    {
+        _logger.LogInformation("Connection closing");
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                if (_serialPort != null)
+                {
+                    _serialPort.Close();
+                    _serialPort.Dispose();
+                    _serialPort = null;
+                    OnConnectEvent?.Invoke(false);
+                }
+            }
+
+            _disposed = true;
         }
     }
 }

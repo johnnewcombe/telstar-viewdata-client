@@ -19,4 +19,5 @@ public interface ICommsClient
     bool Write(char data);
     bool Write(byte[] data);
     void Disconnect();
+    void Dispose();
 }

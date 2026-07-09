@@ -20,9 +20,9 @@
 using System;
 using System.Threading;
 using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
-using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 
@@ -59,7 +59,7 @@ public partial class MainWindowViewModel
     /// <param name="arg2">This will be the tcp port number for TCP
     /// connections or baud rate for serial connections</param>
     /// <param name="serial"></param>
-    public void Connect(string arg1, int arg2, bool serial)
+    private void Connect(string arg1, int arg2, bool serial)
     {
         try
         {
@@ -67,17 +67,17 @@ public partial class MainWindowViewModel
             if (serial)
             {
                 _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1, arg2);
-                _comms = new SerialClient();
+                SwitchCommsClient(CommsClientType.Serial);
             }
             else
             {
                 _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1, arg2);
-                _comms = new TcpClient();
+                SwitchCommsClient(CommsClientType.Tcp);
             }
 
-            _comms.OnConnectEvent += OnConnect;
-            _comms.OnDataReceivedEvent += OnReceived;
-            _comms.Connect(arg1, arg2);
+            _commsClient.OnConnectEvent += OnConnect;
+            _commsClient.OnDataReceivedEvent += OnReceived;
+            _commsClient.Connect(arg1, arg2);
 
             _cyclicBuffer.Clear();
 
@@ -94,9 +94,9 @@ public partial class MainWindowViewModel
     {
         _logger.LogInformation("Disconnecting");
 
-        if (_comms is not null)
+        if (_commsClient is not null)
         {
-            _comms.Disconnect();
+            _commsClient.Disconnect();
 
             // set the thread safe property
             ConnectStatus = false;
