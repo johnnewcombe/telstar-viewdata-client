@@ -384,6 +384,7 @@ public partial class MainWindowViewModel
         var port = 0;
         var host = string.Empty;
         var name = string.Empty;
+        var parity = false;
 
         switch (asciiValue)
         {
@@ -399,9 +400,10 @@ public partial class MainWindowViewModel
                         tcp.Name = string.Empty;
                         tcp.Host = string.Empty;
                         tcp.Port = 0;
+                        tcp.Parity = false;
                     }
 
-                    _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
+                    _logger.LogInformation("Saving connection:{Name}, Host:{IP}, Port:{Port}, Parity:{parity}", name, host, port, parity);
                     _settings.Save();
 
                     //DisplayEditor returns false when complete or canceled
@@ -429,6 +431,9 @@ public partial class MainWindowViewModel
                 field = _currentForm.GetFieldById("port");
                 if (field is not null)
                     int.TryParse(field.Value, out port);
+                field = _currentForm.GetFieldById("parity");
+                if (field is not null)
+                    parity = field.Value is "y" or "Y";
 
                 // if the form is valid get the current connection from the form and update and save it
                 if (_currentForm.IsValid() && _currentForm.Connection is not null)
@@ -438,9 +443,10 @@ public partial class MainWindowViewModel
                         tcp.Name = name;
                         tcp.Host = host;
                         tcp.Port = port;
+                        tcp.Parity = parity;
 
                         // save, the form holds the current connection within settings
-                        _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
+                        _logger.LogInformation("Saving connection, Name:{Name}, Host:{IP}, Port:{Port}, Parity:{parity}", name, host, port, parity);
                         _settings.Save();
                         UpdateConnectStatus();
                         DisplayData = _displayManagerAlt.Display.Chars;
@@ -450,7 +456,7 @@ public partial class MainWindowViewModel
                 {
                     if (_currentForm.Connection != null)
                     {
-                        _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}", name, host, port);
+                        _logger.LogError("Connection invalid and not saved, Name:{Name}, Host:{IP}, Port:{Port}", name, host, port);
 
                         // display error message on the status bar
                         DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);

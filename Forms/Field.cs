@@ -62,20 +62,24 @@ public class Field
         if (Value.Length > Length)
             return false;
 
+        bool result;
+        
         // Check type
         switch (Type)
         {
             // TODO Consider different types for host,email,filenames etc. so that validation can be better.
             case FieldType.Alpha:
-                return Value.All(c => char.IsBetween(c,(char)Constants.SPACE,(char)Constants.DEL));
-            // TODO How is this different to the above except for DEL
             case FieldType.AlphaNumeric:
-                return Value.All(c => c > Constants.SPACE && c <=Constants.DEL);
-//                return Value.All(c => char.IsLetterOrDigit(c) || c == '.' || c == ' ');
+               result = Value.All(c => char.IsBetween(c,(char)Constants.SPACE,(char)Constants.DEL));
+               return result;
+            // return Value.All(c => char.IsLetterOrDigit(c) || c == '.' || c == ' ');
             case FieldType.Numeric:
-                return Value.All(char.IsDigit);
+                result = Value.All(c => c > Constants.SPACE && c <=Constants.DEL);
+                return result;
+                // return Value.All(char.IsDigit);
             case FieldType.Bool:
-                return Value.All(c => c is 'y' or 'Y' or 'n' or 'N');
+                result = Value.All(c => c is 'y' or 'Y' or 'n' or 'N');
+                return result;
             default:
                 return false;
         }
