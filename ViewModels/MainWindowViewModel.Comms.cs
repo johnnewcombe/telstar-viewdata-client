@@ -79,8 +79,8 @@ public partial class MainWindowViewModel
 
             _commsClient.OnConnectEvent += OnConnect;
             _commsClient.OnDataReceivedEvent += OnReceived;
-            // TODO set arg 3 to use/not use parity
-            _commsClient.Connect(arg1, arg2,false);
+
+            _commsClient.Connect(arg1, arg2, parity);
 
             _cyclicBuffer.Clear();
 
@@ -108,6 +108,7 @@ public partial class MainWindowViewModel
             _displayManagerMain.Display.Clear();
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
+
         _logger.LogInformation("Disconnected");
     }
 
@@ -122,7 +123,7 @@ public partial class MainWindowViewModel
         // switch to UI thread
         Dispatcher.UIThread.Post(UpdateConnectStatus);
     }
-    
+
     // Data Received Listener
     private void OnReceived(string data)
     {

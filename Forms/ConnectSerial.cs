@@ -1,3 +1,4 @@
+using System.IO.Ports;
 using TelstarClient.Configuration;
 
 namespace TelstarClient.Forms;
@@ -14,17 +15,20 @@ public class ConnectSerial : FormBase
     {
         var device = string.Empty;
         var baudRate = 0;
+        var parity = string.Empty;
 
         if (connection is SerialConnection ser)
         {
             device = ser.Device;
             baudRate = ser.BaudRate;
+            parity = ser.Parity ? "Y" : "N";
         }
 
         // create fields
         Fields = new List<Field>();
         Fields.Add(new Field("device", 6, 16, 20, device, FieldType.AlphaNumeric, true));
         Fields.Add(new Field("baud", 8, 16, 20, baudRate.ToString(), FieldType.Numeric, true));
+        Fields.Add(new Field("parity", 10, 16, 1, parity, FieldType.Bool, true));
     }
 
     public override string ToString()
@@ -37,6 +41,8 @@ public class ConnectSerial : FormBase
             .Replace("[PLACEHOLDER]", Fields[0].Value);
         menu.Append(Converters.ConvertFromMarkup("[C]    BAUD RATE:[W][PLACEHOLDER]\r\n\n"))
             .Replace("[PLACEHOLDER]", Fields[1].Value);
+        menu.Append(Converters.ConvertFromMarkup("[C]       PARITY:[W][PLACEHOLDER]\r\n\n"))
+            .Replace("[PLACEHOLDER]", Fields[2].Value);
         menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Alt-C[C]to Connect\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Escape[C]to Return"));
         //menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));

@@ -84,7 +84,7 @@ public class TcpConnection : IConnection{
 public class SerialConnection : IConnection
 {
     public string Device { get; set; } = "";
-    public int BaudRate { get; set; } = 9600;
+    public int BaudRate { get; set; } = 1200;
     public bool Parity { get; set; } = false;
     public string InitString { get; set; }
 }

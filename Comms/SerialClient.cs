@@ -53,7 +53,7 @@ public class SerialClient : ICommsClient
             _logger.LogInformation("Connecting to Device:{arg1}, Daud:{arg2}, Parity:{Parity}", deviceName, baudRate, Parity);
 
             _serialPort = new SerialPort(deviceName, baudRate);
-            _serialPort.Parity = this.Parity;
+            _serialPort.Parity = parity ? Parity.Even : Parity.None;
             _serialPort.DataReceived += SerialPort_DataReceived;
             _serialPort.Open();
             OnConnectEvent?.Invoke(true);

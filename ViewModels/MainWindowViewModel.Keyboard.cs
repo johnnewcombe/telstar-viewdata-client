@@ -313,8 +313,9 @@ public partial class MainWindowViewModel
     /// <returns></returns>
     private bool HandleConnectSerialKey(byte asciiValue)
     {
-        int baud = 0;
-        string device = string.Empty;
+        var baud = 0;
+        var device = string.Empty;
+        var parity = false;
 
         switch (asciiValue)
         {
@@ -337,14 +338,18 @@ public partial class MainWindowViewModel
                     field = _currentForm.GetFieldById("baud");
                     if (field is not null)
                         int.TryParse(field.Value, out baud);
-
+                    field = _currentForm.GetFieldById("parity");
+                    if (field is not null)
+                        parity = field.Value is "y" or "Y";
+                    
                     // update settings directly
                     _settings.Config.SerialConnection.Device = device;
                     _settings.Config.SerialConnection.BaudRate = baud;
+                    _settings.Config.SerialConnection.Parity = parity ;
                     _settings.Save();
 
                     // connect
-                    Connect(device, baud, false, true);
+                    Connect(device, baud, parity, true);
                     SetDisplay(DisplayType.Terminal);
                 }
                 else

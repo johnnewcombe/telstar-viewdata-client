@@ -9,6 +9,7 @@ public enum FieldType
     AlphaNumeric = 0,
     Alpha = 1,
     Numeric = 2,
+    Bool = 3,
 }
 
 public class Field
@@ -73,6 +74,8 @@ public class Field
 //                return Value.All(c => char.IsLetterOrDigit(c) || c == '.' || c == ' ');
             case FieldType.Numeric:
                 return Value.All(char.IsDigit);
+            case FieldType.Bool:
+                return Value.All(c => c is 'y' or 'Y' or 'n' or 'N');
             default:
                 return false;
         }
