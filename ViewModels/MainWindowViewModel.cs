@@ -225,13 +225,11 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 _logger.LogInformation("Displaying status message to main display:{message}", message);
                 DisplayData = _displayManagerMain.Display.Chars;
-                Cursor = _displayManagerMain.Cursor;
             }
             else
             {
                 _logger.LogInformation("Displaying status message to alternate display:{message}", message);
                 DisplayData = _displayManagerAlt.Display.Chars;
-                Cursor = _displayManagerAlt.Cursor;
             }
         }
         catch (Exception ex)
@@ -287,7 +285,10 @@ public partial class MainWindowViewModel : ViewModelBase
     #region Public Properties and methods
 
     /// <summary>
-    /// Display data to be displayed by the View.
+    /// Display data to be displayed by the View. Setting this property causes
+    /// MainWindow to collect the data and display it via the OnPropertyChanged
+    /// event. Setting DsplaData will also cause MainWindow to read the Cursor
+    /// property.
     /// </summary>
     public List<ViewdataDisplay.Char> DisplayData
     {
@@ -298,9 +299,11 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+    
 
     /// <summary>
-    /// The cursor position.
+    /// The cursor position, this is collected by MainWindow when the DisplayData property is updated.
+    /// is fired when the main data is updated. Any Cursor setting can be placed here 
     /// </summary>
     public Cursor Cursor
     {
@@ -308,7 +311,7 @@ public partial class MainWindowViewModel : ViewModelBase
         set
         {
             _cursor = value;
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     }
 

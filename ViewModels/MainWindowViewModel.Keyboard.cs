@@ -76,6 +76,10 @@ public partial class MainWindowViewModel
                 return;
             case Constants.ALT_X: // alt+x disconnect
                 Disconnect();
+                // clear the display
+                _displayManagerMain.Display.Clear();
+
+                // switch back to the directory
                 SetDisplay(DisplayType.Directory);
                 return;
             case Constants.ALT_Q: // alt+q

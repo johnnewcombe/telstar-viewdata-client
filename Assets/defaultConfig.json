@@ -36,9 +36,9 @@
     "Parity" : false,
     "InitString" : ""
   }, {
-    "Name" : "",
-    "Host" : "",
-    "Port" : 0,
+    "Name" : "Night Qwl BBS",
+    "Host" : "nightowlbbs.ddns.net",
+    "Port" : 6400,
     "Parity" : false,
     "InitString" : ""
   }, {
@@ -56,7 +56,7 @@
   } ] ,
   "SerialConnection" : {
     "Device" : "",
-    "BaudRate" : 9600,
+    "BaudRate" : 1200,
     "Parity" : false,
     "InitString" : ""
   }

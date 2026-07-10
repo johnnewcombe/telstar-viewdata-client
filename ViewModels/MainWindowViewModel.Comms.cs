@@ -20,7 +20,6 @@
 using System;
 using System.Threading;
 using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
 
@@ -37,7 +36,7 @@ public partial class MainWindowViewModel
     /// Thread safe property to allow the connected status to be read
     /// from multiple threads
     /// </summary>
-    public bool ConnectStatus
+    private bool ConnectStatus
     {
         get
         {
@@ -58,6 +57,7 @@ public partial class MainWindowViewModel
     /// for TCP connections and serial device for serial connections.</param>
     /// <param name="arg2">This will be the tcp port number for TCP
     /// connections or baud rate for serial connections</param>
+    /// <param name="parity"></param>
     /// <param name="serial"></param>
     private void Connect(string arg1, int arg2, bool parity, bool serial)
     {
@@ -103,10 +103,7 @@ public partial class MainWindowViewModel
 
             // set the thread safe property
             ConnectStatus = false;
-
-            // switch to UI thread
-            _displayManagerMain.Display.Clear();
-            Dispatcher.UIThread.Post(UpdateMainDisplay);
+            
         }
 
         _logger.LogInformation("Disconnected");
