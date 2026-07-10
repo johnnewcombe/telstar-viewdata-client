@@ -66,13 +66,13 @@ public partial class MainWindowViewModel
             // open the comms client
             if (serial)
             {
-                _logger.LogInformation("Connecting to device:{arg1}, baud rate:{arg2}", arg1, arg2);
+                _logger.LogInformation("Connecting to device:{arg1}, baud rate:{arg2} parity:{parity}", arg1, arg2, parity);
                 _commsClient.Dispose();
                 _commsClient = _commsClientFactory.Create(CommsClientType.Serial);
             }
             else
             {
-                _logger.LogInformation("Connecting to Host:{arg1} :Port{arg2}", arg1, arg2);
+                _logger.LogInformation("Connecting to host:{arg1} :port{arg2}, parity:{parity}", arg1, arg2, parity);
                 _commsClient.Dispose();
                 _commsClient = _commsClientFactory.Create(CommsClientType.Tcp);
             }

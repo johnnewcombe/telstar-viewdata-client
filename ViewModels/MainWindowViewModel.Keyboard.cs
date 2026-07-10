@@ -261,8 +261,9 @@ public partial class MainWindowViewModel
     /// <returns></returns>
     private bool HandleConnectTcpKey(byte asciiValue)
     {
-        int port = 0;
-        string host = string.Empty;
+        var port = 0;
+        var host = string.Empty;
+        var parity = false;
 
         switch (asciiValue)
         {
@@ -285,8 +286,11 @@ public partial class MainWindowViewModel
                     field = _currentForm.GetFieldById("port");
                     if (field is not null)
                         int.TryParse(field.Value, out port);
+                    field = _currentForm.GetFieldById("parity");
+                    if (field is not null)
+                        parity = field.Value is "y" or "Y";
 
-                    Connect(host, port, false, false);
+                    Connect(host, port, parity, false);
                     SetDisplay(DisplayType.Terminal);
                 }
                 else

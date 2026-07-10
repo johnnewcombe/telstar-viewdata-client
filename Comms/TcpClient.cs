@@ -27,7 +27,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.IO.Ports;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -52,7 +51,8 @@ namespace TelstarClient.Comms
         // Connection Parameters
         private IPAddress _ipAddress;
         private int _port;
-
+        private bool _parity;
+        
         // Socket Parameters
         private System.Net.Sockets.TcpClient _tcpClient;
         private NetworkStream _stream;
@@ -82,8 +82,10 @@ namespace TelstarClient.Comms
         /// </summary>
         /// <param name="ip">Server IP</param>
         /// <param name="port">Server Port</param>
+        /// <param name="parity"></param>
         public void Connect(string ip, int port, bool parity)
         {
+            _parity = parity;
             Task.Run(async () => await ConnectAsync(ip, port, parity));
         }
 
@@ -152,9 +154,9 @@ namespace TelstarClient.Comms
             {
                 try
                 {
-                    byte[] byteDateLine = Encoding.ASCII.GetBytes(data);
-                    _stream.Write(byteDateLine, 0, byteDateLine.Length);
-                    return true;
+                    byte[] byteDate = Encoding.ASCII.GetBytes(data);
+                    return Write(byteDate);
+
                 }
                 catch (Exception)
                 {
@@ -200,13 +202,20 @@ namespace TelstarClient.Comms
             {
                 try
                 {
+                    if (_parity)
+                    {
+                        data=ApplyEvenParity(data);
+                    }
+                    
                     _stream.Write(data, 0, data.Length);
                     return true;
                 }
                 catch (Exception)
                 {
+                    _logger.LogError("Error writing to socket:{Data}", data);
                     Dispose();
                     throw;
+
                 }
             }
 
@@ -228,7 +237,37 @@ namespace TelstarClient.Comms
         #endregion
 
         #region Private Methods
+        public static byte[] ApplyEvenParity(byte[] data)
+        {
+            var result = new byte[data.Length];
 
+            for (int i = 0; i < data.Length; i++)
+            {
+                byte b = (byte)(data[i] & 0x7F); // ensure only 7 bits of data
+                int bitCount = CountSetBits(b);
+
+                // if odd number of 1s, set the 8th bit to make it even
+                if ((bitCount & 1) != 0)
+                {
+                    b |= 0x80;
+                }
+
+                result[i] = b;
+            }
+
+            return result;
+        }
+        private static int CountSetBits(byte b)
+        {
+            int count = 0;
+            while (b != 0)
+            {
+                count += b & 1;
+                b >>= 1;
+            }
+            return count;
+        }
+        
         private async Task ReceiveLoopAsync()
         {
             try
