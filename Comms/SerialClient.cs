@@ -41,7 +41,7 @@ public class SerialClient : ICommsClient
         _logger = logger;
     }
     
-    public void Connect(string deviceName, int baudRate)
+    public void Connect(string deviceName, int baudRate, bool parity)
     {
         try
         {
@@ -50,6 +50,7 @@ public class SerialClient : ICommsClient
                 _serialPort.Close();
                 _serialPort.Dispose();
             }
+            _logger.LogInformation("Connecting to Device:{arg1}, Daud:{arg2}, Parity:{Parity}", deviceName, baudRate, Parity);
 
             _serialPort = new SerialPort(deviceName, baudRate);
             _serialPort.Parity = this.Parity;

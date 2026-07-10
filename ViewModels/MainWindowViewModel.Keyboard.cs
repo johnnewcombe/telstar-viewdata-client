@@ -27,7 +27,6 @@ using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 
-
 public partial class MainWindowViewModel
 {
     #region Public Methods
@@ -60,7 +59,7 @@ public partial class MainWindowViewModel
     #endregion
 
     #region Private Methods
-    
+
     /// <summary>
     /// Handles keyboard activity passed from the View.
     /// </summary>
@@ -119,9 +118,9 @@ public partial class MainWindowViewModel
         }
 
         // update the appropriate display man
-        DisplayData = _displayType == DisplayType.Terminal ? 
-            _displayManagerMain.Display.Chars : 
-            _displayManagerAlt.Display.Chars;
+        DisplayData = _displayType == DisplayType.Terminal
+            ? _displayManagerMain.Display.Chars
+            : _displayManagerAlt.Display.Chars;
     }
 
     /// <summary>
@@ -152,8 +151,7 @@ public partial class MainWindowViewModel
             case (byte)ViewdataDisplay.Constants.CurOn:
                 return true;
             case (byte)ViewdataDisplay.Constants.CurOff:
-                return true; 
-                
+                return true;
         }
 
         // send value to remote end
@@ -168,6 +166,7 @@ public partial class MainWindowViewModel
 
         return false;
     }
+
     /// <summary>
     /// Key handler, returns true the status has been updated.
     /// </summary>
@@ -178,7 +177,7 @@ public partial class MainWindowViewModel
         // pointless switch statement for future use and to remove ReSharper warnings
         switch (asciiValue)
         {
-            case >0:
+            case > 0:
                 break;
         }
 
@@ -187,6 +186,7 @@ public partial class MainWindowViewModel
         SetDisplay(DisplayType.Directory);
         return false;
     }
+
     /// <summary>
     /// Key handler, returns true the status has been updated.
     /// </summary>
@@ -228,7 +228,7 @@ public partial class MainWindowViewModel
                     {
                         if (!string.IsNullOrEmpty(tcp.Name))
                         {
-                            Connect(tcp.Host, tcp.Port, false);
+                            Connect(tcp.Host, tcp.Port, false, false);
                             SetDisplay(DisplayType.Terminal);
                         }
                     }
@@ -253,6 +253,7 @@ public partial class MainWindowViewModel
 
         return false;
     }
+
     /// <summary>
     /// Key handler, returns true the status has been updated.
     /// </summary>
@@ -285,7 +286,7 @@ public partial class MainWindowViewModel
                     if (field is not null)
                         int.TryParse(field.Value, out port);
 
-                    Connect(host, port, false);
+                    Connect(host, port, false, false);
                     SetDisplay(DisplayType.Terminal);
                 }
                 else
@@ -304,6 +305,7 @@ public partial class MainWindowViewModel
 
         return false;
     }
+
     /// <summary>
     /// Key handler, returns true the status has been updated.
     /// </summary>
@@ -342,17 +344,16 @@ public partial class MainWindowViewModel
                     _settings.Save();
 
                     // connect
-                    Connect(device, baud, true);
+                    Connect(device, baud, false, true);
                     SetDisplay(DisplayType.Terminal);
                 }
                 else
                 {
                     _logger.LogError("Form is invalid: {Device}, {Baud}", device, baud);
-                                            
-                    // display error message on the status bar
-                    DisplayStatusMessage("INVALID DATA",ViewdataDisplay.Constants.Red);
-                    return true;
 
+                    // display error message on the status bar
+                    DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
+                    return true;
                 }
             }
         }
@@ -363,6 +364,7 @@ public partial class MainWindowViewModel
 
         return false;
     }
+
     /// <summary>
     /// Key handler, returns true the status has been updated.
     /// </summary>
@@ -389,12 +391,14 @@ public partial class MainWindowViewModel
                         tcp.Host = string.Empty;
                         tcp.Port = 0;
                     }
+
                     _logger.LogInformation("Saving connection:{Name}, {IP}, {Port}", name, host, port);
                     _settings.Save();
 
                     //DisplayEditor returns false when complete or canceled
                     SetDisplay(_previousDisplayType);
                 }
+
                 break;
         }
 
@@ -433,21 +437,20 @@ public partial class MainWindowViewModel
                         DisplayData = _displayManagerAlt.Display.Chars;
                     }
                 }
-                else  // connection is either null or invalid
+                else // connection is either null or invalid
                 {
                     if (_currentForm.Connection != null)
                     {
                         _logger.LogError("Connection invalid and not saved:{Name}, {IP}, {Port}", name, host, port);
-                        
+
                         // display error message on the status bar
-                        DisplayStatusMessage("INVALID DATA",ViewdataDisplay.Constants.Red);
+                        DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
                         return true;
                     }
                     else
                     {
                         _logger.LogError("Connection invalid and not saved, the forms connection is null");
                     }
-
                 }
             }
 
@@ -472,9 +475,10 @@ public partial class MainWindowViewModel
                 SetDisplay(_previousDisplayType);
                 break;
         }
+
         return false;
     }
-    
+
 
     private static byte? GetAsciiKey(KeyEventArgs e)
     {
@@ -510,6 +514,7 @@ public partial class MainWindowViewModel
             {
                 return e.Key == Key.T ? (byte)10 : (byte)(e.Key - Key.A + 1);
             }
+
             return null;
         }
 
@@ -530,10 +535,10 @@ public partial class MainWindowViewModel
 
             // Modifier keys that shouldn't produce a key code
             Key.LeftShift or Key.RightShift or
-            Key.LeftCtrl or Key.RightCtrl or
-            Key.LeftAlt or Key.RightAlt or
-            Key.Capital or Key.NumLock or
-            Key.Scroll => null,
+                Key.LeftCtrl or Key.RightCtrl or
+                Key.LeftAlt or Key.RightAlt or
+                Key.Capital or Key.NumLock or
+                Key.Scroll => null,
 
             _ => null
         };

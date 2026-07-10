@@ -59,25 +59,28 @@ public partial class MainWindowViewModel
     /// <param name="arg2">This will be the tcp port number for TCP
     /// connections or baud rate for serial connections</param>
     /// <param name="serial"></param>
-    private void Connect(string arg1, int arg2, bool serial)
+    private void Connect(string arg1, int arg2, bool parity, bool serial)
     {
         try
         {
             // open the comms client
             if (serial)
             {
-                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1, arg2);
-                SwitchCommsClient(CommsClientType.Serial);
+                _logger.LogInformation("Connecting to device:{arg1}, baud rate:{arg2}", arg1, arg2);
+                _commsClient.Dispose();
+                _commsClient = _commsClientFactory.Create(CommsClientType.Serial);
             }
             else
             {
-                _logger.LogInformation("Connecting to {arg1} at {arg2} baud", arg1, arg2);
-                SwitchCommsClient(CommsClientType.Tcp);
+                _logger.LogInformation("Connecting to Host:{arg1} :Port{arg2}", arg1, arg2);
+                _commsClient.Dispose();
+                _commsClient = _commsClientFactory.Create(CommsClientType.Tcp);
             }
 
             _commsClient.OnConnectEvent += OnConnect;
             _commsClient.OnDataReceivedEvent += OnReceived;
-            _commsClient.Connect(arg1, arg2);
+            // TODO set arg 3 to use/not use parity
+            _commsClient.Connect(arg1, arg2,false);
 
             _cyclicBuffer.Clear();
 

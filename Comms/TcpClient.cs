@@ -1,6 +1,4 @@
-﻿
-
-/*
+﻿/*
    MIT License
 
    Copyright (c) 2019 Softink Lab
@@ -24,6 +22,7 @@
    SOFTWARE.
 
  */
+
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -49,17 +48,10 @@ namespace TelstarClient.Comms
         #endregion
 
         #region Properties
-
-        public Parity Parity
-        {
-            get => throw new NotImplementedException();
-            set => throw new NotImplementedException();
-        }
-
+        
         // Connection Parameters
         private IPAddress _ipAddress;
         private int _port;
-
 
         // Socket Parameters
         private System.Net.Sockets.TcpClient _tcpClient;
@@ -90,12 +82,12 @@ namespace TelstarClient.Comms
         /// </summary>
         /// <param name="ip">Server IP</param>
         /// <param name="port">Server Port</param>
-        public void Connect(string ip, int port)
+        public void Connect(string ip, int port, bool parity)
         {
-            Task.Run(async () => await ConnectAsync(ip, port));
+            Task.Run(async () => await ConnectAsync(ip, port, parity));
         }
 
-        private async Task ConnectAsync(string ip, int port)
+        private async Task ConnectAsync(string ip, int port, bool parity)
         {
             try
             {
@@ -117,6 +109,8 @@ namespace TelstarClient.Comms
                     _tcpClient.Dispose();
                     _tcpClient = null;
                 }
+
+                _logger.LogInformation("Connecting to Host:{arg1}, Port:{arg2}, Parity:{arg3}", ip, port, parity);
 
                 // Create the client object
                 _tcpClient = new System.Net.Sockets.TcpClient();
@@ -263,7 +257,7 @@ namespace TelstarClient.Comms
         }
 
         #endregion
-        
+
         /// <summary>
         /// Close the Socket Connection
         /// </summary>
@@ -293,7 +287,5 @@ namespace TelstarClient.Comms
                 _disposed = true;
             }
         }
-
     }
-    
 }

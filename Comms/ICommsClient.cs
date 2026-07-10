@@ -10,9 +10,9 @@ public interface ICommsClient
     event DataReceivedEventHandler OnDataReceivedEvent;
     event OnConnectEventHandler OnConnectEvent;
 
-    Parity Parity { get; set; }
 
-    void Connect(string arg1, int arg2);
+
+    void Connect(string arg1, int arg2, bool arg3);
     bool IsConnected();
     bool Write(string data);
     bool Write(byte data);

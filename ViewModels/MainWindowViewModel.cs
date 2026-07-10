@@ -167,11 +167,6 @@ public partial class MainWindowViewModel : ViewModelBase
             (desktop.MainWindow as Views.MainWindow)?.ToggleKioskMode();
         }
     }
-    public void SwitchCommsClient(CommsClientType type)
-    {
-        _commsClient.Dispose();
-        _commsClient = _commsClientFactory.Create(type);
-    }
     
     /// <summary>
     /// This method is called by the _displayManagerMain.OnDisplayDataChangedEvent if the
