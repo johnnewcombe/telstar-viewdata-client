@@ -23,7 +23,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Configuration;
-using ViewdataDisplay;
 
 namespace TelstarClient.ViewModels;
 
@@ -345,11 +344,11 @@ public partial class MainWindowViewModel
                     field = _currentForm.GetFieldById("parity");
                     if (field is not null)
                         parity = field.Value is "y" or "Y";
-                    
+
                     // update settings directly
                     _settings.Config.SerialConnection.Device = device;
                     _settings.Config.SerialConnection.BaudRate = baud;
-                    _settings.Config.SerialConnection.Parity = parity ;
+                    _settings.Config.SerialConnection.Parity = parity;
                     _settings.Save();
 
                     // connect
@@ -403,7 +402,8 @@ public partial class MainWindowViewModel
                         tcp.Parity = false;
                     }
 
-                    _logger.LogInformation("Saving connection:{Name}, Host:{IP}, Port:{Port}, Parity:{parity}", name, host, port, parity);
+                    _logger.LogInformation("Saving connection:{Name}, Host:{IP}, Port:{Port}, Parity:{parity}", name,
+                        host, port, parity);
                     _settings.Save();
 
                     //DisplayEditor returns false when complete or canceled
@@ -446,7 +446,9 @@ public partial class MainWindowViewModel
                         tcp.Parity = parity;
 
                         // save, the form holds the current connection within settings
-                        _logger.LogInformation("Saving connection, Name:{Name}, Host:{IP}, Port:{Port}, Parity:{parity}", name, host, port, parity);
+                        _logger.LogInformation(
+                            "Saving connection, Name:{Name}, Host:{IP}, Port:{Port}, Parity:{parity}", name, host, port,
+                            parity);
                         _settings.Save();
                         UpdateConnectStatus();
                         DisplayData = _displayManagerAlt.Display.Chars;
@@ -456,7 +458,8 @@ public partial class MainWindowViewModel
                 {
                     if (_currentForm.Connection != null)
                     {
-                        _logger.LogError("Connection invalid and not saved, Name:{Name}, Host:{IP}, Port:{Port}", name, host, port);
+                        _logger.LogError("Connection invalid and not saved, Name:{Name}, Host:{IP}, Port:{Port}", name,
+                            host, port);
 
                         // display error message on the status bar
                         DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);

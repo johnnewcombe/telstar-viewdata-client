@@ -66,11 +66,8 @@ macos-x64:
 add-tag:
 	# triggers a remote build on GitHub and populated the GitHub Releases area on the GitHub website.
 	# this not related to the Releases directory in the local project directory.
-	git tag v$(VERSION)
+	-git tag -d v$(VERSION)
+	git tag -a v$(VERSION) -m "Release v$(VERSION)"
+	git push origin :refs/tags/v$(VERSION)
 	git push origin v$(VERSION)
 
-update-tag:
-	# this will delete a tage and recreate it allowing a remote build to be re-invokked. See above.
-	git tag -d v$(VERSION)
-	git push origin :refs/tags/v$(VERSION)
-	$(MAKE) add-tag
