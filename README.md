@@ -16,7 +16,7 @@ It can be downloaded from the [releases section](https://github.com/johnnewcombe
 
 ## Screen Shots
 
-![alt text](./Assets/ScreenshotAll.png)
+![alt text](./Assets/Screenshots.png)
 
 ## Installation
 
