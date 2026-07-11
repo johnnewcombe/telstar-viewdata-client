@@ -237,6 +237,11 @@ namespace TelstarClient.Comms
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Applies even parity to the data.
+        /// </summary>
+        /// <param name="data">The byte array to process.</param>
+        /// <returns>A new byte array with parity bits applied.</returns>
         public static byte[] ApplyEvenParity(byte[] data)
         {
             var result = new byte[data.Length];
@@ -257,6 +262,11 @@ namespace TelstarClient.Comms
 
             return result;
         }
+        /// <summary>
+        /// Counts the number of set bits in a byte.
+        /// </summary>
+        /// <param name="b">The byte to check.</param>
+        /// <returns>The number of set bits.</returns>
         private static int CountSetBits(byte b)
         {
             int count = 0;
@@ -268,6 +278,10 @@ namespace TelstarClient.Comms
             return count;
         }
         
+        /// <summary>
+        /// Asynchronously receives data from the TCP stream.
+        /// </summary>
+        /// <returns>A task representing the asynchronous receive loop.</returns>
         private async Task ReceiveLoopAsync()
         {
             try
@@ -307,6 +321,10 @@ namespace TelstarClient.Comms
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes of the resources used by the TCP client.
+        /// </summary>
+        /// <param name="disposing">True if called from Dispose, false if called from finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)

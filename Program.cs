@@ -27,10 +27,7 @@ sealed class Program
     
     // Miscellaneous Issues
     // TODO Consider an option to start up in kiosk mode via cmd line.
-    // TODO Cursor appers on screen after a disconnect
     // TODO if a frame is downloaded that tuns the cursor on this only gets shown on the next (Flash) update.
-    // TODO Display shows blank areas after a period of time
-    // 
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized

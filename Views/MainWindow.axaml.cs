@@ -33,6 +33,10 @@ using Brushes = Avalonia.Media.Brushes;
 
 namespace TelstarClient.Views;
 
+/// <summary>
+/// Interaction logic for MainWindow.axaml.
+/// Handles the main window setup, user input, and the rendering of the Viewdata display.
+/// </summary>
 public partial class MainWindow : Window
 {
     private readonly ILogger<MainWindow> _logger =
@@ -46,6 +50,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        // Subscribe to DataContext changes to link the Viewmodel's property changes to the display handler.
         DataContextChanged += (_, _) =>
         {
             if (DataContext is MainWindowViewModel viewModel)
@@ -55,10 +60,10 @@ public partial class MainWindow : Window
             }
         };
 
-        //initialise the display
+        // Initialize the display grid with character labels.
         Display.Children.Clear();
 
-        // note that we create an extra row of labels for the status line
+        // Create an extra row of labels to accommodate the status line.
         for (int i = 0; i < ViewdataDisplay.Display.Cols * (ViewdataDisplay.Display.Rows + 1); i++)
         {
             var g = InitCharacterLabel(ViewdataDisplay.Display.Spc);
@@ -66,6 +71,9 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Handles changes in the ViewModel properties, specifically triggering display updates.
+    /// </summary>
     private void PropertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
@@ -73,7 +81,7 @@ public partial class MainWindow : Window
             case nameof(ViewModel.DisplayData):
                 try
                 {
-                    // execute on the main thread
+                    // Execute display updates on the UI thread to avoid cross-thread exceptions.
                     UpdateDisplay();
                 }
                 catch (Exception ex)
@@ -85,11 +93,14 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Toggles the window between normal mode and full-screen kiosk mode (no chrome, topmost).
+    /// </summary>
     public void ToggleKioskMode()
     {
         if (KioskMode)
         {
-            // turn kiosk mode off
+            // Turn kiosk mode off: restore standard window decorations and state.
             ExtendClientAreaToDecorationsHint = false;
             ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.Default;
             WindowState = WindowState.Normal;
@@ -97,17 +108,20 @@ public partial class MainWindow : Window
         }
         else
         {
-            // turn kiosk mode on
+            // Turn kiosk mode on: hide window chrome and set to full-screen.
             ExtendClientAreaToDecorationsHint = true;
             ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
             WindowState = WindowState.FullScreen;
             Topmost = true;
         }
 
-        // toggle the flag
+        // Toggle the kiosk mode flag.
         KioskMode = !KioskMode;
     }
 
+    /// <summary>
+    /// Handles key press events, passing them to the ViewModel for processing.
+    /// </summary>
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         _logger.LogDebug("Keypress:{Key}, Physical Key:{PhysicalKey}, Modifiers:{Modifiers}", e.Key,
@@ -122,6 +136,9 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Handles text input events, passing them to the ViewModel for processing.
+    /// </summary>
     private void Window_TextInput(object sender, TextInputEventArgs e)
     {
         _logger.LogDebug("TextInput:{Text}", e.Text);
@@ -129,7 +146,6 @@ public partial class MainWindow : Window
         {
             ViewModel.TextHandler(e);
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Message}", ex.Message);
@@ -137,6 +153,9 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Updates the cursor visual representation on the display.
+    /// </summary>
     private void UpdateCursor()
     {
         var cursor = ViewModel.Cursor;
@@ -148,6 +167,9 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Updates the display grid based on the data received from the ViewModel.
+    /// </summary>
     private void UpdateDisplay()
     {
         var data = ViewModel.DisplayData;
@@ -162,9 +184,6 @@ public partial class MainWindow : Window
             var label = (Label)((Viewbox)Display.Children[c.Index]).Child;
             
             if (label == null) continue;
-            
-            
-            
             
             /*
              * Avalonia's default Label template wraps its content in a ContentPresenter inside
@@ -182,19 +201,19 @@ public partial class MainWindow : Window
              */
             if (c.InVisible)
             {
-                // see note above
+                // Set to invisible using the empty graphic character and black background.
                 label.Content = '\xE200';
                 label.Background =  new ImmutableSolidColorBrush(Colors.Black);
             }
             else if (c.InvisibleForeground)
             {
-                // see note above
+                // Set to invisible foreground using the empty graphic character.
                 label.Content = '\xE200'; // full graphic character
                 label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
             }
             else
             {
-                // display the character
+                // Display the character with its specific foreground and background colors.
                 label.Content = c.Value;
                 label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
                 label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
@@ -202,15 +221,20 @@ public partial class MainWindow : Window
             }
         }
 
-        // once rendered, add the cursor
+        // Once rendered, add the cursor to the updated display.
         UpdateCursor();
     }
 
+    /// <summary>
+    /// Initializes a Viewbox containing a Label for a character cell.
+    /// </summary>
+    /// <param name="charNumber">The character code to initialize the label with.</param>
+    /// <returns>A Viewbox containing the configured Label.</returns>
     private static Viewbox InitCharacterLabel(int charNumber)
     {
         var thicknessZero = Thickness.Parse("0");
 
-        // create a sixel
+        // Create the character label with default styling.
         var label = new Label()
         {
             Background = Brushes.Black,
@@ -220,9 +244,10 @@ public partial class MainWindow : Window
             Margin = thicknessZero,
         };
 
-        // set the style i.e. Mode 7 font.
+        // Set the style i.e. Mode 7 font.
         label.Classes.Add("mode7");
 
+        // Wrap the label in a Viewbox to handle scaling/stretching.
         var viewBox = new Viewbox()
         {
             Child = label,

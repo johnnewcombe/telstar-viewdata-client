@@ -36,11 +36,21 @@ public class SerialClient : ICommsClient
     public event DataReceivedEventHandler OnDataReceivedEvent;
     public event OnConnectEventHandler OnConnectEvent;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SerialClient"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
     public SerialClient(ILogger<SerialClient> logger)
     { 
         _logger = logger;
     }
     
+    /// <summary>
+    /// Connects to the serial device.
+    /// </summary>
+    /// <param name="deviceName">The name of the serial device (e.g., COM1).</param>
+    /// <param name="baudRate">The baud rate.</param>
+    /// <param name="parity">A flag indicating if parity should be used.</param>
     public void Connect(string deviceName, int baudRate, bool parity)
     {
         try
@@ -66,6 +76,11 @@ public class SerialClient : ICommsClient
         }
     }
 
+    /// <summary>
+    /// Handles the DataReceived event from the serial port.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
     private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
         if (OnDataReceivedEvent != null)
@@ -140,6 +155,9 @@ public class SerialClient : ICommsClient
         return false;
     }
 
+    /// <summary>
+    /// Disconnects from the serial device.
+    /// </summary>
     public void Disconnect()
     {
         if (_serialPort != null)

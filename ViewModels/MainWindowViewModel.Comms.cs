@@ -51,14 +51,12 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
-    /// Note that this could be called for serial and tcp connections
+    /// Establishes a connection to the specified target, either TCP or Serial.
     /// </summary>
-    /// <param name="arg1">This will be the ip address or hostname
-    /// for TCP connections and serial device for serial connections.</param>
-    /// <param name="arg2">This will be the tcp port number for TCP
-    /// connections or baud rate for serial connections</param>
-    /// <param name="parity"></param>
-    /// <param name="serial"></param>
+    /// <param name="arg1">The IP address/hostname or serial device name.</param>
+    /// <param name="arg2">The TCP port or baud rate.</param>
+    /// <param name="parity">A flag indicating if parity is enabled.</param>
+    /// <param name="serial">True for a serial connection, false for TCP.</param>
     private void Connect(string arg1, int arg2, bool parity, bool serial)
     {
         try
@@ -93,6 +91,9 @@ public partial class MainWindowViewModel
         }
     }
 
+    /// <summary>
+    /// Disconnects from the current connection.
+    /// </summary>
     private void Disconnect()
     {
         _logger.LogInformation("Disconnecting");
@@ -109,7 +110,10 @@ public partial class MainWindowViewModel
         _logger.LogInformation("Disconnected");
     }
 
-    // Connection Status Listener
+    /// <summary>
+    /// Listener for connection events.
+    /// </summary>
+    /// <param name="status">The new connection status.</param>
     private void OnConnect(bool status)
     {
         _logger.LogInformation("Connected:{Status}", status);
@@ -121,7 +125,10 @@ public partial class MainWindowViewModel
         Dispatcher.UIThread.Post(UpdateConnectStatus);
     }
 
-    // Data Received Listener
+    /// <summary>
+    /// Listener for data received events.
+    /// </summary>
+    /// <param name="data">The received data.</param>
     private void OnReceived(string data)
     {
         // add data to the cyclic buffer, this is thread safe

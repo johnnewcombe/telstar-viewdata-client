@@ -49,6 +49,9 @@ public partial class MainWindowViewModel : ViewModelBase
     // used to keep track of what is being displayed to the user
     // the order is unimportant EXCEPT that 'Welcome' must be the
     // first entry.
+    /// <summary>
+    /// Defines the types of screens that can be displayed to the user.
+    /// </summary>
     private enum DisplayType
     {
         Welcome,
@@ -133,6 +136,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _cyclicBuffer = new CyclicBuffer(2048);
         
     }
+    /// <summary>
+    /// Disposes of the view model, ensuring resources like the communication client are properly cleaned up.
+    /// </summary>
     public void Dispose()
     {
         _logger.LogInformation("Disposing MainWindowViewModel");
@@ -390,6 +396,10 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Generates the directory menu display string from the configuration settings.
+    /// </summary>
+    /// <returns>A formatted string representing the menu.</returns>
     private string GetDirectoryFromConfig()
     {
         // get the menu details from the config file
