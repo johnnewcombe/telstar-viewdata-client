@@ -90,6 +90,20 @@ public partial class MainWindow : Window
                 }
 
                 break;
+
+            case nameof(ViewModel.Cursor):
+                try
+                {
+                    UpdateCursor();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to update the cursor");
+                }
+
+                break;
+            default:
+                break;
         }
     }
 
@@ -158,6 +172,8 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateCursor()
     {
+        _logger.LogInformation("Updating cursor");
+
         var cursor = ViewModel.Cursor;
         if (cursor is not null &&
             cursor.Visible)
@@ -172,6 +188,8 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateDisplay()
     {
+        _logger.LogInformation("Updating display");
+
         var data = ViewModel.DisplayData;
 
         if (data is null)
@@ -220,8 +238,7 @@ public partial class MainWindow : Window
                 
             }
         }
-
-        // Once rendered, add the cursor to the updated display.
+        // every time the display gets updated we need to put the cursor back
         UpdateCursor();
     }
 

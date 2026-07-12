@@ -122,6 +122,8 @@ public partial class MainWindowViewModel : ViewModelBase
         // set up the alt display and show the welcome message
         // this will set the 'displayType' to 'Welcome'
         _displayManagerAlt = new DisplayManager();
+        _displayManagerAlt.OnDisplayDataChangedEvent += DisplayDataChangedAlt;
+        _displayManagerAlt.OnCurosrPositionChangedEvent += CursorPositionChangedAlt;
 
         // note that this method is asynchronous and includes a delay such
         // that it completes AFTER the constructor has completed
@@ -129,7 +131,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _ = DisplayWelcomeMessage();
 
         _displayManagerMain = new DisplayManager(true);
-        _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChanged;
+        _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChangedMain;
+        _displayManagerMain.OnCurosrPositionChangedEvent += CursorPositionChangedMain;
         _displayManagerMain.Display.SetStatusText(DISCONNECTED_STATUS);
 
         _settings = new Settings(configFile);
@@ -178,7 +181,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// This method is called by the _displayManagerMain.OnDisplayDataChangedEvent if the
     /// Display Manager has updated the display internally
     /// </summary>
-    private void DisplayDataChanged()
+    private void DisplayDataChangedMain()
     {
         // this method is called by the _displayManagerMain.OnDisplayDataChangedEvent
         // if the Display Manager has updated the display internally
@@ -190,13 +193,46 @@ public partial class MainWindowViewModel : ViewModelBase
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
     }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    private void CursorPositionChangedMain()
+    {
+        Dispatcher.UIThread.Post(UpdateMainCursor);
+                
+    }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    private void DisplayDataChangedAlt()
+    {
+        // this method is called by the _displayManagerMain.OnDisplayDataChangedEvent
+        // if the Display Manager has updated the display internally
+        // this allows us to update the DisplayData property of this view model
+
+            Dispatcher.UIThread.Post(UpdateAltDisplay);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void CursorPositionChangedAlt()
+    {
+        Dispatcher.UIThread.Post(UpdateAltCursor);
+                
+    }
+    
     /// <summary>
     /// Updates the main display, this is the display that handles terminal data.
     /// </summary>
     private void UpdateMainDisplay()
     {
         DisplayData = _displayManagerMain.Display.Chars;
+    }
+    private void UpdateMainCursor()
+    {
         Cursor = _displayManagerMain.Cursor;
     }
 
@@ -207,9 +243,13 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateAltDisplay()
     {
         DisplayData = _displayManagerAlt.Display.Chars;
-        Cursor = _displayManagerAlt.Cursor;
     }
 
+    private void UpdateAltCursor()
+    {
+        Cursor = _displayManagerAlt.Cursor;
+        
+    }
     /// <summary>
     /// Helper method to update the status display. It handles both main and alt displays
     /// and updates the cursor etc.
@@ -280,6 +320,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 // only update the view for terminal display
                 if (_displayType == DisplayType.Terminal)
                 {
+                    // TODO consider raising the OnDataChanged event within ViewdataDisplay.
                     DisplayData = _displayManagerMain.Display.Chars;
                 }
             }
@@ -317,7 +358,7 @@ public partial class MainWindowViewModel : ViewModelBase
         set
         {
             _cursor = value;
-            //OnPropertyChanged();
+            OnPropertyChanged();
         }
     }
 
@@ -386,14 +427,14 @@ public partial class MainWindowViewModel : ViewModelBase
         _previousDisplayType = _displayType;
         _displayType = displayType;
 
-        if (_displayType == DisplayType.Terminal)
-        {
-            Dispatcher.UIThread.Post(UpdateMainDisplay);
-        }
-        else
-        {
-            Dispatcher.UIThread.Post(UpdateAltDisplay);
-        }
+        //if (_displayType == DisplayType.Terminal)
+        //{
+        //    Dispatcher.UIThread.Post(UpdateMainDisplay);
+        //}
+        //else
+        //{
+        //    Dispatcher.UIThread.Post(UpdateAltDisplay);
+        //}
     }
 
     /// <summary>
