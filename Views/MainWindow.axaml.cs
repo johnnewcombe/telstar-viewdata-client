@@ -172,7 +172,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateCursor()
     {
-        _logger.LogInformation("Updating cursor");
+        _logger.LogDebug("Updating cursor");
 
         var cursor = ViewModel.Cursor;
         if (cursor is not null &&
@@ -188,7 +188,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateDisplay()
     {
-        _logger.LogInformation("Updating display");
+        _logger.LogDebug("Updating display");
 
         var data = ViewModel.DisplayData;
 
