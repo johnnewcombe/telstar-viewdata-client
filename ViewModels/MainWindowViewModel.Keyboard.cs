@@ -120,8 +120,8 @@ public partial class MainWindowViewModel
             UpdateConnectStatus();
         }
 
-        UpdateMainDisplay();
-        UpdateAltDisplay();
+        //UpdateMainDisplay();
+        //UpdateAltDisplay();
         // update the appropriate display man
 //        DisplayData = _displayType == DisplayType.Terminal
 //            ? _displayManagerMain.Display.Chars
