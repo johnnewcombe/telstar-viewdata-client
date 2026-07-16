@@ -16,6 +16,11 @@ internal static class BitmapConverter
     /// Converts a raw RGBA8888 buffer (row-major, top-to-bottom,
     /// left-to-right, 4 bytes per pixel - exactly what
     /// DisplayManager.Bitmap produces) into a WriteableBitmap.
+    ///
+    /// Uses Marshal.Copy rather than unsafe pointer arithmetic - no
+    /// AllowUnsafeBlocks project setting required. Given this runs once
+    /// per frame regenerate (not once per pixel), the performance
+    /// difference against the unsafe version should be negligible.
     /// </summary>
     /// <param name="rgba">The raw pixel buffer.</param>
     /// <param name="width">Bitmap width in pixels (480 at the standard Viewdata grid).</param>
@@ -39,30 +44,28 @@ internal static class BitmapConverter
 
         using ILockedFramebuffer frameBuffer = bitmap.Lock();
 
-        // frameBuffer.RowBytes may not exactly equal width*4 (stride
-        // padding) - copy row by row rather than assuming the buffer is
-        // contiguous, so this stays correct even if Avalonia ever pads
-        // rows on some platform/format combination.
         int sourceStride = width * 4;
-        unsafe
+
+        // frameBuffer.RowBytes may not exactly equal width*4 (stride
+        // padding on some platform/format combinations) - copy row by
+        // row via Marshal.Copy rather than assuming the buffer is fully
+        // contiguous, so this stays correct either way.
+        if (frameBuffer.RowBytes == sourceStride)
         {
-            byte* destination = (byte*)frameBuffer.Address;
+            // Common case: no padding, the whole buffer is contiguous -
+            // one single copy rather than looping per row.
+            System.Runtime.InteropServices.Marshal.Copy(rgba, 0, frameBuffer.Address, rgba.Length);
+        }
+        else
+        {
             for (int y = 0; y < height; y++)
             {
                 int sourceOffset = y * sourceStride;
-                int destOffset = y * frameBuffer.RowBytes;
-                Marshal_Copy(rgba, sourceOffset, destination + destOffset, sourceStride);
+                IntPtr destinationRow = frameBuffer.Address + (y * frameBuffer.RowBytes);
+                System.Runtime.InteropServices.Marshal.Copy(rgba, sourceOffset, destinationRow, sourceStride);
             }
         }
 
         return bitmap;
-    }
-
-    private static unsafe void Marshal_Copy(byte[] source, int sourceOffset, byte* destination, int length)
-    {
-        fixed (byte* sourcePtr = &source[sourceOffset])
-        {
-            Buffer.MemoryCopy(sourcePtr, destination, length, length);
-        }
     }
 }

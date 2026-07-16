@@ -199,7 +199,10 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void CursorPositionChangedMain()
     {
-        Dispatcher.UIThread.Post(UpdateMainCursor);
+        if (_displayType == DisplayType.Terminal)
+        {
+            Dispatcher.UIThread.Post(UpdateMainCursor);
+        }
                 
     }
 
@@ -211,8 +214,10 @@ public partial class MainWindowViewModel : ViewModelBase
         // this method is called by the _displayManagerMain.OnDisplayDataChangedEvent
         // if the Display Manager has updated the display internally
         // this allows us to update the DisplayData property of this view model
-
+        if (_displayType != DisplayType.Terminal)
+        {
             Dispatcher.UIThread.Post(UpdateAltDisplay);
+        }
     }
 
     /// <summary>
@@ -220,8 +225,10 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void CursorPositionChangedAlt()
     {
-        Dispatcher.UIThread.Post(UpdateAltCursor);
-                
+        if (_displayType != DisplayType.Terminal)
+        {
+            Dispatcher.UIThread.Post(UpdateAltCursor);
+        }
     }
     
     /// <summary>
@@ -236,6 +243,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateMainCursor()
     {
         Cursor = _displayManagerMain.Cursor;
+        Bitmap = _displayManagerMain.Bitmap;
+        
     }
 
     /// <summary>
@@ -251,7 +260,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateAltCursor()
     {
         Cursor = _displayManagerAlt.Cursor;
-        
+        Bitmap = _displayManagerAlt.Bitmap;
     }
     /// <summary>
     /// Helper method to update the status display. It handles both main and alt displays

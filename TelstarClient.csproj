@@ -11,7 +11,7 @@
         <SelfContained>true</SelfContained>
         <PublishTrimmed>false</PublishTrimmed>
         <PublishReadyToRun>true</PublishReadyToRun>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
         <!---->
     </PropertyGroup>
     <PropertyGroup>

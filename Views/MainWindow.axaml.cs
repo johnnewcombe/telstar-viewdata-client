@@ -238,7 +238,7 @@ public partial class MainWindow : Window
         //}
     
         // every time the display gets updated we need to put the cursor back
-        UpdateCursor();
+        //UpdateCursor();
     }
 /*
     /// <summary>
