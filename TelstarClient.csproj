@@ -11,6 +11,7 @@
         <SelfContained>true</SelfContained>
         <PublishTrimmed>false</PublishTrimmed>
         <PublishReadyToRun>true</PublishReadyToRun>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <!---->
     </PropertyGroup>
     <PropertyGroup>
@@ -11495,5 +11496,9 @@
 
     <ItemGroup>
       <None Remove="log4net.config" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ViewdataDisplay\ViewdataDisplay.csproj" />
     </ItemGroup>
 </Project>

@@ -120,10 +120,12 @@ public partial class MainWindowViewModel
             UpdateConnectStatus();
         }
 
+        UpdateMainDisplay();
+        UpdateAltDisplay();
         // update the appropriate display man
-        DisplayData = _displayType == DisplayType.Terminal
-            ? _displayManagerMain.Display.Chars
-            : _displayManagerAlt.Display.Chars;
+//        DisplayData = _displayType == DisplayType.Terminal
+//            ? _displayManagerMain.Display.Chars
+//            : _displayManagerAlt.Display.Chars;
     }
 
     /// <summary>
@@ -307,7 +309,8 @@ public partial class MainWindowViewModel
         }
         else
         {
-            DisplayData = _displayManagerAlt.Display.Chars;
+            UpdateAltDisplay();
+            //DisplayData = _displayManagerAlt.Display.Chars;
         }
 
         return false;
@@ -371,7 +374,8 @@ public partial class MainWindowViewModel
         }
         else
         {
-            DisplayData = _displayManagerAlt.Display.Chars;
+            UpdateAltDisplay();
+            //DisplayData = _displayManagerAlt.Display.Chars;
         }
 
         return false;
@@ -455,7 +459,8 @@ public partial class MainWindowViewModel
                             parity);
                         _settings.Save();
                         UpdateConnectStatus();
-                        DisplayData = _displayManagerAlt.Display.Chars;
+                        UpdateAltDisplay();
+                        //DisplayData = _displayManagerAlt.Display.Chars;
                     }
                 }
                 else // connection is either null or invalid

@@ -61,14 +61,14 @@ public partial class MainWindow : Window
         };
 
         // Initialize the display grid with character labels.
-        Display.Children.Clear();
+        //Display.Children.Clear();
 
         // Create an extra row of labels to accommodate the status line.
-        for (int i = 0; i < ViewdataDisplay.Display.Cols * (ViewdataDisplay.Display.Rows + 1); i++)
-        {
-            var g = InitCharacterLabel(ViewdataDisplay.Display.Spc);
-            Display.Children.Add(g);
-        }
+        //for (int i = 0; i < ViewdataDisplay.Display.Cols * (ViewdataDisplay.Display.Rows + 1); i++)
+        //{
+        //    var g = InitCharacterLabel(ViewdataDisplay.Display.Spc);
+        //    Display.Children.Add(g);
+        //}
     }
 
     /// <summary>
@@ -178,8 +178,8 @@ public partial class MainWindow : Window
         if (cursor is not null &&
             cursor.Visible)
         {
-            var label = (Label)((Viewbox)Display.Children[cursor.GetCursorIndex()]).Child;
-            if (label != null) label.Content = "_";
+            //var label = (Label)((Viewbox)Display.Children[cursor.GetCursorIndex()]).Child;
+            //if (label != null) label.Content = "_";
         }
     }
 
@@ -190,18 +190,22 @@ public partial class MainWindow : Window
     {
         _logger.LogDebug("Updating display");
 
-        var data = ViewModel.DisplayData;
+        BitmapDisplay.Source = BitmapConverter.ToWriteableBitmap(ViewModel.Bitmap, width: 480, height: 500);
+        
+        
+        //var data = ViewModel.DisplayData;
+        
 
-        if (data is null)
-        {
-            return;
-        }
+        //if (data is null)
+        //{
+        //    return;
+        //}
 
-        foreach (var c in data)
-        {
-            var label = (Label)((Viewbox)Display.Children[c.Index]).Child;
+        //foreach (var c in data)
+        //{
+        //    var label = (Label)((Viewbox)Display.Children[c.Index]).Child;
             
-            if (label == null) continue;
+        //    if (label == null) continue;
             
             /*
              * Avalonia's default Label template wraps its content in a ContentPresenter inside
@@ -217,27 +221,28 @@ public partial class MainWindow : Window
              * empty graphic character is specified. Another approach would be to use any printable
              * character and set the forground colour to equl the background colour.
              */
-            if (c.InVisible)
-            {
+        //    if (c.InVisible)
+        //    {
                 // Set to invisible using the empty graphic character and black background.
-                label.Content = '\xE200';
-                label.Background =  new ImmutableSolidColorBrush(Colors.Black);
-            }
-            else if (c.InvisibleForeground)
-            {
+        //        label.Content = '\xE200';
+        //        label.Background =  new ImmutableSolidColorBrush(Colors.Black);
+        //    }
+        //    else if (c.InvisibleForeground)
+        //    {
                 // Set to invisible foreground using the empty graphic character.
-                label.Content = '\xE200'; // full graphic character
-                label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
-            }
-            else
-            {
+        //        label.Content = '\xE200'; // full graphic character
+        //        label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+        //    }
+        //    else
+        //    {
                 // Display the character with its specific foreground and background colors.
-                label.Content = c.Value;
-                label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
-                label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
+        //        label.Content = c.Value;
+        //        label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
+        //        label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
                 
-            }
-        }
+        //    }
+        //}
+    
         // every time the display gets updated we need to put the cursor back
         UpdateCursor();
     }

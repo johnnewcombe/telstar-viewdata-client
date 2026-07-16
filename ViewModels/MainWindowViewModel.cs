@@ -230,6 +230,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateMainDisplay()
     {
         DisplayData = _displayManagerMain.Display.Chars;
+        Bitmap = _displayManagerMain.Bitmap;
+
     }
     private void UpdateMainCursor()
     {
@@ -243,6 +245,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateAltDisplay()
     {
         DisplayData = _displayManagerAlt.Display.Chars;
+        Bitmap = _displayManagerAlt.Bitmap;
     }
 
     private void UpdateAltCursor()
@@ -270,12 +273,14 @@ public partial class MainWindowViewModel : ViewModelBase
             if (_displayType == DisplayType.Terminal)
             {
                 _logger.LogInformation("Displaying status message to main display:{message}", message);
-                DisplayData = _displayManagerMain.Display.Chars;
+                //DisplayData = _displayManagerMain.Display.Chars;
+                UpdateMainDisplay();
             }
             else
             {
                 _logger.LogInformation("Displaying status message to alternate display:{message}", message);
-                DisplayData = _displayManagerAlt.Display.Chars;
+                //DisplayData = _displayManagerAlt.Display.Chars;
+                UpdateAltDisplay();
             }
         }
         catch (Exception ex)
@@ -321,7 +326,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 if (_displayType == DisplayType.Terminal)
                 {
                     // TODO consider raising the OnDataChanged event within ViewdataDisplay.
-                    DisplayData = _displayManagerMain.Display.Chars;
+                    //DisplayData = _displayManagerMain.Display.Chars;
+                    UpdateMainDisplay();
+
                 }
             }
         }
@@ -347,7 +354,17 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
     
-
+    private byte[] _bitmap = Array.Empty<byte>();
+    public byte[] Bitmap
+    {
+        get => _bitmap;
+        set
+        {
+            _bitmap = value;
+            OnPropertyChanged();
+        }
+    }
+    
     /// <summary>
     /// The cursor position, this is collected by MainWindow when the DisplayData property is updated.
     /// is fired when the main data is updated. Any Cursor setting can be placed here 
@@ -401,19 +418,23 @@ public partial class MainWindowViewModel : ViewModelBase
                 _currentForm = new ConnectTcp(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
-                DisplayData = _displayManagerAlt.Display.Chars;
+                //DisplayData = _displayManagerAlt.Display.Chars;
+                UpdateAltDisplay();
+
                 break;
             case DisplayType.ConnectSerial:
                 _currentForm = new ConnectSerial(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
-                DisplayData = _displayManagerAlt.Display.Chars;
+                //DisplayData = _displayManagerAlt.Display.Chars;
+                UpdateAltDisplay();
                 break;
             case DisplayType.EditConnection:
                 _currentForm = new EditConnection(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
-                DisplayData = _displayManagerAlt.Display.Chars;
+                //DisplayData = _displayManagerAlt.Display.Chars;
+                UpdateAltDisplay();
                 break;
             case DisplayType.Help:
                 _currentForm = new Help(_displayManagerAlt, connection);

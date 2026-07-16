@@ -16,7 +16,27 @@
         KeyDown="Window_KeyDown"
         TextInput="Window_TextInput"
         >
+    <!--
+      Window can only have ONE direct child (its Content) - this Grid is
+      that single child, and holds both displays side by side in two
+      columns for comparison. Remove this wrapper (and one of the two
+      children) once you're happy with the bitmap version and want to
+      drop the old UniformGrid renderer.
+    -->
 
-    <UniformGrid Margin="10,10,10,10" Name="Display" Columns="40" Rows="25" Background="Black"></UniformGrid>
-
+        <!--UniformGrid Grid.Column="0" Margin="10,10,10,10" Name="Display" Columns="40" Rows="25" Background="Black" /-->
+        <!--
+          RenderOptions.BitmapInterpolationMode="None" gives crisp, blocky,
+          nearest-neighbour scaling as the window resizes - the authentic
+          "CRT emulator" look discussed earlier. Switch to "HighQuality"
+          for smooth/anti-aliased scaling instead if you'd rather compare
+          that look too.
+        -->
+        <Image
+            Grid.Column="1"
+            Name="BitmapDisplay"
+            Stretch="Uniform"
+            RenderOptions.BitmapInterpolationMode="None"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch" />
 </Window>
