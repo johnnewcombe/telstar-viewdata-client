@@ -19,17 +19,12 @@
 
 using System;
 using System.ComponentModel;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Media.Immutable;
 using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelstarClient.ViewModels;
-using Brushes = Avalonia.Media.Brushes;
 
 namespace TelstarClient.Views;
 
@@ -78,7 +73,8 @@ public partial class MainWindow : Window
     {
         switch (e.PropertyName)
         {
-            case nameof(ViewModel.DisplayData):
+            
+            case nameof(ViewModel.Bitmap):
                 try
                 {
                     // Execute display updates on the UI thread to avoid cross-thread exceptions.
@@ -101,8 +97,6 @@ public partial class MainWindow : Window
                     _logger.LogError(ex, "Failed to update the cursor");
                 }
 
-                break;
-            default:
                 break;
         }
     }
@@ -246,7 +240,7 @@ public partial class MainWindow : Window
         // every time the display gets updated we need to put the cursor back
         UpdateCursor();
     }
-
+/*
     /// <summary>
     /// Initializes a Viewbox containing a Label for a character cell.
     /// </summary>
@@ -280,5 +274,5 @@ public partial class MainWindow : Window
 
         return viewBox;
     }
-
+*/
 }

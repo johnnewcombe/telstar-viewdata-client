@@ -229,7 +229,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void UpdateMainDisplay()
     {
-        DisplayData = _displayManagerMain.Display.Chars;
+        //DisplayData = _displayManagerMain.Display.Chars;
         Bitmap = _displayManagerMain.Bitmap;
 
     }
@@ -244,7 +244,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void UpdateAltDisplay()
     {
-        DisplayData = _displayManagerAlt.Display.Chars;
+        //DisplayData = _displayManagerAlt.Display.Chars;
         Bitmap = _displayManagerAlt.Bitmap;
     }
 
@@ -344,15 +344,15 @@ public partial class MainWindowViewModel : ViewModelBase
     /// event. Setting DsplaData will also cause MainWindow to read the Cursor
     /// property.
     /// </summary>
-    public List<ViewdataDisplay.Char> DisplayData
-    {
-        get { return _displayData; }
-        set
-        {
-            _displayData = value;
-            OnPropertyChanged();
-        }
-    }
+    //public List<ViewdataDisplay.Char> DisplayData
+    //{
+    //    get { return _displayData; }
+    //    set
+    //    {
+    //        _displayData = value;
+    //        OnPropertyChanged();
+    //    }
+    //}
     
     private byte[] _bitmap = Array.Empty<byte>();
     public byte[] Bitmap
