@@ -123,7 +123,6 @@ public partial class MainWindowViewModel : ViewModelBase
         // this will set the 'displayType' to 'Welcome'
         _displayManagerAlt = new DisplayManager();
         _displayManagerAlt.OnDisplayDataChangedEvent += DisplayDataChangedAlt;
-        _displayManagerAlt.OnCurosrPositionChangedEvent += CursorPositionChangedAlt;
 
         // note that this method is asynchronous and includes a delay such
         // that it completes AFTER the constructor has completed
@@ -132,7 +131,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _displayManagerMain = new DisplayManager(true);
         _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChangedMain;
-        _displayManagerMain.OnCurosrPositionChangedEvent += CursorPositionChangedMain;
         _displayManagerMain.Display.SetStatusText(DISCONNECTED_STATUS);
 
         _settings = new Settings(configFile);
