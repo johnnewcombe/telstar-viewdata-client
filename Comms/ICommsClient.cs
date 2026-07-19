@@ -1,3 +1,4 @@
+using System;
 using System.IO.Ports;
 
 namespace TelstarClient.Comms;
@@ -18,8 +19,8 @@ public interface ICommsClient
     /// <summary>
     /// Event raised when the connection status changes.
     /// </summary>
-    event OnConnectEventHandler OnConnectEvent;
-
+    //event OnConnectEventHandler OnConnectEvent;
+    event Action<bool, string?> OnConnectEvent;
     /// <summary>
     /// Establishes a connection to the specified target.
     /// </summary>

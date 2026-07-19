@@ -77,7 +77,7 @@ public partial class MainWindowViewModel
             case Constants.ALT_X: // alt+x disconnect
                 Disconnect();
                 // clear the display
-                _displayManagerMain.Display.Clear();
+                _displayManagerMain.ClearDisplay();
 
                 // switch back to the directory
                 SetDisplay(DisplayType.Directory);
@@ -119,13 +119,6 @@ public partial class MainWindowViewModel
         {
             UpdateConnectStatus();
         }
-
-        //UpdateMainDisplay();
-        //UpdateAltDisplay();
-        // update the appropriate display man
-//        DisplayData = _displayType == DisplayType.Terminal
-//            ? _displayManagerMain.Display.Chars
-//            : _displayManagerAlt.Display.Chars;
     }
 
     /// <summary>

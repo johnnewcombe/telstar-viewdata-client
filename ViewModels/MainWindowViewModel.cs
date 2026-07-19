@@ -18,7 +18,6 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,7 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private IForm _currentForm;
     private DisplayType _displayType;
     private DisplayType _previousDisplayType;
-    private List<ViewdataDisplay.Char> _displayData;
+    //private List<ViewdataDisplay.Char> _displayData;
     private Cursor _cursor;
     private readonly Settings _settings;
     private readonly DisplayManager _displayManagerMain;
@@ -195,18 +194,6 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// 
     /// </summary>
-    private void CursorPositionChangedMain()
-    {
-        if (_displayType == DisplayType.Terminal)
-        {
-            Dispatcher.UIThread.Post(UpdateMainCursor);
-        }
-                
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
     private void DisplayDataChangedAlt()
     {
         // this method is called by the _displayManagerMain.OnDisplayDataChangedEvent
@@ -219,17 +206,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    private void CursorPositionChangedAlt()
-    {
-        if (_displayType != DisplayType.Terminal)
-        {
-            Dispatcher.UIThread.Post(UpdateAltCursor);
-        }
-    }
-    
-    /// <summary>
     /// Updates the main display, this is the display that handles terminal data.
     /// </summary>
     private void UpdateMainDisplay()
@@ -237,12 +213,6 @@ public partial class MainWindowViewModel : ViewModelBase
         //DisplayData = _displayManagerMain.Display.Chars;
         Bitmap = _displayManagerMain.Bitmap;
 
-    }
-    private void UpdateMainCursor()
-    {
-        Cursor = _displayManagerMain.Cursor;
-        Bitmap = _displayManagerMain.Bitmap;
-        
     }
 
     /// <summary>
@@ -254,12 +224,7 @@ public partial class MainWindowViewModel : ViewModelBase
         //DisplayData = _displayManagerAlt.Display.Chars;
         Bitmap = _displayManagerAlt.Bitmap;
     }
-
-    private void UpdateAltCursor()
-    {
-        Cursor = _displayManagerAlt.Cursor;
-        Bitmap = _displayManagerAlt.Bitmap;
-    }
+    
     /// <summary>
     /// Helper method to update the status display. It handles both main and alt displays
     /// and updates the cursor etc.
@@ -402,8 +367,7 @@ public partial class MainWindowViewModel : ViewModelBase
         // if we are using the alt display then clear it etc
         if (displayType > 0)
         {
-            _displayManagerAlt.Display.Clear();
-            _displayManagerAlt.SetCursorPosition(0, 0);
+            _displayManagerAlt.ClearDisplay();
         }
 
         // The screen can be in any one of these states. The client could

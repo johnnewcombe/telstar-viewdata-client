@@ -18,7 +18,9 @@
 */
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using TelstarClient.Comms;
@@ -75,7 +77,7 @@ public partial class MainWindowViewModel
                 _commsClient = _commsClientFactory.Create(CommsClientType.Tcp);
             }
 
-            _commsClient.OnConnectEvent += OnConnect;
+            _commsClient.OnConnectEvent += OnConnectionChange;
             _commsClient.OnDataReceivedEvent += OnReceived;
 
             _commsClient.Connect(arg1, arg2, parity);
@@ -111,20 +113,52 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
-    /// Listener for connection events.
+    /// Listener for connection events. Note that this is 
     /// </summary>
     /// <param name="status">The new connection status.</param>
-    private void OnConnect(bool status)
+    private void OnConnectionChange(bool connected, string? error)
     {
-        _logger.LogInformation("Connected:{Status}", status);
+        
+        if (error is not null || error.Length > 0)
+        {
+            _logger.LogError("Error:{Error}", error);
+        }
+        else
+        {
+            _logger.LogInformation("Connected:{Connected}", connected);
+        }
 
         // set the thread safe property
-        ConnectStatus = status;
-
+        ConnectStatus = connected;
+        
         // switch to UI thread
-        Dispatcher.UIThread.Post(UpdateConnectStatus);
+        Dispatcher.UIThread.Post(() => ConnectionChange(connected, error));   
+
     }
 
+/// <summary>
+/// We only get here 
+/// </summary>
+    private async void ConnectionChange(bool connected, string error)
+    {
+        // TODO create a SetErrorStatus method or combine with SetStatusText
+        // display the error
+        _displayManagerMain.Display.SetStatusText(error,"Red");
+        await Task.Delay(2000);
+        
+        // we are on the UI thread so update the display
+        UpdateConnectStatus();
+
+        if (!ConnectStatus)
+        {
+            // we have been disconnected but we don't know if this
+            // was an error or due to a user action.
+            SetDisplay(DisplayType.Directory);
+            _displayManagerMain.ClearDisplay();
+            UpdateAltDisplay();
+        }
+        
+    }
     /// <summary>
     /// Listener for data received events.
     /// </summary>

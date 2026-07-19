@@ -28,6 +28,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 
 namespace TelstarClient.Comms
@@ -42,8 +43,8 @@ namespace TelstarClient.Comms
         #region Delegates
 
         public event DataReceivedEventHandler OnDataReceivedEvent;
-        public event OnConnectEventHandler OnConnectEvent;
-
+        //public event OnConnectEventHandler OnConnectEvent;
+        public event Action<bool, string?> OnConnectEvent;
         #endregion
 
         #region Properties
@@ -86,7 +87,7 @@ namespace TelstarClient.Comms
         public void Connect(string ip, int port, bool parity)
         {
             _parity = parity;
-            Task.Run(async () => await ConnectAsync(ip, port, parity));
+            _ = Task.Run(async () => await ConnectAsync(ip, port, parity));
         }
 
         private async Task ConnectAsync(string ip, int port, bool parity)
@@ -100,10 +101,11 @@ namespace TelstarClient.Comms
                 else
                 {
                     var addresses = await Dns.GetHostAddressesAsync(ip);
+                    if (addresses.Length == 0)
+                        throw new SocketException((int)SocketError.HostNotFound);
                     _ipAddress = addresses[0];
                 }
 
-                // Close the client if open
                 if (_tcpClient != null)
                 {
                     _stream?.Dispose();
@@ -114,26 +116,28 @@ namespace TelstarClient.Comms
 
                 _logger.LogInformation("Connecting to Host:{arg1}, Port:{arg2}, Parity:{arg3}", ip, port, parity);
 
-                // Create the client object
                 _tcpClient = new System.Net.Sockets.TcpClient();
                 await _tcpClient.ConnectAsync(_ipAddress, port);
                 _stream = _tcpClient.GetStream();
                 _port = port;
 
-                OnConnectEvent?.Invoke(true);
+                RaiseConnectEvent(true, null);
 
-                // Start receiving
                 _ = ReceiveLoopAsync();
             }
             catch (Exception ex)
             {
-                OnConnectEvent?.Invoke(false);
-                _logger.LogError("Error connecting to TCP server:{Error}", ex.Message
-                );
-                throw;
+                _logger.LogError("Error connecting to TCP server:{Error}", ex.Message);
+                RaiseConnectEvent(false, "UNABLE TO CONNECT");
             }
         }
-
+        private void RaiseConnectEvent(bool connected, string? error)
+        {
+            //if (Dispatcher.UIThread.CheckAccess())
+                OnConnectEvent?.Invoke(connected, error);
+            //else
+            //    Dispatcher.UIThread.Post(() => OnConnectEvent?.Invoke(connected, error));
+        }
         /// <summary>
         /// Check connection status of the socket
         /// </summary>
@@ -304,8 +308,8 @@ namespace TelstarClient.Comms
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error in receive loop:{Error}", ex.Message);
-                Dispose();
+                _logger.LogError("Receive loop terminated: {Error}", ex.Message);
+                RaiseConnectEvent(false, ex.Message);
             }
         }
 
@@ -337,7 +341,7 @@ namespace TelstarClient.Comms
                         _tcpClient.Close();
                         _tcpClient.Dispose();
                         _tcpClient = null;
-                        OnConnectEvent?.Invoke(false);
+                        OnConnectEvent?.Invoke(false,"");
                     }
                 }
 

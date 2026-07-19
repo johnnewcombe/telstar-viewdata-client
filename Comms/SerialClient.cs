@@ -34,7 +34,7 @@ public class SerialClient : ICommsClient
     
     private readonly ILogger<SerialClient> _logger;
     public event DataReceivedEventHandler OnDataReceivedEvent;
-    public event OnConnectEventHandler OnConnectEvent;
+    public event Action<bool, string?> OnConnectEvent;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SerialClient"/> class.
@@ -66,11 +66,11 @@ public class SerialClient : ICommsClient
             _serialPort.Parity = parity ? Parity.Even : Parity.None;
             _serialPort.DataReceived += SerialPort_DataReceived;
             _serialPort.Open();
-            OnConnectEvent?.Invoke(true);
+            OnConnectEvent?.Invoke(true,"");
         }
         catch (Exception ex)
         {
-            OnConnectEvent?.Invoke(false);
+            OnConnectEvent?.Invoke(false,"");
             _logger.LogError("Error connecting to Serial device:{Error}", ex.Message);
 
         }
@@ -169,7 +169,7 @@ public class SerialClient : ICommsClient
             }
             _serialPort.Dispose();
             _serialPort = null;
-            OnConnectEvent?.Invoke(false);
+            OnConnectEvent?.Invoke(false, "");
         }
 
         _logger.LogInformation("Disconnecting");
@@ -194,7 +194,7 @@ public class SerialClient : ICommsClient
                     _serialPort.Close();
                     _serialPort.Dispose();
                     _serialPort = null;
-                    OnConnectEvent?.Invoke(false);
+                    OnConnectEvent?.Invoke(false,"");
                 }
             }
 
