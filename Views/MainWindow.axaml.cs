@@ -21,6 +21,7 @@ using System;
 using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,6 +41,12 @@ public partial class MainWindow : Window
     private MainWindowViewModel ViewModel { get; set; }
 
     private bool KioskMode { get; set; }
+
+    // Created once on first display update and reused for every subsequent
+    // frame (see UpdateDisplay) - a WriteableBitmap's pixel content is
+    // mutable in place via Lock(), so there's no need to allocate a new
+    // native bitmap surface on every single character/frame update.
+    private WriteableBitmap _displayBitmap;
 
     public MainWindow()
     {
@@ -184,8 +191,15 @@ public partial class MainWindow : Window
     {
         _logger.LogDebug("Updating display");
 
-        BitmapDisplay.Source = BitmapConverter.ToWriteableBitmap(ViewModel.Bitmap, width: 480, height: 500);
-        
+        if (_displayBitmap is null)
+        {
+            _displayBitmap = BitmapConverter.CreateWriteableBitmap(width: 480, height: 500);
+            BitmapDisplay.Source = _displayBitmap;
+        }
+
+        BitmapConverter.UpdatePixels(_displayBitmap, ViewModel.Bitmap);
+        BitmapDisplay.InvalidateVisual();
+
         
         //var data = ViewModel.DisplayData;
         
