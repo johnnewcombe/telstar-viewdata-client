@@ -228,6 +228,7 @@ public partial class MainWindowViewModel
                         {
                             Connect(tcp.Host, tcp.Port, false, false);
                             SetDisplay(DisplayType.Terminal);
+                            _displayManagerMain.SetStatusText(CONNECTING_STATUS);
 
                         }
                     }

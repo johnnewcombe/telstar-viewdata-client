@@ -66,13 +66,17 @@ public partial class MainWindowViewModel
             if (serial)
             {
                 _logger.LogInformation("Connecting to device:{arg1}, baud rate:{arg2} parity:{parity}", arg1, arg2, parity);
-                _commsClient.Dispose();
+                // removing the event stops the Disconnect fiddling with the screen and
+                _commsClient.OnConnectEvent -= OnConnectionChange;
+                _commsClient.Disconnect();
                 _commsClient = _commsClientFactory.Create(CommsClientType.Serial);
             }
             else
             {
                 _logger.LogInformation("Connecting to host:{arg1} :port{arg2}, parity:{parity}", arg1, arg2, parity);
-                _commsClient.Dispose();
+                // removing the event stops the Disconnect fiddling with the screen and
+                _commsClient.OnConnectEvent -= OnConnectionChange;                _commsClient.Disconnect();
+                _commsClient.Disconnect();
                 _commsClient = _commsClientFactory.Create(CommsClientType.Tcp);
             }
 
@@ -100,10 +104,6 @@ public partial class MainWindowViewModel
         if (_commsClient is not null)
         {
             _commsClient.Disconnect();
-
-            // set the thread safe property
-            //ConnectStatus = false;
-            
         }
 
         _logger.LogInformation("Disconnected");
@@ -159,16 +159,16 @@ public partial class MainWindowViewModel
         {
             // we have been disconnected but we don't know if this
             // was an error or due to a user action.
-            //SetDisplay(DisplayType.Directory);
+            SetDisplay(DisplayType.Directory);
             
             // clear the display so that all old data is removed
             // for next time we switch to Terminal
-            //_displayManagerMain.ClearDisplay();
+            _displayManagerMain.ClearDisplay();
         }
-        //else
-        //{
-        //    SetDisplay(DisplayType.Terminal);
-        //}
+        else
+        {
+            SetDisplay(DisplayType.Terminal);
+        }
     }
     /// <summary>
     /// Listener for data received events.

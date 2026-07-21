@@ -38,6 +38,8 @@ namespace TelstarClient.Comms
     {
         private const int CONNECT_TIMEOUT = 5;
         private const string UNABLE_TO_CONNECT = "UNABLE TO CONNECT";
+        private const string COMMS_ERROR = "COMMUNICATIONS ERROR";
+
         private bool _disposed;
 
         // *** Event Handlers *** //
@@ -323,7 +325,7 @@ namespace TelstarClient.Comms
             catch (Exception ex)
             {
                 _logger.LogError("Receive loop terminated: {Error}", ex.Message);
-                RaiseConnectEvent(false, ex.Message);
+                //RaiseConnectEvent(false, COMMS_ERROR);
             }
         }
 
