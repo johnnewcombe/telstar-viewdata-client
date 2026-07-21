@@ -36,6 +36,9 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private const string CONNECTED_STATUS = "CONNECTED";
     private const string DISCONNECTED_STATUS = "DISCONNECTED";
+    private const string CONNECTING_STATUS = "CONNECTING";
+    //private const string UNABLE_TO_CONNECT_STATUS = "UNABLE TO CONNECT";
+    private const string INVALID_DATA_STATUS = "INVALID DATA";
     private const string CONFIG_FILE = "config.json";
 
     // Used to store the index (screen pos) of any fields within the display.
@@ -130,7 +133,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _displayManagerMain = new DisplayManager(true);
         _displayManagerMain.OnDisplayDataChangedEvent += DisplayDataChangedMain;
-        _displayManagerMain.Display.SetStatusText(DISCONNECTED_STATUS);
+        _displayManagerMain.SetStatusText(DISCONNECTED_STATUS);
 
         _settings = new Settings(configFile);
         _cyclicBuffer = new CyclicBuffer(2048);
@@ -207,6 +210,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>
     /// Updates the main display, this is the display that handles terminal data.
+    /// This method woul not normally be called directly but via the
+    /// OnDisplayDataChangedEvent handler. It must be called on the UI thread.
     /// </summary>
     private void UpdateMainDisplay()
     {
@@ -216,8 +221,10 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Updates the alt display, this is the display that handles connection, help
-    /// and other internal screens.
+    /// Updates the alt display, this is the display that handles connection, Help
+    /// and other non-terminal screens.
+    /// This method woul not normally be called directly but via the
+    /// OnDisplayDataChangedEvent handler. It must be called on the UI thread.
     /// </summary>
     private void UpdateAltDisplay()
     {
@@ -225,6 +232,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Bitmap = _displayManagerAlt.Bitmap;
     }
     
+    /*
     /// <summary>
     /// Helper method to update the status display. It handles both main and alt displays
     /// and updates the cursor etc.
@@ -238,8 +246,8 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             // update both displays
-            _displayManagerMain.Display.SetStatusText(message, foregroundColour, backgroundColour);
-            _displayManagerAlt.Display.SetStatusText(message,foregroundColour, backgroundColour);
+            _displayManagerMain.SetStatusText(message, foregroundColour, backgroundColour);
+            _displayManagerAlt.SetStatusText(message,foregroundColour, backgroundColour);
 
             // but only display one
             if (_displayType == DisplayType.Terminal)
@@ -263,7 +271,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _logger.LogError(ex, "Failed to update the Connection Status");
         }
     }
-
+*/
     /// <summary>
     /// This should be called on the UI Thread or via the dispatcher (see OnConnect event).
     /// </summary>
@@ -272,13 +280,15 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // this function cannot have parameters so read from thread safe property
         // to get the current status.
-        if (ConnectStatus)
+        if (_commsClient.IsConnected())
         {
-            DisplayStatusMessage(CONNECTED_STATUS);
+            _displayManagerAlt.SetStatusText(CONNECTED_STATUS);
+            _displayManagerMain.SetStatusText(CONNECTED_STATUS);
         }
         else
         {
-            DisplayStatusMessage(DISCONNECTED_STATUS);
+            _displayManagerAlt.SetStatusText(DISCONNECTED_STATUS);
+            _displayManagerMain.SetStatusText(DISCONNECTED_STATUS);
         }
     }
 
@@ -297,10 +307,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 // only update the view for terminal display
                 if (_displayType == DisplayType.Terminal)
                 {
-                    // TODO consider raising the OnDataChanged event within ViewdataDisplay.
-                    //DisplayData = _displayManagerMain.Display.Chars;
                     UpdateMainDisplay();
-
                 }
             }
         }
@@ -364,6 +371,8 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <param name="connection"></param>
     private void SetDisplay(DisplayType displayType, IConnection connection = null)
     {
+        _logger.LogDebug("Setting display type:{displayType}, previous display type:{previousDisplay}",displayType,_previousDisplayType);
+        
         // if we are using the alt display then clear it etc
         if (displayType > 0)
         {
@@ -389,23 +398,17 @@ public partial class MainWindowViewModel : ViewModelBase
                 _currentForm = new ConnectTcp(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
-                //DisplayData = _displayManagerAlt.Display.Chars;
-                UpdateAltDisplay();
 
                 break;
             case DisplayType.ConnectSerial:
                 _currentForm = new ConnectSerial(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
-                //DisplayData = _displayManagerAlt.Display.Chars;
-                UpdateAltDisplay();
                 break;
             case DisplayType.EditConnection:
                 _currentForm = new EditConnection(_displayManagerAlt, connection);
                 _displayManagerAlt.Write(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
-                //DisplayData = _displayManagerAlt.Display.Chars;
-                UpdateAltDisplay();
                 break;
             case DisplayType.Help:
                 _currentForm = new Help(_displayManagerAlt, connection);
@@ -419,14 +422,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _previousDisplayType = _displayType;
         _displayType = displayType;
 
-        //if (_displayType == DisplayType.Terminal)
-        //{
-        //    Dispatcher.UIThread.Post(UpdateMainDisplay);
-        //}
-        //else
-        //{
-        //    Dispatcher.UIThread.Post(UpdateAltDisplay);
-        //}
+        UpdateConnectStatus();
+
     }
 
     /// <summary>

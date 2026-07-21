@@ -27,6 +27,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,8 @@ namespace TelstarClient.Comms
 {
     public class TcpClient : ICommsClient, IDisposable
     {
+        private const int CONNECT_TIMEOUT = 5;
+        private const string UNABLE_TO_CONNECT = "UNABLE TO CONNECT";
         private bool _disposed;
 
         // *** Event Handlers *** //
@@ -43,17 +46,19 @@ namespace TelstarClient.Comms
         #region Delegates
 
         public event DataReceivedEventHandler OnDataReceivedEvent;
+
         //public event OnConnectEventHandler OnConnectEvent;
         public event Action<bool, string?> OnConnectEvent;
+
         #endregion
 
         #region Properties
-        
+
         // Connection Parameters
         private IPAddress _ipAddress;
         private int _port;
         private bool _parity;
-        
+
         // Socket Parameters
         private System.Net.Sockets.TcpClient _tcpClient;
         private NetworkStream _stream;
@@ -87,10 +92,10 @@ namespace TelstarClient.Comms
         public void Connect(string ip, int port, bool parity)
         {
             _parity = parity;
-            _ = Task.Run(async () => await ConnectAsync(ip, port, parity));
+            _ = Task.Run(async () => await ConnectAsync(ip, port, parity, CONNECT_TIMEOUT));
         }
 
-        private async Task ConnectAsync(string ip, int port, bool parity)
+        private async Task ConnectAsync(string ip, int port, bool parity, int timeout)
         {
             try
             {
@@ -117,27 +122,35 @@ namespace TelstarClient.Comms
                 _logger.LogInformation("Connecting to Host:{arg1}, Port:{arg2}, Parity:{arg3}", ip, port, parity);
 
                 _tcpClient = new System.Net.Sockets.TcpClient();
-                await _tcpClient.ConnectAsync(_ipAddress, port);
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
+                try
+                {
+                    await _tcpClient.ConnectAsync(_ipAddress, port, cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // this exception is caught and logged below
+                    throw new TimeoutException($"Connection to {ip}:{port} timed out after {timeout} seconds.");
+                }
+
                 _stream = _tcpClient.GetStream();
                 _port = port;
-
                 RaiseConnectEvent(true, null);
-
                 _ = ReceiveLoopAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError("Error connecting to TCP server:{Error}", ex.Message);
-                RaiseConnectEvent(false, "UNABLE TO CONNECT");
+                RaiseConnectEvent(false, UNABLE_TO_CONNECT);
             }
         }
+
         private void RaiseConnectEvent(bool connected, string? error)
         {
-            //if (Dispatcher.UIThread.CheckAccess())
-                OnConnectEvent?.Invoke(connected, error);
-            //else
-            //    Dispatcher.UIThread.Post(() => OnConnectEvent?.Invoke(connected, error));
+            OnConnectEvent?.Invoke(connected, error);
         }
+
         /// <summary>
         /// Check connection status of the socket
         /// </summary>
@@ -160,7 +173,6 @@ namespace TelstarClient.Comms
                 {
                     byte[] byteDate = Encoding.ASCII.GetBytes(data);
                     return Write(byteDate);
-
                 }
                 catch (Exception)
                 {
@@ -208,9 +220,9 @@ namespace TelstarClient.Comms
                 {
                     if (_parity)
                     {
-                        data=ApplyEvenParity(data);
+                        data = ApplyEvenParity(data);
                     }
-                    
+
                     _stream.Write(data, 0, data.Length);
                     return true;
                 }
@@ -219,7 +231,6 @@ namespace TelstarClient.Comms
                     _logger.LogError("Error writing to socket:{Data}", data);
                     Dispose();
                     throw;
-
                 }
             }
 
@@ -241,6 +252,7 @@ namespace TelstarClient.Comms
         #endregion
 
         #region Private Methods
+
         /// <summary>
         /// Applies even parity to the data.
         /// </summary>
@@ -266,6 +278,7 @@ namespace TelstarClient.Comms
 
             return result;
         }
+
         /// <summary>
         /// Counts the number of set bits in a byte.
         /// </summary>
@@ -279,9 +292,10 @@ namespace TelstarClient.Comms
                 count += b & 1;
                 b >>= 1;
             }
+
             return count;
         }
-        
+
         /// <summary>
         /// Asynchronously receives data from the TCP stream.
         /// </summary>
@@ -341,7 +355,7 @@ namespace TelstarClient.Comms
                         _tcpClient.Close();
                         _tcpClient.Dispose();
                         _tcpClient = null;
-                        OnConnectEvent?.Invoke(false,"");
+                        OnConnectEvent?.Invoke(false, "");
                     }
                 }
 

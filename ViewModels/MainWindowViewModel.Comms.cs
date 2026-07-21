@@ -18,8 +18,6 @@
 */
 
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
@@ -31,9 +29,10 @@ public partial class MainWindowViewModel
 {
     #region Comms Client Control and Events
 
-    private Lock _lock = new();
-    private bool _connectStatus;
+    //private Lock _lock = new();
+    //private bool _connectStatus;
 
+    /*
     /// <summary>
     /// Thread safe property to allow the connected status to be read
     /// from multiple threads
@@ -51,7 +50,7 @@ public partial class MainWindowViewModel
                 _connectStatus = value;
         }
     }
-
+*/
     /// <summary>
     /// Establishes a connection to the specified target, either TCP or Serial.
     /// </summary>
@@ -79,12 +78,10 @@ public partial class MainWindowViewModel
 
             _commsClient.OnConnectEvent += OnConnectionChange;
             _commsClient.OnDataReceivedEvent += OnReceived;
-
             _commsClient.Connect(arg1, arg2, parity);
-
             _cyclicBuffer.Clear();
 
-            Dispatcher.UIThread.Post(UpdateMainDisplay);
+            //Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
         catch (Exception ex)
         {
@@ -105,7 +102,7 @@ public partial class MainWindowViewModel
             _commsClient.Disconnect();
 
             // set the thread safe property
-            ConnectStatus = false;
+            //ConnectStatus = false;
             
         }
 
@@ -115,11 +112,12 @@ public partial class MainWindowViewModel
     /// <summary>
     /// Listener for connection events. Note that this is 
     /// </summary>
-    /// <param name="status">The new connection status.</param>
+    /// <param name="connected">The new connection status.</param>
+    /// <param name="error"></param>
     private void OnConnectionChange(bool connected, string? error)
     {
         
-        if (error is not null || error.Length > 0)
+        if (!string.IsNullOrEmpty(error))
         {
             _logger.LogError("Error:{Error}", error);
         }
@@ -129,7 +127,7 @@ public partial class MainWindowViewModel
         }
 
         // set the thread safe property
-        ConnectStatus = connected;
+        //ConnectStatus = connected;
         
         // switch to UI thread
         Dispatcher.UIThread.Post(() => ConnectionChange(connected, error));   
@@ -141,23 +139,36 @@ public partial class MainWindowViewModel
 /// </summary>
     private async void ConnectionChange(bool connected, string error)
     {
+        _logger.LogInformation("Connection change, connected:{connected}", connected);
+
         // TODO create a SetErrorStatus method or combine with SetStatusText
-        // display the error
-        _displayManagerMain.Display.SetStatusText(error,"Red");
-        await Task.Delay(2000);
+        // display the error if the error text is populated
+        if (!string.IsNullOrEmpty(error))
+        {
+            // we have to do both as we could be on a connect screen or a terminal screen
+            _displayManagerMain.SetStatusText(error,"Red");
+            _displayManagerAlt.SetStatusText(error,"Red");
+            await Task.Delay(2000);
+            SetDisplay(DisplayType.Directory);
+        }
         
         // we are on the UI thread so update the display
         UpdateConnectStatus();
 
-        if (!ConnectStatus)
+        if (!connected)
         {
             // we have been disconnected but we don't know if this
             // was an error or due to a user action.
-            SetDisplay(DisplayType.Directory);
-            _displayManagerMain.ClearDisplay();
-            UpdateAltDisplay();
+            //SetDisplay(DisplayType.Directory);
+            
+            // clear the display so that all old data is removed
+            // for next time we switch to Terminal
+            //_displayManagerMain.ClearDisplay();
         }
-        
+        //else
+        //{
+        //    SetDisplay(DisplayType.Terminal);
+        //}
     }
     /// <summary>
     /// Listener for data received events.

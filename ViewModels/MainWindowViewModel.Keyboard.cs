@@ -65,7 +65,6 @@ public partial class MainWindowViewModel
     /// <param name="asciiValue"></param>
     private void ProcessKey(byte asciiValue)
     {
-        // NOTE That this function does not run on the UI thread
         _logger.LogDebug("ASCII Value:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
 
         // generic operations only, Form specific operations are below
@@ -87,38 +86,39 @@ public partial class MainWindowViewModel
                 Shutdown();
                 return;
         }
-
-        var result = false;
-
+        
         switch (_displayType)
         {
             case DisplayType.Terminal:
-                result = HandleTerminalKey(asciiValue);
+                HandleTerminalKey(asciiValue);
                 break;
             case DisplayType.Welcome:
-                result = HandleWelcomeKey(asciiValue);
+                HandleWelcomeKey(asciiValue);
                 break;
             case DisplayType.Directory:
-                result = HandleDirectoryKey(asciiValue);
+                HandleDirectoryKey(asciiValue);
                 break;
             case DisplayType.ConnectTcp:
-                result = HandleConnectTcpKey(asciiValue);
+                HandleConnectTcpKey(asciiValue);
                 break;
             case DisplayType.ConnectSerial:
-                result = HandleConnectSerialKey(asciiValue);
+                HandleConnectSerialKey(asciiValue);
                 break;
             case DisplayType.EditConnection:
-                result = HandleEditConnectionKey(asciiValue);
+                HandleEditConnectionKey(asciiValue);
                 break;
             case DisplayType.Help:
-                result = HandleHelpKey(asciiValue);
+                HandleHelpKey(asciiValue);
                 break;
         }
 
-        if (!result)
-        {
-            UpdateConnectStatus();
-        }
+        // update the status if result true
+        // TODO: do this in the resoective handlers as that is where the display is updated
+        //  get rid of reult variable and have handlers return void
+//        if (!result)
+//        {
+        //UpdateConnectStatus();
+//        }
     }
 
     /// <summary>
@@ -126,17 +126,19 @@ public partial class MainWindowViewModel
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
-    private bool HandleTerminalKey(byte asciiValue)
+    private void HandleTerminalKey(byte asciiValue)
     {
         // looking for alt key combinations (same as ctrl codes but with high bit set)
         switch (asciiValue)
         {
             case Constants.ALT_C: // conceal
                 _displayManagerMain.Display.Conceal();
-                break;
+                UpdateMainDisplay();
+                return; // dont send to server
             case Constants.ALT_R: // reveal
                 _displayManagerMain.Display.Reveal();
-                break;
+                UpdateMainDisplay();
+                return; // dont send to server
             case Constants.CR: // return
                 asciiValue = Constants.HASH;
                 break;
@@ -145,11 +147,11 @@ public partial class MainWindowViewModel
                 break;
             case Constants.ALT_H: // alt+h show help menus
                 SetDisplay(DisplayType.Help);
-                return false;
-            case (byte)ViewdataDisplay.Constants.CurOn:
-                return true;
-            case (byte)ViewdataDisplay.Constants.CurOff:
-                return true;
+                return; // dont send to server
+//            case (byte)ViewdataDisplay.Constants.CurOn:
+//                break;
+//            case (byte)ViewdataDisplay.Constants.CurOff:
+//                break;
         }
 
         // send value to remote end
@@ -162,7 +164,6 @@ public partial class MainWindowViewModel
             _logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
         }
 
-        return false;
     }
 
     /// <summary>
@@ -170,7 +171,7 @@ public partial class MainWindowViewModel
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
-    private bool HandleWelcomeKey(byte asciiValue)
+    private void HandleWelcomeKey(byte asciiValue)
     {
         // pointless switch statement for future use and to remove ReSharper warnings
         switch (asciiValue)
@@ -182,15 +183,14 @@ public partial class MainWindowViewModel
         // if we get a key press of any kind whilst looking at the welcome page
         // then load the menu
         SetDisplay(DisplayType.Directory);
-        return false;
     }
 
     /// <summary>
-    /// Key handler, returns true the status has been updated.
+    /// Key handler, returns true if the status has been updated.
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
-    private bool HandleDirectoryKey(byte asciiValue)
+    private void HandleDirectoryKey(byte asciiValue)
     {
         IConnection con;
         int index;
@@ -228,6 +228,7 @@ public partial class MainWindowViewModel
                         {
                             Connect(tcp.Host, tcp.Port, false, false);
                             SetDisplay(DisplayType.Terminal);
+
                         }
                     }
                 }
@@ -249,15 +250,14 @@ public partial class MainWindowViewModel
                 break;
         }
 
-        return false;
     }
 
     /// <summary>
-    /// Key handler, returns true the status has been updated.
+    /// Key handler, returns true if the status has been updated.
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
-    private bool HandleConnectTcpKey(byte asciiValue)
+    private void HandleConnectTcpKey(byte asciiValue)
     {
         var port = 0;
         var host = string.Empty;
@@ -267,7 +267,7 @@ public partial class MainWindowViewModel
         {
             case Constants.ESC:
                 SetDisplay(_previousDisplayType);
-                return false;
+                return;
         }
 
         // connect or ignore
@@ -290,23 +290,23 @@ public partial class MainWindowViewModel
 
                     Connect(host, port, parity, false);
                     SetDisplay(DisplayType.Terminal);
+                    _displayManagerMain.SetStatusText(CONNECTING_STATUS);
                 }
                 else
                 {
-                    _logger.LogError("Form is invalid: {Host}, {Port}", host, port);
+                    _logger.LogInformation("Form is invalid: {Host}, {Port}", host, port);
                     // update the status
-                    DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
-                    return true;
+                    _displayManagerAlt.SetStatusText(INVALID_DATA_STATUS, ViewdataDisplay.Constants.Red);
+                    //DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
                 }
             }
         }
         else
         {
-            UpdateAltDisplay();
-            //DisplayData = _displayManagerAlt.Display.Chars;
+            // update the display with user entered character
+            //UpdateAltDisplay();
         }
 
-        return false;
     }
 
     /// <summary>
@@ -314,7 +314,7 @@ public partial class MainWindowViewModel
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
-    private bool HandleConnectSerialKey(byte asciiValue)
+    private void HandleConnectSerialKey(byte asciiValue)
     {
         var baud = 0;
         var device = string.Empty;
@@ -324,7 +324,7 @@ public partial class MainWindowViewModel
         {
             case Constants.ESC:
                 SetDisplay(_previousDisplayType);
-                return false;
+                return;
         }
 
         if (!_currentForm.ProcessFormKey(asciiValue) || asciiValue == Constants.ALT_C)
@@ -350,28 +350,30 @@ public partial class MainWindowViewModel
                     _settings.Config.SerialConnection.BaudRate = baud;
                     _settings.Config.SerialConnection.Parity = parity;
                     _settings.Save();
-
+                    
                     // connect
                     Connect(device, baud, parity, true);
                     SetDisplay(DisplayType.Terminal);
+                    _displayManagerMain.SetStatusText(CONNECTING_STATUS);
+
                 }
                 else
                 {
-                    _logger.LogError("Form is invalid: {Device}, {Baud}", device, baud);
+                    _logger.LogInformation("Form is invalid: {Device}, {Baud}", device, baud);
 
                     // display error message on the status bar
-                    DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
-                    return true;
+                    _displayManagerAlt.SetStatusText(INVALID_DATA_STATUS, ViewdataDisplay.Constants.Red);
+                    //DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
+
                 }
             }
         }
         else
         {
-            UpdateAltDisplay();
+            //UpdateAltDisplay();
             //DisplayData = _displayManagerAlt.Display.Chars;
         }
-
-        return false;
+        
     }
 
     /// <summary>
@@ -379,7 +381,7 @@ public partial class MainWindowViewModel
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
-    private bool HandleEditConnectionKey(byte asciiValue)
+    private void HandleEditConnectionKey(byte asciiValue)
     {
         var port = 0;
         var host = string.Empty;
@@ -390,7 +392,7 @@ public partial class MainWindowViewModel
         {
             case Constants.ESC:
                 SetDisplay(_previousDisplayType);
-                return false;
+                return;
             case Constants.ALT_D: // delete entry
 
                 if (_currentForm.Connection is not null)
@@ -452,7 +454,7 @@ public partial class MainWindowViewModel
                             parity);
                         _settings.Save();
                         UpdateConnectStatus();
-                        UpdateAltDisplay();
+                        //UpdateAltDisplay();
                         //DisplayData = _displayManagerAlt.Display.Chars;
                     }
                 }
@@ -464,8 +466,9 @@ public partial class MainWindowViewModel
                             host, port);
 
                         // display error message on the status bar
-                        DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
-                        return true;
+                        //DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
+                        _displayManagerAlt.SetStatusText(INVALID_DATA_STATUS, ViewdataDisplay.Constants.Red);
+                        return;
                     }
                     else
                     {
@@ -477,9 +480,7 @@ public partial class MainWindowViewModel
             //DisplayEditor returns false when complete or canceled
             SetDisplay(_previousDisplayType);
         }
-
-
-        return false;
+        
     }
 
     /// <summary>
@@ -487,7 +488,7 @@ public partial class MainWindowViewModel
     /// </summary>
     /// <param name="asciiValue"></param>
     /// <returns></returns>
-    private bool HandleHelpKey(byte asciiValue)
+    private void HandleHelpKey(byte asciiValue)
     {
         switch (asciiValue)
         {
@@ -496,7 +497,6 @@ public partial class MainWindowViewModel
                 break;
         }
 
-        return false;
     }
 
 
