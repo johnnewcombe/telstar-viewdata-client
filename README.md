@@ -4,7 +4,7 @@ This repository contains an experimental cross platform Viewdata Terminal. Unlik
 resizable and includes full screen (no chrome) support.
 It includes both serial port and TCP connections.
 
-This is a 'work in progress' but as of v0.0.25 is usable.
+This is a 'work in progress', however, the latest release is perfectly usable.
 
 It currently works on the following platforms
 
