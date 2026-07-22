@@ -36,10 +36,9 @@ namespace TelstarClient.Comms
 {
     public class TcpClient : ICommsClient, IDisposable
     {
-        private const int CONNECT_TIMEOUT = 5;
-        private const string UNABLE_TO_CONNECT = "UNABLE TO CONNECT";
-        private const string COMMS_ERROR = "COMMUNICATIONS ERROR";
-
+        //private const int CONNECT_TIMEOUT = 5;
+        //private const string UNABLE_TO_CONNECT = "UNABLE TO CONNECT";
+        //private const string COMMS_ERROR = "COMMUNICATIONS ERROR";
         private bool _disposed;
 
         // *** Event Handlers *** //
@@ -94,7 +93,7 @@ namespace TelstarClient.Comms
         public void Connect(string ip, int port, bool parity)
         {
             _parity = parity;
-            _ = Task.Run(async () => await ConnectAsync(ip, port, parity, CONNECT_TIMEOUT));
+            _ = Task.Run(async () => await ConnectAsync(ip, port, parity, CommsConstants.CONNECT_TIMEOUT));
         }
 
         private async Task ConnectAsync(string ip, int port, bool parity, int timeout)
@@ -138,20 +137,21 @@ namespace TelstarClient.Comms
 
                 _stream = _tcpClient.GetStream();
                 _port = port;
-                RaiseConnectEvent(true, null);
+                OnConnectEvent?.Invoke(true, null);
+
                 _ = ReceiveLoopAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError("Error connecting to TCP server:{Error}", ex.Message);
-                RaiseConnectEvent(false, UNABLE_TO_CONNECT);
+                OnConnectEvent?.Invoke(false, CommsConstants.UNABLE_TO_CONNECT);
+
             }
         }
-
-        private void RaiseConnectEvent(bool connected, string? error)
-        {
-            OnConnectEvent?.Invoke(connected, error);
-        }
+        //private void RaiseConnectEvent(bool connected, string? error)
+        //{
+//            OnConnectEvent?.Invoke(connected, error);
+        //}
 
         /// <summary>
         /// Check connection status of the socket
@@ -180,7 +180,7 @@ namespace TelstarClient.Comms
                 {
                     _logger.LogError("Error writing to socket:{Data}", data);
                     Dispose();
-                    throw;
+                    return false;
                 }
             }
 
@@ -232,7 +232,7 @@ namespace TelstarClient.Comms
                 {
                     _logger.LogError("Error writing to socket:{Data}", data);
                     Dispose();
-                    throw;
+                    return false;
                 }
             }
 

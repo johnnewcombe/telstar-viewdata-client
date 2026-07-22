@@ -26,6 +26,7 @@ namespace TelstarClient.Comms;
 
 public class SerialClient : ICommsClient
 {
+
     private bool _disposed;
     
     private SerialPort _serialPort;
@@ -72,7 +73,7 @@ public class SerialClient : ICommsClient
         {
             OnConnectEvent?.Invoke(false,"");
             _logger.LogError("Error connecting to Serial device:{Error}", ex.Message);
-
+            OnConnectEvent?.Invoke(false, CommsConstants.UNABLE_TO_CONNECT);
         }
     }
 
@@ -96,6 +97,11 @@ public class SerialClient : ICommsClient
         return _serialPort != null && _serialPort.IsOpen;
     }
 
+    /// <summary>
+    /// Write Data to Port
+    /// </summary>
+    /// <param name="data">Data to be written</param>
+    /// <returns>Success status as Boolean Value</returns>
     public bool Write(string data)
     {
         try
@@ -110,47 +116,56 @@ public class SerialClient : ICommsClient
         {
             _logger.LogError("Error writing to device:{Data}", data);
             Dispose();
-            throw;
+            return false;
         }
         
         return false;
     }
-
+    
+    /// <summary>
+    /// Write Data to Port
+    /// </summary>
+    /// <param name="data">Data to be written</param>
+    /// <returns>Success status as Boolean Value</returns>
     public bool Write(byte data)
     {
-        if (IsConnected())
-        {
-            _serialPort.Write(new[] { data }, 0, 1);
-            return true;
-        }
-        return false;
+        byte[] array = [data];
+        return Write(array);
     }
 
+    /// <summary>
+    /// Write Data to Port
+    /// </summary>
+    /// <param name="data">Data to be written</param>
+    /// <returns>Success status as Boolean Value</returns>
     public bool Write(char data)
+    {
+        byte[] array = [(byte)data];
+        return Write(array);
+    }
+    
+    
+    /// <summary>
+    /// Write Data to Port
+    /// </summary>
+    /// <param name="data">Data to be written</param>
+    /// <returns>Success status as Boolean Value</returns>
+    public bool Write(byte[] data)
     {
         if (IsConnected())
         {
             try
             {
-                _serialPort.Write(data.ToString());
-                return true;
+                
+            _serialPort.Write(data, 0, data.Length);
+            return true;
             }
             catch (Exception)
             {
+                _logger.LogError("Error writing to device:{Data}", data);
                 Dispose();
-                throw;
+                return false; 
             }
-        }
-        
-        return false;
-    }
-
-    public bool Write(byte[] data)
-    {
-        if (IsConnected())
-        {
-            _serialPort.Write(data, 0, data.Length);
-            return true;
         }
         return false;
     }

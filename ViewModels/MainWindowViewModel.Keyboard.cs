@@ -111,14 +111,6 @@ public partial class MainWindowViewModel
                 HandleHelpKey(asciiValue);
                 break;
         }
-
-        // update the status if result true
-        // TODO: do this in the resoective handlers as that is where the display is updated
-        //  get rid of reult variable and have handlers return void
-//        if (!result)
-//        {
-        //UpdateConnectStatus();
-//        }
     }
 
     /// <summary>

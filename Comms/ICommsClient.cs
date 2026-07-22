@@ -11,6 +11,8 @@ public delegate void OnConnectEventHandler(bool status);
 /// </summary>
 public interface ICommsClient
 {
+
+
     /// <summary>
     /// Event raised when data is received from the communication source.
     /// </summary>
