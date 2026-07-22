@@ -58,6 +58,6 @@
     "Device" : "",
     "BaudRate" : 1200,
     "Parity" : false,
-    "InitString" : ""
+    "InitString" : "AT^MATDTGLASSTTY.COM:6502^M"
   }
 }

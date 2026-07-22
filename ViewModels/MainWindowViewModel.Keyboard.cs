@@ -86,7 +86,7 @@ public partial class MainWindowViewModel
                 Shutdown();
                 return;
         }
-        
+
         switch (_displayType)
         {
             case DisplayType.Terminal:
@@ -140,10 +140,6 @@ public partial class MainWindowViewModel
             case Constants.ALT_H: // alt+h show help menus
                 SetDisplay(DisplayType.Help);
                 return; // dont send to server
-//            case (byte)ViewdataDisplay.Constants.CurOn:
-//                break;
-//            case (byte)ViewdataDisplay.Constants.CurOff:
-//                break;
         }
 
         // send value to remote end
@@ -155,7 +151,6 @@ public partial class MainWindowViewModel
         {
             _logger.LogInformation("Character sent to server:{Hex:X2}h,{Decimal}d", asciiValue, asciiValue);
         }
-
     }
 
     /// <summary>
@@ -218,10 +213,9 @@ public partial class MainWindowViewModel
                     {
                         if (!string.IsNullOrEmpty(tcp.Name))
                         {
-                            Connect(tcp.Host, tcp.Port, false, false);
+                            Connect(tcp.Host, tcp.Port, false, string.Empty, false);
                             SetDisplay(DisplayType.Terminal);
                             _displayManagerMain.SetStatusText(CONNECTING_STATUS);
-
                         }
                     }
                 }
@@ -242,7 +236,6 @@ public partial class MainWindowViewModel
 
                 break;
         }
-
     }
 
     /// <summary>
@@ -281,7 +274,7 @@ public partial class MainWindowViewModel
                     if (field is not null)
                         parity = field.Value is "y" or "Y";
 
-                    Connect(host, port, parity, false);
+                    Connect(host, port, parity, string.Empty, false);
                     SetDisplay(DisplayType.Terminal);
                     _displayManagerMain.SetStatusText(CONNECTING_STATUS);
                 }
@@ -299,7 +292,6 @@ public partial class MainWindowViewModel
             // update the display with user entered character
             //UpdateAltDisplay();
         }
-
     }
 
     /// <summary>
@@ -312,6 +304,7 @@ public partial class MainWindowViewModel
         var baud = 0;
         var device = string.Empty;
         var parity = false;
+        var init = string.Empty;
 
         switch (asciiValue)
         {
@@ -337,18 +330,21 @@ public partial class MainWindowViewModel
                     field = _currentForm.GetFieldById("parity");
                     if (field is not null)
                         parity = field.Value is "y" or "Y";
+                    field = _currentForm.GetFieldById("init");
+                    init = field.Value;
+
 
                     // update settings directly
                     _settings.Config.SerialConnection.Device = device;
                     _settings.Config.SerialConnection.BaudRate = baud;
                     _settings.Config.SerialConnection.Parity = parity;
+                    _settings.Config.SerialConnection.InitString = init;
                     _settings.Save();
-                    
+
                     // connect
-                    Connect(device, baud, parity, true);
+                    Connect(device, baud, parity, init, true);
                     SetDisplay(DisplayType.Terminal);
                     _displayManagerMain.SetStatusText(CONNECTING_STATUS);
-
                 }
                 else
                 {
@@ -357,7 +353,6 @@ public partial class MainWindowViewModel
                     // display error message on the status bar
                     _displayManagerAlt.SetStatusText(INVALID_DATA_STATUS, ViewdataDisplay.Constants.Red);
                     //DisplayStatusMessage("INVALID DATA", ViewdataDisplay.Constants.Red);
-
                 }
             }
         }
@@ -366,7 +361,6 @@ public partial class MainWindowViewModel
             //UpdateAltDisplay();
             //DisplayData = _displayManagerAlt.Display.Chars;
         }
-        
     }
 
     /// <summary>
@@ -473,7 +467,6 @@ public partial class MainWindowViewModel
             //DisplayEditor returns false when complete or canceled
             SetDisplay(_previousDisplayType);
         }
-        
     }
 
     /// <summary>
@@ -489,7 +482,6 @@ public partial class MainWindowViewModel
                 SetDisplay(_previousDisplayType);
                 break;
         }
-
     }
 
 

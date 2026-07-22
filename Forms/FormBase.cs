@@ -16,11 +16,10 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
     {
         switch (asciiValue)
         {
-            //var currentField = _currentForm.GetCurrentField();
             // escape 
             case TelstarClient.Constants.ESC:
-                //_currentForm = null;
                 return false;
+
             // backspace
             case TelstarClient.Constants.BACK when GetCurrentField().Value.Length > 0:
                 // remove the char from the display by setting the cursor to the current position
@@ -53,7 +52,10 @@ public abstract class FormBase(DisplayManager displayManager, IConnection connec
             }
         }
 
-        if (GetCurrentField().Value.Length >= GetCurrentField().Length)
+        // this restricts the amaount of data that can be placed in the field
+        if (GetCurrentField().Value.Length >= GetCurrentField().Length
+            && asciiValue != TelstarClient.Constants.TAB 
+            && asciiValue != TelstarClient.Constants.CR)
         {
             return true;
         }

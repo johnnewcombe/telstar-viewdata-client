@@ -58,7 +58,7 @@ public partial class MainWindowViewModel
     /// <param name="arg2">The TCP port or baud rate.</param>
     /// <param name="parity">A flag indicating if parity is enabled.</param>
     /// <param name="serial">True for a serial connection, false for TCP.</param>
-    private void Connect(string arg1, int arg2, bool parity, bool serial)
+    private void Connect(string arg1, int arg2, bool parity, string initString, bool serial)
     {
         try
         {
@@ -84,8 +84,10 @@ public partial class MainWindowViewModel
             _commsClient.OnDataReceivedEvent += OnReceived;
             _commsClient.Connect(arg1, arg2, parity);
             _cyclicBuffer.Clear();
+            
+            // send init
+            _commsClient.Write(initString.ToUpper().Replace("^M","\r\n"));
 
-            //Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
         catch (Exception ex)
         {
@@ -125,7 +127,7 @@ public partial class MainWindowViewModel
         {
             _logger.LogInformation("Connected:{Connected}", connected);
         }
-
+        
         // set the thread safe property
         //ConnectStatus = connected;
         

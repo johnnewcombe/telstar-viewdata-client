@@ -20,6 +20,7 @@
 
 using System;
 using System.IO.Ports;
+using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace TelstarClient.Comms;
@@ -28,6 +29,7 @@ public class SerialClient : ICommsClient
 {
 
     private bool _disposed;
+    private readonly StringBuilder _receiveBuffer = new();
     
     private SerialPort _serialPort;
 
@@ -82,13 +84,19 @@ public class SerialClient : ICommsClient
     /// </summary>
     /// <param name="sender">The event sender.</param>
     /// <param name="e">The event arguments.</param>
+
+
     private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
-        if (OnDataReceivedEvent != null)
+        string data = _serialPort.ReadExisting();
+
+        _receiveBuffer.Append(data);
+        OnDataReceivedEvent?.Invoke(data);
+
+        if (_receiveBuffer.ToString().Contains(CommsConstants.NoCarrierText))
         {
-            // Read available data
-            string data = _serialPort.ReadExisting();
-            OnDataReceivedEvent.Invoke(data);
+            Disconnect();
+            _receiveBuffer.Clear();
         }
     }
 
@@ -175,18 +183,6 @@ public class SerialClient : ICommsClient
     /// </summary>
     public void Disconnect()
     {
-        if (_serialPort != null)
-        {
-            _serialPort.DataReceived -= SerialPort_DataReceived;
-            if (_serialPort.IsOpen)
-            {
-                _serialPort.Close();
-            }
-            _serialPort.Dispose();
-            _serialPort = null;
-            OnConnectEvent?.Invoke(false, "");
-        }
-
         _logger.LogInformation("Disconnecting");
         Dispose();
     }
@@ -206,9 +202,13 @@ public class SerialClient : ICommsClient
             {
                 if (_serialPort != null)
                 {
-                    _serialPort.Close();
+                    if (_serialPort.IsOpen)
+                    {
+                        _serialPort.Close();
+                    }
                     _serialPort.Dispose();
                     _serialPort = null;
+                    _receiveBuffer.Clear();
                     OnConnectEvent?.Invoke(false,"");
                 }
             }
