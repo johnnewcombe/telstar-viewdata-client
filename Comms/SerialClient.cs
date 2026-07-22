@@ -80,12 +80,41 @@ public class SerialClient : ICommsClient
     }
 
     /// <summary>
-    /// Handles the DataReceived event from the serial port.
+    /// Handles the DataReceived event from the serial port. Also checks
+    /// for a 'NO CARRIER' response sitting on a line of its own.
     /// </summary>
     /// <param name="sender">The event sender.</param>
     /// <param name="e">The event arguments.</param>
+    private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+    {
+        string data = _serialPort.ReadExisting();
 
+        _receiveBuffer.Append(data);
+        OnDataReceivedEvent?.Invoke(data);
 
+        // Split on CR (or CRLF) and check each complete line for an exact match,
+        // rather than searching the raw buffer for the substring anywhere.
+        var text = _receiveBuffer.ToString();
+        var lines = text.Split('\r');
+
+        // The last "line" may be incomplete (no terminator yet) — keep it in the buffer.
+        for (int i = 0; i < lines.Length - 1; i++)
+        {
+            var line = lines[i].Trim('\n', ' ');
+            if (line == CommsConstants.NoCarrierText)
+            {
+                Disconnect();
+                _receiveBuffer.Clear();
+                return;
+            }
+        }
+
+        // Retain only the unterminated tail for the next event
+        _receiveBuffer.Clear();
+        _receiveBuffer.Append(lines[^1]);
+    }
+    
+    /*
     private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
         string data = _serialPort.ReadExisting();
@@ -99,7 +128,7 @@ public class SerialClient : ICommsClient
             _receiveBuffer.Clear();
         }
     }
-
+*/
     public bool IsConnected()
     {
         return _serialPort != null && _serialPort.IsOpen;
