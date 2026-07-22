@@ -63,7 +63,7 @@ macos-x64:
 	cp Assets/icon.icns ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/Resources/icon.icns
 	sed 's/VERSION_PLACEHOLDER/$(VERSION)/g' Assets/TelstarClient.app.plist > ../releases/$(VERSION)/$(APPBUNDLE-X64)/Contents/Info.plist
 
-add-tag:
+add-tag: build
 	# triggers a remote build on GitHub and populated the GitHub Releases area on the GitHub website.
 	# this not related to the Releases directory in the local project directory.
 	-git tag -d v$(VERSION)
