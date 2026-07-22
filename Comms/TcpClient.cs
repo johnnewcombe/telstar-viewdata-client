@@ -93,7 +93,7 @@ namespace TelstarClient.Comms
         public void Connect(string ip, int port, bool parity)
         {
             _parity = parity;
-            _ = Task.Run(async () => await ConnectAsync(ip, port, parity, CommsConstants.CONNECT_TIMEOUT));
+            _ = Task.Run(async () => await ConnectAsync(ip, port, parity, CommsConstants.ConnectTimeout));
         }
 
         private async Task ConnectAsync(string ip, int port, bool parity, int timeout)
@@ -144,7 +144,7 @@ namespace TelstarClient.Comms
             catch (Exception ex)
             {
                 _logger.LogError("Error connecting to TCP server:{Error}", ex.Message);
-                OnConnectEvent?.Invoke(false, CommsConstants.UNABLE_TO_CONNECT);
+                OnConnectEvent?.Invoke(false, CommsConstants.UnableToConnect);
 
             }
         }

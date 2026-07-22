@@ -29,28 +29,6 @@ public partial class MainWindowViewModel
 {
     #region Comms Client Control and Events
 
-    //private Lock _lock = new();
-    //private bool _connectStatus;
-
-    /*
-    /// <summary>
-    /// Thread safe property to allow the connected status to be read
-    /// from multiple threads
-    /// </summary>
-    private bool ConnectStatus
-    {
-        get
-        {
-            lock (_lock)
-                return _connectStatus;
-        }
-        set
-        {
-            lock (_lock)
-                _connectStatus = value;
-        }
-    }
-*/
     /// <summary>
     /// Establishes a connection to the specified target, either TCP or Serial.
     /// </summary>
@@ -128,9 +106,6 @@ public partial class MainWindowViewModel
             _logger.LogInformation("Connected:{Connected}", connected);
         }
         
-        // set the thread safe property
-        //ConnectStatus = connected;
-        
         // switch to UI thread
         Dispatcher.UIThread.Post(() => ConnectionChange(connected, error));   
 
@@ -150,12 +125,13 @@ public partial class MainWindowViewModel
             // we have to do both as we could be on a connect screen or a terminal screen
             _displayManagerMain.SetStatusText(error,"Red");
             _displayManagerAlt.SetStatusText(error,"Red");
-            await Task.Delay(2000);
+            await Task.Delay(1600);
             SetDisplay(DisplayType.Directory);
+            return;
         }
         
         // we are on the UI thread so update the display
-        UpdateConnectStatus();
+        //UpdateConnectStatus();
 
         if (!connected)
         {

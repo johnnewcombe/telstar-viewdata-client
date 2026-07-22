@@ -371,7 +371,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <param name="connection"></param>
     private void SetDisplay(DisplayType displayType, IConnection connection = null)
     {
-        _logger.LogDebug("Setting display type:{displayType}, previous display type:{previousDisplay}",displayType,_previousDisplayType);
+        _logger.LogDebug("Setting display type:{displayType}",displayType);
         
         // if we are using the alt display then clear it etc
         if (displayType > 0)

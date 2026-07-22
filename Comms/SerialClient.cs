@@ -75,7 +75,7 @@ public class SerialClient : ICommsClient
         {
             OnConnectEvent?.Invoke(false,"");
             _logger.LogError("Error connecting to Serial device:{Error}", ex.Message);
-            OnConnectEvent?.Invoke(false, CommsConstants.UNABLE_TO_CONNECT);
+            OnConnectEvent?.Invoke(false, CommsConstants.UnableToConnect);
         }
     }
 

@@ -31,7 +31,7 @@ public class ConnectSerial : FormBase
         Fields.Add(new Field("device", 6, 16, 20, device, FieldType.AlphaNumeric, true));
         Fields.Add(new Field("baud", 8, 16, 20, baudRate.ToString(), FieldType.Numeric, true));
         Fields.Add(new Field("parity", 10, 16, 1, parity, FieldType.Bool, true));
-        Fields.Add(new Field("init", 13, 1, 38, init, FieldType.AlphaNumeric, false));
+        Fields.Add(new Field("init", 14, 1, 38, init, FieldType.AlphaNumeric, false));
     }
 
     public override string ToString()
@@ -46,7 +46,7 @@ public class ConnectSerial : FormBase
             .Replace("[PLACEHOLDER]", Fields[1].Value);
         menu.Append(Converters.ConvertFromMarkup("[C]       PARITY:[W][PLACEHOLDER]\r\n\n"))
             .Replace("[PLACEHOLDER]", Fields[2].Value);
-        menu.Append(Converters.ConvertFromMarkup("[C]INIT STRING:\r\n"));
+        menu.Append(Converters.ConvertFromMarkup("[C]INIT STRING:\r\n\n"));
         menu.Append(Converters.ConvertFromMarkup("[W][PLACEHOLDER]\r\n\n"))
             .Replace("[PLACEHOLDER]", Fields[3].Value);
         menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
