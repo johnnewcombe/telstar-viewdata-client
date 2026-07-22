@@ -37,21 +37,26 @@ jobs:
 
       - name: Install NSIS
         run: sudo apt-get install -y nsis
-
       - name: Package Linux arm64
         run: |
+          cp Assets/linux-install.sh ./bin/Release/net9.0/linux-arm64/publish/install.sh
+          chmod +x ./bin/Release/net9.0/linux-arm64/publish/install.sh
+          cp Assets/icon.png ./bin/Release/net9.0/linux-arm64/publish/icon.png
           cd ./bin/Release/net9.0/linux-arm64/publish
           zip -r TelstarClient-linux-arm64-${{ steps.version.outputs.VERSION }}.zip * --exclude "*.zip"
           cd -
           cp ./bin/Release/net9.0/linux-arm64/publish/TelstarClient-linux-arm64-${{ steps.version.outputs.VERSION }}.zip .
-
+      
       - name: Package Linux x64
         run: |
+          cp Assets/linux-install.sh ./bin/Release/net9.0/linux-x64/publish/install.sh
+          chmod +x ./bin/Release/net9.0/linux-x64/publish/install.sh
+          cp Assets/icon.png ./bin/Release/net9.0/linux-x64/publish/icon.png
           cd ./bin/Release/net9.0/linux-x64/publish
           zip -r TelstarClient-linux-x64-${{ steps.version.outputs.VERSION }}.zip * --exclude "*.zip"
           cd -
           cp ./bin/Release/net9.0/linux-x64/publish/TelstarClient-linux-x64-${{ steps.version.outputs.VERSION }}.zip .
-
+      
       - name: Package macOS arm64
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
