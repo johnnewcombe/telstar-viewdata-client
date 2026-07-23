@@ -23,26 +23,25 @@ public class Help : FormBase {
         var menu = new StringBuilder();
 
         menu.Append("\r\n");
-        menu.Append(Converters.ConvertFromMarkup("[17][D]HELP\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]Alt C[C]Conceal     "));
-        menu.Append(Converters.ConvertFromMarkup("[W]Alt R[C]Reveal\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]Alt H[C]Help        "));
-        menu.Append(Converters.ConvertFromMarkup("[W]Alt F[C]Full Screen\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]Alt X[C]Disconnect  "));
-        menu.Append(Converters.ConvertFromMarkup("[W]Alt Q[C]Quit\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[9]Press escape to Return\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]*<page>_[C]Load a Specific Page\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]*_      [C]Load Previous Frame\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]*00     [C]Refresh Current Frame\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]*09     [C]Update Current Frame\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]__      [C]Correct Keying Error\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W]_       [C]Load Continuation Frame\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[13]Version " + version + "\r\n"));
-        menu.Append(Converters.ConvertFromMarkup("[8][C](c) John Newcombe 2026\r\n\n"));
-        //menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
+        menu.Append("[17][D]HELP\r\n\n");
+        menu.Append("[c][l-]\r\n");
+        menu.Append(" [W]Alt C[C]Conceal     ");
+        menu.Append(" [W]Alt R[C]Reveal\r\n");
+        menu.Append(" [W]Alt H[C]Help        ");
+        menu.Append(" [W]Alt F[C]Full Screen\r\n");
+        menu.Append(" [W]Alt X[C]Disconnect  ");
+        menu.Append(" [W]Alt Q[C]Quit\r\n\n");
+        menu.Append("[9]Press escape to Return\r\n");
+        menu.Append("[c][l-]\r\n");
+        menu.Append(" [W]*<page>_[C]Load a Specific Page\r\n");
+        menu.Append(" [W]*_      [C]Load Previous Frame\r\n");
+        menu.Append(" [W]*00     [C]Refresh Current Frame\r\n");
+        menu.Append(" [W]*09     [C]Update Current Frame\r\n");
+        menu.Append(" [W]__      [C]Correct Keying Error\r\n");
+        menu.Append(" [W]_       [C]Load Continuation Frame\r\n");
+        menu.Append("[c][l-]\r\n");
+        menu.Append("[13]Version " + version + "\r\n");
+        menu.Append("[8][C](c) John Newcombe 2026\r\n\n");
         return menu.ToString();
     }
 

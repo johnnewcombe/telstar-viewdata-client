@@ -387,32 +387,36 @@ public partial class MainWindowViewModel : ViewModelBase
                 // nothing to do
                 break;
             case DisplayType.Welcome:
-                _displayManagerAlt.Write(new Welcome(_displayManagerAlt, connection).ToString());
+                _displayManagerAlt.WriteMarkup(new Welcome(_displayManagerAlt, connection).ToString());
                 break;
             case DisplayType.Directory:
+
+//                _displayManagerAlt.Write(new Directory(_displayManagerAlt, connection).ToString()
+//                    .Replace(ViewdataDisplay.Constants.PlaceHolder, GetDirectoryFromConfig()));
+                
                 // pop the menu into the placeholder
-                _displayManagerAlt.Write(new Directory(_displayManagerAlt, connection).ToString()
+                _displayManagerAlt.WriteMarkup(new Directory(_displayManagerAlt, connection).ToString()
                     .Replace(ViewdataDisplay.Constants.PlaceHolder, GetDirectoryFromConfig()));
                 break;
             case DisplayType.ConnectTcp:
                 _currentForm = new ConnectTcp(_displayManagerAlt, connection);
-                _displayManagerAlt.Write(_currentForm.ToString());
+                _displayManagerAlt.WriteMarkup(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
 
                 break;
             case DisplayType.ConnectSerial:
                 _currentForm = new ConnectSerial(_displayManagerAlt, connection);
-                _displayManagerAlt.Write(_currentForm.ToString());
+                _displayManagerAlt.WriteMarkup(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 break;
             case DisplayType.EditConnection:
                 _currentForm = new EditConnection(_displayManagerAlt, connection);
-                _displayManagerAlt.Write(_currentForm.ToString());
+                _displayManagerAlt.WriteMarkup(_currentForm.ToString());
                 _displayManagerAlt.SetCursorPosition(_currentForm.GetCursor());
                 break;
             case DisplayType.Help:
                 _currentForm = new Help(_displayManagerAlt, connection);
-                _displayManagerAlt.Write(_currentForm.ToString());
+                _displayManagerAlt.WriteMarkup(_currentForm.ToString());
                 break;
             default:
                 return; // important

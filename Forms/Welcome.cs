@@ -20,19 +20,14 @@ public class Welcome : FormBase {
         // field with 10 spaces
 
         logo.Append("\r\n\n\n\n\n\n");
-        logo.Append(Converters.ConvertFromMarkup("[_-]")); // cursor off
-        logo.Append(Converters.ConvertFromMarkup("[w]///////////////////////////////////////\r\n\n"));
-        logo.Append(Converters.ConvertFromMarkup("[c][sg] ppp p   `pp0 ppp `pp0 pppp`ppp0p  p\r\n"));
-        logo.Append(
-            Converters.ConvertFromMarkup("[c][sg]j7#+%\x7f   \x7f##\x7fj7##%\x7f##+ #k7#\"#\x7f#!\x7f  \x7f\r\n"));
-        logo.Append(Converters.ConvertFromMarkup("[c][sg]j5*o5\x7f   \x7f//\x7f\"//o4+//}  j5   \x7f  \"//\x7f\r\n"));
-        logo.Append(Converters.ConvertFromMarkup("[c][sg]*}|~%\x7f||4\x7f  \x7f*||~%m||?  j5   \x7f  m||?\r\n"));
-        logo.Append(Converters.ConvertFromMarkup("\r\n\n\n"));
-        logo.Append(Converters.ConvertFromMarkup("[D][n][B][9]Viewdata Terminal"));
-
-
-        // alignment guide
-        //logo.Append(Converters.ConvertFromMarkup("0123456789012345678901234567890123456789"));
+        logo.Append("[_-]"); // cursor off
+        logo.Append("[w]///////////////////////////////////////\r\n\n");
+        logo.Append("[c][sg] ppp p   `pp0 ppp `pp0 pppp`ppp0p  p\r\n");
+        logo.Append("[c][sg]j7#+%\x7f   \x7f##\x7fj7##%\x7f##+ #k7#\"#\x7f#!\x7f  \x7f\r\n");
+        logo.Append("[c][sg]j5*o5\x7f   \x7f//\x7f\"//o4+//}  j5   \x7f  \"//\x7f\r\n");
+        logo.Append("[c][sg]*}|~%\x7f||4\x7f  \x7f*||~%m||?  j5   \x7f  m||?\r\n");
+        logo.Append("\r\n\n\n");
+        logo.Append("[D][n][B][9]Viewdata Terminal");
 
         return logo.ToString();
     }

@@ -39,21 +39,21 @@ public class EditConnection : FormBase
     {
 
         var menu = new StringBuilder();
-        menu.Append(Converters.ConvertFromMarkup("\r\n[_+]")); // cursor on
-        menu.Append(Converters.ConvertFromMarkup("[17][D]EDIT\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[C]  NAME:[W][PLACEHOLDER]\r\n\n")
-            .Replace("[PLACEHOLDER]", Fields[0].Value));
-        menu.Append(Converters.ConvertFromMarkup("[C]  HOST:[W][PLACEHOLDER]\r\n\n")
-            .Replace("[PLACEHOLDER]", Fields[1].Value));
-        menu.Append(Converters.ConvertFromMarkup("[C]  PORT:[W][PLACEHOLDER]\r\n\n")
-            .Replace("[PLACEHOLDER]", Fields[2].Value));
-        menu.Append(Converters.ConvertFromMarkup("[C]PARITY:[W][PLACEHOLDER]\r\n\n"))
+        menu.Append("\r\n[_+]"); // cursor on
+        menu.Append("[17][D]EDIT\r\n\n");
+        menu.Append("[c][l-]\r\n\n");
+        menu.Append("[C]  NAME:[W][PLACEHOLDER]\r\n\n")
+            .Replace("[PLACEHOLDER]", Fields[0].Value);
+        menu.Append("[C]  HOST:[W][PLACEHOLDER]\r\n\n")
+            .Replace("[PLACEHOLDER]", Fields[1].Value);
+        menu.Append("[C]  PORT:[W][PLACEHOLDER]\r\n\n")
+            .Replace("[PLACEHOLDER]", Fields[2].Value);
+        menu.Append("[C]PARITY:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[3].Value);
-        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[10][C]Press[W]Alt-S[C]to Save\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Alt-D[C]to Delete\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Escape[C]to Return"));
+        menu.Append("[c][l-]\r\n\n");
+        menu.Append("[10][C]Press[W]Alt-S[C]to Save\r\n\n");
+        menu.Append("[9][C]Press[W]Alt-D[C]to Delete\r\n\n");
+        menu.Append("[9][C]Press[W]Escape[C]to Return");
 
         return menu.ToString();
     }

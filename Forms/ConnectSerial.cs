@@ -31,28 +31,27 @@ public class ConnectSerial : FormBase
         Fields.Add(new Field("device", 6, 16, 20, device, FieldType.AlphaNumeric, true));
         Fields.Add(new Field("baud", 8, 16, 20, baudRate.ToString(), FieldType.Numeric, true));
         Fields.Add(new Field("parity", 10, 16, 1, parity, FieldType.Bool, true));
-        Fields.Add(new Field("init", 14, 1, 38, init, FieldType.AlphaNumeric, false));
+        Fields.Add(new Field("init", 14, 2, 36, init, FieldType.AlphaNumeric, false));
     }
 
     public override string ToString()
     {
         var menu = new StringBuilder();
-        menu.Append(Converters.ConvertFromMarkup("\r\n[_+]")); // cursor on
-        menu.Append(Converters.ConvertFromMarkup("[12][D]CONNECT MODEM\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[C]SERIAL DEVICE:[W][PLACEHOLDER]\r\n\n"))
+        menu.Append("\r\n[_+]"); // cursor on
+        menu.Append("[12][D]CONNECT MODEM\r\n\n");
+        menu.Append("[c][l-]\r\n\n");
+        menu.Append("[C]SERIAL DEVICE:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[0].Value);
-        menu.Append(Converters.ConvertFromMarkup("[C]    BAUD RATE:[W][PLACEHOLDER]\r\n\n"))
+        menu.Append("[C]    BAUD RATE:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[1].Value);
-        menu.Append(Converters.ConvertFromMarkup("[C]       PARITY:[W][PLACEHOLDER]\r\n\n"))
+        menu.Append("[C]       PARITY:[W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[2].Value);
-        menu.Append(Converters.ConvertFromMarkup("[C]INIT STRING:\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[W][PLACEHOLDER]\r\n\n"))
+        menu.Append("[C]INIT STRING:\r\n\n");
+        menu.Append(" [W][PLACEHOLDER]\r\n\n")
             .Replace("[PLACEHOLDER]", Fields[3].Value);
-        menu.Append(Converters.ConvertFromMarkup("[c][l-]\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Alt-C[C]to Connect\r\n\n"));
-        menu.Append(Converters.ConvertFromMarkup("[9][C]Press[W]Escape[C]to Return"));
-        //menu.Append(Converters.ConvertFromMarkup("\r\n0123456789012345678901234567890123456789"));
+        menu.Append("[c][l-]\r\n\n");
+        menu.Append("[9][C]Press[W]Alt-C[C]to Connect\r\n\n");
+        menu.Append("[9][C]Press[W]Escape[C]to Return");
         return menu.ToString();
     }
 }
