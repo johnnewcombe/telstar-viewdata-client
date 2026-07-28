@@ -189,7 +189,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateDisplay()
     {
-        _logger.LogDebug("Updating display");
+        //_logger.LogDebug("Updating display");
 
         if (_displayBitmap is null)
         {
@@ -200,93 +200,5 @@ public partial class MainWindow : Window
         BitmapConverter.UpdatePixels(_displayBitmap, ViewModel.Bitmap);
         BitmapDisplay.InvalidateVisual();
 
-        
-        //var data = ViewModel.DisplayData;
-        
-
-        //if (data is null)
-        //{
-        //    return;
-        //}
-
-        //foreach (var c in data)
-        //{
-        //    var label = (Label)((Viewbox)Display.Children[c.Index]).Child;
-            
-        //    if (label == null) continue;
-            
-            /*
-             * Avalonia's default Label template wraps its content in a ContentPresenter inside
-             * a Border (the Border.Background is what you're setting). The Border sizes itself
-             * based on the measured size of its content. Most text-rendering engines — Avalonia's
-             * included — collapse or zero-out the measured advance width for a string that's
-             * whitespace-only, because trailing/leading whitespace gets trimmed during text
-             * shaping. So the Label ends up with an effective width (and sometimes height)
-             * of zero, even though Background is correctly applied — there's just nothing left
-             * to paint it on.
-             
-             * The pattern used below is that in order to set a character to be invisible the
-             * empty graphic character is specified. Another approach would be to use any printable
-             * character and set the forground colour to equl the background colour.
-             */
-        //    if (c.InVisible)
-        //    {
-                // Set to invisible using the empty graphic character and black background.
-        //        label.Content = '\xE200';
-        //        label.Background =  new ImmutableSolidColorBrush(Colors.Black);
-        //    }
-        //    else if (c.InvisibleForeground)
-        //    {
-                // Set to invisible foreground using the empty graphic character.
-        //        label.Content = '\xE200'; // full graphic character
-        //        label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
-        //    }
-        //    else
-        //    {
-                // Display the character with its specific foreground and background colors.
-        //        label.Content = c.Value;
-        //        label.Foreground = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Foreground);
-        //        label.Background = (IImmutableSolidColorBrush)new BrushConverter().ConvertFromString(c.Background);
-                
-        //    }
-        //}
-    
-        // every time the display gets updated we need to put the cursor back
-        //UpdateCursor();
     }
-/*
-    /// <summary>
-    /// Initializes a Viewbox containing a Label for a character cell.
-    /// </summary>
-    /// <param name="charNumber">The character code to initialize the label with.</param>
-    /// <returns>A Viewbox containing the configured Label.</returns>
-    private static Viewbox InitCharacterLabel(int charNumber)
-    {
-        var thicknessZero = Thickness.Parse("0");
-
-        // Create the character label with default styling.
-        var label = new Label()
-        {
-            Background = Brushes.Black,
-            Foreground = Brushes.White,
-            Content = (char)charNumber,
-            Padding = thicknessZero,
-            Margin = thicknessZero,
-        };
-
-        // Set the style i.e. Mode 7 font.
-        label.Classes.Add("mode7");
-
-        // Wrap the label in a Viewbox to handle scaling/stretching.
-        var viewBox = new Viewbox()
-        {
-            Child = label,
-            Stretch = Stretch.Fill,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch
-        };
-
-        return viewBox;
-    }
-*/
 }
