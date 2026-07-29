@@ -123,13 +123,8 @@ public partial class MainWindowViewModel
         // looking for alt key combinations (same as ctrl codes but with high bit set)
         switch (asciiValue)
         {
-            case Constants.ALT_C: // conceal
-                _displayManagerMain.Display.Conceal();
-                UpdateMainDisplay();
-                return; // dont send to server
             case Constants.ALT_R: // reveal
-                _displayManagerMain.Display.Reveal();
-                UpdateMainDisplay();
+                _displayManagerMain.Conceal();
                 return; // dont send to server
             case Constants.CR: // return
                 asciiValue = Constants.HASH;

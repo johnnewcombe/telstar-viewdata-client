@@ -36,7 +36,9 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private const string CONNECTED_STATUS = "CONNECTED";
     private const string DISCONNECTED_STATUS = "DISCONNECTED";
+
     private const string CONNECTING_STATUS = "CONNECTING";
+
     //private const string UNABLE_TO_CONNECT_STATUS = "UNABLE TO CONNECT";
     private const string INVALID_DATA_STATUS = "INVALID DATA";
     private const string CONFIG_FILE = "config.json";
@@ -64,7 +66,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Help,
         EditConnection,
     }
-    
+
 
     private ILogger<MainWindowViewModel> _logger;
     private ICommsClient _commsClient;
@@ -77,7 +79,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private IForm _currentForm;
     private DisplayType _displayType;
+
     private DisplayType _previousDisplayType;
+
     //private List<ViewdataDisplay.Char> _displayData;
     private Cursor _cursor;
     private readonly Settings _settings;
@@ -137,8 +141,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _settings = new Settings(configFile);
         _cyclicBuffer = new CyclicBuffer(2048);
-        
     }
+
     /// <summary>
     /// Disposes of the view model, ensuring resources like the communication client are properly cleaned up.
     /// </summary>
@@ -148,6 +152,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _commsClient.Dispose();
         // dispose anything else owned here
     }
+
     /// <summary>
     /// Display the Welcome message and update the connected status.
     /// note this is an asynchronous method with a delay such that
@@ -176,7 +181,7 @@ public partial class MainWindowViewModel : ViewModelBase
             (desktop.MainWindow as Views.MainWindow)?.ToggleKioskMode();
         }
     }
-    
+
     /// <summary>
     /// This method is called by the _displayManagerMain.OnDisplayDataChangedEvent if the
     /// Display Manager has updated the display internally
@@ -193,7 +198,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Dispatcher.UIThread.Post(UpdateMainDisplay);
         }
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -210,14 +215,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>
     /// Updates the main display, this is the display that handles terminal data.
-    /// This method woul not normally be called directly but via the
+    /// This method would not normally be called directly but via the
     /// OnDisplayDataChangedEvent handler. It must be called on the UI thread.
     /// </summary>
     private void UpdateMainDisplay()
     {
-        //DisplayData = _displayManagerMain.Display.Chars;
         Bitmap = _displayManagerMain.Bitmap;
-
     }
 
     /// <summary>
@@ -228,56 +231,14 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private void UpdateAltDisplay()
     {
-        //DisplayData = _displayManagerAlt.Display.Chars;
         Bitmap = _displayManagerAlt.Bitmap;
     }
     
-    /*
-    /// <summary>
-    /// Helper method to update the status display. It handles both main and alt displays
-    /// and updates the cursor etc.
-    /// </summary>
-    /// <param name="message"></param>
-    /// <param name="foregroundColour"></param>
-    /// <param name="backgroundColour"></param>
-    private void DisplayStatusMessage(string message,string foregroundColour = ViewdataDisplay.Constants.Green, 
-        string backgroundColour = ViewdataDisplay.Constants.Black)
-    {
-        try
-        {
-            // update both displays
-            _displayManagerMain.SetStatusText(message, foregroundColour, backgroundColour);
-            _displayManagerAlt.SetStatusText(message,foregroundColour, backgroundColour);
-
-            // but only display one
-            if (_displayType == DisplayType.Terminal)
-            {
-                _logger.LogInformation("Displaying status message to main display:{message}", message);
-                //DisplayData = _displayManagerMain.Display.Chars;
-                UpdateMainDisplay();
-            }
-            else
-            {
-                _logger.LogInformation("Displaying status message to alternate display:{message}", message);
-                //DisplayData = _displayManagerAlt.Display.Chars;
-                UpdateAltDisplay();
-            }
-        }
-        catch (Exception ex)
-        {
-            // ensures that all exceptions are handled within the async body
-            // not handling them with void async methods can cause the process
-            // to crash
-            _logger.LogError(ex, "Failed to update the Connection Status");
-        }
-    }
-*/
     /// <summary>
     /// This should be called on the UI Thread or via the dispatcher (see OnConnect event).
     /// </summary>
     private void UpdateConnectStatus()
     {
-
         // this function cannot have parameters so read from thread safe property
         // to get the current status.
         if (_commsClient.IsConnected())
@@ -318,22 +279,13 @@ public partial class MainWindowViewModel : ViewModelBase
     #region Public Properties and methods
 
     /// <summary>
-    /// Display data to be displayed by the View. Setting this property causes
-    /// MainWindow to collect the data and display it via the OnPropertyChanged
-    /// event. Setting DsplaData will also cause MainWindow to read the Cursor
+    /// Bitmap to be displayed by the View. Setting this property causes
+    /// MainWindow to display it via the OnPropertyChanged
+    /// event.
     /// property.
     /// </summary>
-    //public List<ViewdataDisplay.Char> DisplayData
-    //{
-    //    get { return _displayData; }
-    //    set
-    //    {
-    //        _displayData = value;
-    //        OnPropertyChanged();
-    //    }
-    //}
-    
     private byte[] _bitmap = Array.Empty<byte>();
+
     public byte[] Bitmap
     {
         get => _bitmap;
@@ -343,10 +295,10 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
-    
+/*
     /// <summary>
-    /// The cursor position, this is collected by MainWindow when the DisplayData property is updated.
-    /// is fired when the main data is updated. Any Cursor setting can be placed here 
+    /// The cursor position, Setting this property causes MainWindow to
+    /// display it via the OnPropertyChanged event.
     /// </summary>
     public Cursor Cursor
     {
@@ -357,7 +309,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
-
+*/
     #endregion
 
     #region Private Methods
@@ -371,8 +323,8 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <param name="connection"></param>
     private void SetDisplay(DisplayType displayType, IConnection connection = null)
     {
-        _logger.LogDebug("Setting display type:{displayType}",displayType);
-        
+        _logger.LogDebug("Setting display type:{displayType}", displayType);
+
         // if we are using the alt display then clear it etc
         if (displayType > 0)
         {
@@ -390,10 +342,6 @@ public partial class MainWindowViewModel : ViewModelBase
                 _displayManagerAlt.WriteMarkup(new Welcome(_displayManagerAlt, connection).ToString());
                 break;
             case DisplayType.Directory:
-
-//                _displayManagerAlt.Write(new Directory(_displayManagerAlt, connection).ToString()
-//                    .Replace(ViewdataDisplay.Constants.PlaceHolder, GetDirectoryFromConfig()));
-                
                 // pop the menu into the placeholder
                 _displayManagerAlt.WriteMarkup(new Directory(_displayManagerAlt, connection).ToString()
                     .Replace(ViewdataDisplay.Constants.PlaceHolder, GetDirectoryFromConfig()));
@@ -427,7 +375,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _displayType = displayType;
 
         UpdateConnectStatus();
-
     }
 
     /// <summary>
@@ -452,6 +399,4 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     #endregion
-    
-    
 }

@@ -62,15 +62,6 @@ public partial class MainWindow : Window
             }
         };
 
-        // Initialize the display grid with character labels.
-        //Display.Children.Clear();
-
-        // Create an extra row of labels to accommodate the status line.
-        //for (int i = 0; i < ViewdataDisplay.Display.Cols * (ViewdataDisplay.Display.Rows + 1); i++)
-        //{
-        //    var g = InitCharacterLabel(ViewdataDisplay.Display.Spc);
-        //    Display.Children.Add(g);
-        //}
     }
 
     /// <summary>
@@ -94,17 +85,6 @@ public partial class MainWindow : Window
 
                 break;
 
-            case nameof(ViewModel.Cursor):
-                try
-                {
-                    UpdateCursor();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to update the cursor");
-                }
-
-                break;
         }
     }
 
@@ -167,29 +147,13 @@ public partial class MainWindow : Window
             throw;
         }
     }
-
-    /// <summary>
-    /// Updates the cursor visual representation on the display.
-    /// </summary>
-    private void UpdateCursor()
-    {
-        _logger.LogDebug("Updating cursor");
-
-        var cursor = ViewModel.Cursor;
-        if (cursor is not null &&
-            cursor.Visible)
-        {
-            //var label = (Label)((Viewbox)Display.Children[cursor.GetCursorIndex()]).Child;
-            //if (label != null) label.Content = "_";
-        }
-    }
-
+    
     /// <summary>
     /// Updates the display grid based on the data received from the ViewModel.
     /// </summary>
     private void UpdateDisplay()
     {
-        //_logger.LogDebug("Updating display");
+        _logger.LogDebug("Updating display");
 
         if (_displayBitmap is null)
         {
