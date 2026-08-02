@@ -27,8 +27,8 @@ public class Welcome : FormBase {
         logo.Append("[c][sg]j5*o5\x7f   \x7f//\x7f\"//o4+//}  j5   \x7f  \"//\x7f\r\n");
         logo.Append("[c][sg]*}|~%\x7f||4\x7f  \x7f*||~%m||?  j5   \x7f  m||?\r\n");
         logo.Append("\r\n\n\n");
-        logo.Append("[D][n][B][9]Viewdata Terminal");
-
+        logo.Append("[D][n][9][B]Viewdata Terminal");
+        
         return logo.ToString();
     }
 
